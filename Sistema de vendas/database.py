@@ -33,19 +33,21 @@ def _init_db():
     if not os.path.exists(DB_FILE):
         data = {
             "produtos": [
-                {"id": "prod-1", "name": "Fone Bluetooth Pro Max", "description": "Fone de ouvido com cancelamento de ruído", "price": 319.90, "stock": 100, "category": "Eletrônicos", "image_url": ""},
-                {"id": "prod-2", "name": "Tênis Running Ultra Boost", "description": "Tênis de corrida de alta performance", "price": 459.90, "stock": 50, "category": "Esportes", "image_url": ""},
-                {"id": "prod-3", "name": "Smartwatch Fit Series 3", "description": "Relógio inteligente com monitor cardíaco", "price": 699.00, "stock": 15, "category": "Eletrônicos", "image_url": ""},
-                {"id": "prod-4", "name": "Kit Skincare Premium", "description": "Produtos para cuidados completos", "price": 189.90, "stock": 8, "category": "Beleza", "image_url": ""}
+                {"id": "perf-1", "name": "Bleu de Chanel", "description": "Fragrância amadeirada aromática para o homem moderno e sofisticado.", "price": 850.00, "stock": 45, "category": "Masculino", "image_url": ""},
+                {"id": "perf-2", "name": "Dior Sauvage", "description": "Uma composição radical e fresca, inspirada em espaços abertos e céu azul.", "price": 790.00, "stock": 30, "category": "Masculino", "image_url": ""},
+                {"id": "perf-3", "name": "Chanel No. 5", "description": "O clássico atemporal, a essência mítica da feminilidade.", "price": 920.00, "stock": 25, "category": "Feminino", "image_url": ""},
+                {"id": "perf-4", "name": "Creed Aventus", "description": "Uma fragrância frutada e amadeirada, celebrando força e sucesso.", "price": 2450.00, "stock": 10, "category": "Nicho", "image_url": ""},
+                {"id": "perf-5", "name": "Tom Ford Lost Cherry", "description": "Um perfume gourmand luxuoso com notas intensas de cereja negra.", "price": 1850.00, "stock": 12, "category": "Nicho", "image_url": ""},
+                {"id": "perf-6", "name": "CK One", "description": "Fragrância revolucionária unissex, ícone de pureza e unidade.", "price": 350.00, "stock": 60, "category": "Unissex", "image_url": ""}
             ],
             "pedidos": [
                 {
                     "id": "ord-001",
-                    "customer_name": "Maria Fernanda",
-                    "customer_email": "maria@example.com",
-                    "items": [{"product_id": "prod-1", "product_name": "Fone Bluetooth Pro Max", "quantity": 1, "unit_price": 319.90}],
-                    "total": 319.90,
-                    "status": "pago", # pending, paid, shipped, delivered
+                    "customer_name": "Juliana Silva",
+                    "customer_email": "juliana@example.com",
+                    "items": [{"product_id": "perf-3", "product_name": "Chanel No. 5", "quantity": 1, "unit_price": 920.00}],
+                    "total": 920.00,
+                    "status": "enviado",
                     "created_at": datetime.now().strftime("%d/%m/%Y %H:%M")
                 }
             ],

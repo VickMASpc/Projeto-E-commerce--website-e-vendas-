@@ -1,84 +1,76 @@
-/**
- * products.js — Dados centralizados de produtos
- * Mapeado com o db_mock.json do Sistema de Vendas
- */
-
 const PRODUCTS = [
   {
-    id: 'prod-1',
-    name: 'Fone Bluetooth Pro Max',
-    description: 'Fone de ouvido com cancelamento de ruído e alta fidelidade sonora.',
-    price: 319.90,
-    oldPrice: 399.90,
-    category: 'Eletrônicos',
-    imageEmoji: '🎧',
-    rating: 4.8,
-    reviews: 243,
-    isSale: true,
-    isNew: false
-  },
-  {
-    id: 'prod-2',
-    name: 'Tênis Running Ultra Boost',
-    description: 'Tênis de corrida de alta performance com amortecimento responsivo.',
-    price: 459.90,
-    category: 'Esportes',
-    imageEmoji: '👟',
-    rating: 4.6,
-    reviews: 187,
-    isSale: false,
-    isNew: true
-  },
-  {
-    id: 'prod-3',
-    name: 'Smartwatch Fit Series 3',
-    description: 'Relógio inteligente com monitor cardíaco e GPS integrado.',
-    price: 699.00,
-    oldPrice: 820.00,
-    category: 'Eletrônicos',
-    imageEmoji: '⌚',
+    id: 'perf-1',
+    name: 'Bleu de Chanel',
+    description: 'Fragrância amadeirada aromática para o homem moderno e sofisticado.',
+    price: 850.00,
+    oldPrice: 950.00,
+    category: 'Masculino',
+    imageEmoji: '🍾',
     rating: 4.9,
-    reviews: 512,
+    reviews: 1240,
     isSale: true,
     isNew: false
   },
   {
-    id: 'prod-4',
-    name: 'Kit Skincare Premium',
-    description: 'Produtos para cuidados completos com a pele, dermatologicamente testados.',
-    price: 189.90,
-    category: 'Beleza',
-    imageEmoji: '🧴',
-    rating: 4.7,
-    reviews: 89,
-    isSale: false,
-    isNew: false
-  },
-  {
-    id: 'prod-5',
-    name: 'Mouse Gamer RGB Pro',
-    description: 'Sensor de alta precisão 16000 DPI e iluminação personalizável.',
-    price: 129.90,
-    category: 'Eletrônicos',
-    imageEmoji: '🖱️',
-    rating: 4.5,
-    reviews: 156,
+    id: 'perf-2',
+    name: 'Dior Sauvage',
+    description: 'Uma composição radical e fresca, inspirada em espaços abertos e céu azul.',
+    price: 790.00,
+    category: 'Masculino',
+    imageEmoji: '🌊',
+    rating: 4.8,
+    reviews: 2150,
     isSale: false,
     isNew: true
   },
   {
-    id: 'prod-6',
-    name: 'Mochila Tech Explorer',
-    description: 'Resistente à água com compartimento para notebook de 15.6".',
-    price: 249.00,
-    category: 'Moda',
-    imageEmoji: '🎒',
-    rating: 4.8,
-    reviews: 92,
+    id: 'perf-3',
+    name: 'Chanel No. 5',
+    description: 'O clássico atemporal, a essência mítica da feminilidade.',
+    price: 920.00,
+    category: 'Feminino',
+    imageEmoji: '✨',
+    rating: 4.7,
+    reviews: 3500,
+    isSale: false,
+    isNew: false
+  },
+  {
+    id: 'perf-4',
+    name: 'Creed Aventus',
+    description: 'Uma fragrância frutada e amadeirada, celebrando força e sucesso.',
+    price: 2450.00,
+    oldPrice: 2800.00,
+    category: 'Nicho',
+    imageEmoji: '👑',
+    rating: 4.9,
+    reviews: 840,
+    isSale: true,
+    isNew: false
+  },
+  {
+    id: 'perf-5',
+    name: 'Tom Ford Lost Cherry',
+    description: 'Um perfume gourmand luxuoso com notas intensas de cereja negra.',
+    price: 1850.00,
+    category: 'Nicho',
+    imageEmoji: '🍒',
+    rating: 4.6,
+    reviews: 320,
+    isSale: false,
+    isNew: true
+  },
+  {
+    id: 'perf-6',
+    name: 'CK One',
+    description: 'Fragrância revolucionária unissex, ícone de pureza e unidade.',
+    price: 350.00,
+    category: 'Unissex',
+    imageEmoji: '🌿',
+    rating: 4.5,
+    reviews: 4200,
     isSale: false,
     isNew: false
   }
 ];
-
-// Se estiver usando ES Modules, descomente:
-// export default PRODUCTS;

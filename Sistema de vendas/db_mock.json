@@ -1,63 +1,126 @@
 {
     "produtos": [
         {
-            "id": "prod-1778669411",
-            "name": "Perfume",
-            "description": "Perfume",
-            "price": 50.0,
-            "stock": 98,
-            "category": "Outros",
+            "id": "perf-1",
+            "name": "Bleu de Chanel",
+            "description": "Fragrância amadeirada aromática para o homem moderno e sofisticado.",
+            "price": 850.0,
+            "stock": 44,
+            "category": "Masculino",
+            "image_url": ""
+        },
+        {
+            "id": "perf-2",
+            "name": "Dior Sauvage",
+            "description": "Uma composição radical e fresca, inspirada em espaços abertos e céu azul.",
+            "price": 790.0,
+            "stock": 28,
+            "category": "Masculino",
+            "image_url": ""
+        },
+        {
+            "id": "perf-3",
+            "name": "Chanel No. 5",
+            "description": "O clássico atemporal, a essência mítica da feminilidade.",
+            "price": 920.0,
+            "stock": 24,
+            "category": "Feminino",
+            "image_url": ""
+        },
+        {
+            "id": "perf-4",
+            "name": "Creed Aventus",
+            "description": "Uma fragrância frutada e amadeirada, celebrando força e sucesso.",
+            "price": 2450.0,
+            "stock": 9,
+            "category": "Nicho",
+            "image_url": ""
+        },
+        {
+            "id": "perf-5",
+            "name": "Tom Ford Lost Cherry",
+            "description": "Um perfume gourmand luxuoso com notas intensas de cereja negra.",
+            "price": 1850.0,
+            "stock": 12,
+            "category": "Nicho",
+            "image_url": ""
+        },
+        {
+            "id": "perf-6",
+            "name": "CK One",
+            "description": "Fragrância revolucionária unissex, ícone de pureza e unidade.",
+            "price": 350.0,
+            "stock": 60,
+            "category": "Unissex",
             "image_url": ""
         }
     ],
     "pedidos": [
         {
             "id": "ord-001",
-            "customer_name": "Maria Fernanda",
-            "customer_email": "maria@example.com",
+            "customer_name": "Juliana Silva",
+            "customer_email": "juliana@example.com",
             "items": [
                 {
-                    "product_id": "prod-1",
-                    "product_name": "Fone Bluetooth Pro Max",
+                    "product_id": "perf-3",
+                    "product_name": "Chanel No. 5",
                     "quantity": 1,
-                    "unit_price": 319.9
+                    "unit_price": 920.0
                 }
             ],
-            "total": 319.9,
+            "total": 920.0,
             "status": "enviado",
-            "created_at": "13/05/2026 07:37"
+            "created_at": "13/05/2026 08:28"
         },
         {
-            "total": 75,
+            "total": 790,
             "customer_name": "Victor (Cliente Web)",
             "customer_email": "victor_web@example.com",
             "items": [
                 {
-                    "product_id": "prod-1778669411",
-                    "product_name": "Perfume",
+                    "product_id": "perf-2",
+                    "product_name": "Dior Sauvage",
                     "quantity": 1,
-                    "unit_price": 50
+                    "unit_price": 790
                 }
             ],
             "id": "ord-002",
             "status": "enviado",
-            "created_at": "13/05/2026 08:05"
+            "created_at": "13/05/2026 08:28"
         },
         {
-            "total": 75,
+            "total": 5010,
             "customer_name": "Victor (Cliente Web)",
             "customer_email": "victor_web@example.com",
             "items": [
                 {
-                    "product_id": "prod-1778669411",
-                    "product_name": "Perfume",
+                    "product_id": "perf-3",
+                    "product_name": "Chanel No. 5",
                     "quantity": 1,
-                    "unit_price": 50
+                    "unit_price": 920
+                },
+                {
+                    "product_id": "perf-4",
+                    "product_name": "Creed Aventus",
+                    "quantity": 1,
+                    "unit_price": 2450
+                },
+                {
+                    "product_id": "perf-2",
+                    "product_name": "Dior Sauvage",
+                    "quantity": 1,
+                    "unit_price": 790
+                },
+                {
+                    "product_id": "perf-1",
+                    "product_name": "Bleu de Chanel",
+                    "quantity": 1,
+                    "unit_price": 850
                 }
             ],
             "id": "ord-003",
             "status": "enviado",
-            "created_at": "13/05/2026 08:08"
+            "created_at": "13/05/2026 08:32"
         }
     ],
     "vendas": []
