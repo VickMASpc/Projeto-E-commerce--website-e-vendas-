@@ -1,7 +1,5 @@
-'use strict';
-
 /**
- * app.js — Lógica principal do E-commerce (MinhaLoja)
+ * app.js — Lógica principal do E-commerce (Grand Parfum)
  * 
  * Módulos:
  *  1. Navbar (scroll + hamburger)
@@ -9,8 +7,76 @@
  *  3. Renderização Dinâmica (Produtos)
  *  4. Animações de scroll (IntersectionObserver)
  *  5. Newsletter
- *  6. Firebase (stubbed — pronto para integração)
+ *  6. Firebase (Integração Real)
+ * 
+ * NOTA: Este arquivo agora é um MÓDULO (ES Module). 
+ * Variáveis globais de outros scripts (como PRODUCTS_LIVE) continuam acessíveis.
  */
+
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs, addDoc, query, limit, doc, setDoc } from 'firebase/firestore';
+import firebaseConfig from './firebase-config.js';
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const FirebaseDB = {
+  /** Busca produtos do Firestore */
+  async getProducts(count = 8) {
+    try {
+      const q = query(collection(db, 'produtos'), limit(count));
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (err) {
+      console.error("Erro ao buscar produtos do Firebase:", err);
+      return [];
+    }
+  },
+
+  /** Adiciona e-mail na newsletter */
+  async addNewsletterEmail(email) {
+    try {
+      await addDoc(collection(db, 'newsletter'), {
+        email,
+        createdAt: new Date()
+      });
+      return true;
+    } catch (err) {
+      console.error("Erro ao salvar newsletter:", err);
+      return false;
+    }
+  },
+
+  /** Registra pedido no Firestore */
+  async createOrder(orderData) {
+    try {
+      // Gerando ID no padrão ord-xxx (usando final do timestamp para ser curto)
+      const orderId = `ord-${Date.now().toString().slice(-4)}`;
+      
+      const pedidoTraduzido = {
+        clienteNome: orderData.customer?.name || "Cliente",
+        clienteEmail: orderData.customer?.email || "",
+        clienteTelefone: orderData.customer?.phone || "",
+        clienteEndereco: orderData.customer?.address || "",
+        itens: orderData.items.map(it => ({
+          produtoNome: it.name || it.nome || "Produto",
+          preco: it.price || it.preco || 0,
+          quantidade: it.quantity || 1
+        })),
+        total: orderData.total,
+        status: 'pendente',
+        dataCriacao: new Date().toISOString()
+      };
+
+      await setDoc(doc(db, 'pedidos', orderId), pedidoTraduzido);
+      return orderId;
+    } catch (err) {
+      console.error("Erro ao criar pedido no Firebase:", err);
+      throw err;
+    }
+  }
+};
 
 /* ============================================================
    1. NAVBAR — scroll effect + hamburger
@@ -206,9 +272,17 @@ document.addEventListener('click', (e) => {
  * @param {Object} product Objeto de produto do products.js
  */
 function createProductCard(product) {
-  const { id, name, price, oldPrice, category, imageEmoji, isSale, isNew, rating, reviews } = product;
+  const { id, rating, reviews } = product;
   
-  // Trata dados vindos do Python que podem não ter todos os campos visuais do site
+  // Normalização de chaves (Suporte Português e Inglês)
+  const name = product.nome || product.name || 'Produto';
+  const price = parseFloat(product.preco || product.price || 0);
+  const oldPrice = parseFloat(product.precoAntigo || product.oldPrice || 0);
+  const category = product.categoria || product.category || 'Perfume';
+  const imageEmoji = product.imageEmoji || '✨';
+  const isSale = product.emOferta || product.isSale || false;
+  const isNew = product.eNovo || product.isNew || false;
+  
   const safeEmoji = imageEmoji || '📦';
   const safeRating = rating || 5.0;
   const safeReviews = reviews || 0;
@@ -379,16 +453,18 @@ if (newsletterForm) {
     submitBtn.textContent = 'Aguarde...';
     submitBtn.disabled = true;
 
-    // TODO: Substituir por chamada real ao Firebase
-    await fakeDelay(1200);
+    // Integração Real com Firebase
+    const success = await FirebaseDB.addNewsletterEmail(email);
 
-    submitBtn.textContent = '✓ Inscrito!';
-    submitBtn.style.background = '#22c55e';
-    submitBtn.style.color = '#fff';
-    emailInput.value = '';
-
-    // Registrar e-mail no Firestore (aqui vai a integração futura)
-    // await FirebaseDB.addNewsletterEmail(email);
+    if (success) {
+        submitBtn.textContent = '✓ Inscrito!';
+        submitBtn.style.background = '#22c55e';
+        submitBtn.style.color = '#fff';
+        emailInput.value = '';
+    } else {
+        submitBtn.textContent = 'Erro ao salvar';
+        submitBtn.style.background = '#ef4444';
+    }
 
     setTimeout(() => {
       submitBtn.textContent = 'Quero Ofertas';
@@ -410,57 +486,10 @@ function fakeDelay(ms) {
 }
 
 
-/* ============================================================
-   5. FIREBASE (STUB) — Esqueleto pronto para integração
-   ============================================================
-   
-   Quando o Firebase estiver configurado:
-   1. Instale: npm install firebase
-   2. Adicione a config em firebase-config.js
-   3. Descomente as funções abaixo
-   
-   ============================================================ */
-
-/*
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, addDoc, onSnapshot } from 'firebase/firestore';
-
-const firebaseConfig = {
-  // Cole sua config do Firebase Console aqui
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const FirebaseDB = {
-  // Busca produtos do Firestore
-  async getProducts(limit = 8) {
-    const snap = await getDocs(collection(db, 'produtos'));
-    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  },
-
-  // Adiciona e-mail na newsletter
-  async addNewsletterEmail(email) {
-    await addDoc(collection(db, 'newsletter'), {
-      email,
-      createdAt: new Date()
-    });
-  },
-
-  // Registra pedido
-  async createOrder(orderData) {
-    const ref = await addDoc(collection(db, 'pedidos'), {
-      ...orderData,
-      status: 'pendente',
-      createdAt: new Date()
-    });
-    return ref.id;
-  }
-};
-*/
+// Exporta funções úteis para uso global se necessário (para compatibilidade com scripts inline)
+window.renderProducts = renderProducts;
+window.FirebaseDB = FirebaseDB;
+window.Cart = Cart;
 
 
 /* ============================================================

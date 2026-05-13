@@ -82,10 +82,10 @@
       <div class="filter-bar">
         <div class="filter-group" id="category-filters">
           <button class="filter-btn active" data-category="all">Todos</button>
-          <button class="filter-btn" data-category="Eletrônicos">Eletrônicos</button>
-          <button class="filter-btn" data-category="Moda">Moda</button>
-          <button class="filter-btn" data-category="Beleza">Beleza</button>
-          <button class="filter-btn" data-category="Esportes">Esportes</button>
+          <button class="filter-btn" data-category="Masculino">Masculino</button>
+          <button class="filter-btn" data-category="Feminino">Feminino</button>
+          <button class="filter-btn" data-category="Unissex">Unissex</button>
+          <button class="filter-btn" data-category="Acessórios">Acessórios</button>
         </div>
 
         <div class="search-input-wrapper">
@@ -117,10 +117,24 @@
     </div>
   </footer>
 
+  <!-- Firebase SDK -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+
   <script src="products_live.js"></script>
   <script src="products.js"></script>
-  <script src="app.js"></script>
-  <script>
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    // Disponibiliza funções do módulo no escopo global
+    import firebaseConfig from "./firebase-config.js";
+    
     document.addEventListener('DOMContentLoaded', () => {
       const grid = 'all-products-grid';
       const searchInput = document.getElementById('product-search');

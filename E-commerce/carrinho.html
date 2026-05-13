@@ -123,10 +123,25 @@
     </div>
   </main>
 
+  <!-- Firebase SDK -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+
   <script src="products_live.js"></script>
   <script src="products.js"></script>
-  <script src="app.js"></script>
-  <script>
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    // Disponibiliza funções do módulo no escopo global para compatibilidade com o HTML legado
+    import { initializeApp } from "firebase/app";
+    import firebaseConfig from "./firebase-config.js";
+    
     document.addEventListener('DOMContentLoaded', () => {
       const cartContainer = document.getElementById('cart-content');
 
@@ -248,41 +263,34 @@
         };
 
         try {
-          const response = await fetch('http://127.0.0.1:5000/order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-          });
-
-          if (!response.ok) throw new Error('Falha ao conectar com o servidor de vendas.');
-
-          const result = await response.json();
-          console.log('Pedido confirmado:', result);
+          // Integração Real com Firebase
+          const orderId = await window.FirebaseDB.createOrder(orderData);
+          console.log('Pedido confirmado via Firebase:', orderId);
 
           Cart.clear();
           cartContainer.innerHTML = `
             <div class="empty-cart" style="grid-column: 1 / -1;">
               <div class="empty-cart__icon" style="color:var(--clr-success); opacity:1;">✅</div>
               <h2 style="margin-bottom: 1rem;">Pedido Realizado!</h2>
-              <p style="color: var(--clr-neutral-500); margin-bottom: 0.5rem;">Seu pedido <strong>#${result.order_id}</strong> foi registrado.</p>
+              <p style="color: var(--clr-neutral-500); margin-bottom: 0.5rem;">Seu pedido <strong>#${orderId}</strong> foi registrado em nosso sistema seguro.</p>
               <p style="color: var(--clr-neutral-400); margin-bottom: 2rem;">A equipe de logística já foi notificada e está preparando sua entrega.</p>
               <a href="index.html" class="btn-primary">Voltar para Home</a>
             </div>
           `;
-          Cart.showToast('Pedido integrado com sucesso! 🚀');
+          Cart.showToast('Pedido registrado com sucesso no Firebase! 🚀');
 
         } catch (error) {
-          console.error('Erro no checkout:', error);
-          btn.textContent = 'Erro ao conectar. Tente novamente.';
+          console.error('Erro no checkout Firebase:', error);
+          btn.textContent = 'Erro ao processar pedido';
           btn.style.background = 'var(--clr-danger)';
           
           setTimeout(() => {
             btn.textContent = originalText;
             btn.style.background = '';
             btn.disabled = false;
-          }, 3000);
+          }, 4000);
           
-          Cart.showToast('Erro: Sistema de vendas offline. Certifique-se que o App Python está rodando! ❌');
+          Cart.showToast('Erro ao salvar no Firebase. Verifique sua conexão. ❌');
         }
       };
 

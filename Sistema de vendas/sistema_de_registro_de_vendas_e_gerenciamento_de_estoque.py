@@ -164,11 +164,12 @@ class SistemaLogisticaApp:
     def _update_dashboard(self):
         prods = database.get_products()
         total_prod = len(prods)
-        baixo_estoque = sum(1 for p in prods if int(p["stock"]) < 5)
+        baixo_estoque = sum(1 for p in prods if int(p.get("estoque", p.get("stock", 0))) < 5)
         
         orders = database.get_orders()
-        # Pedidos 'pagos' são os que logística deve tratar
-        pendentes_envio = sum(1 for o in orders if o["status"].lower() == "pago")
+        # Pedidos 'pagos' ou 'pendente-pagamento' são os que logística deve tratar
+        # No Firestore novos pedidos entram como 'pendente'
+        pendentes_envio = sum(1 for o in orders if o.get("status", "").lower() in ["pago", "pendente"])
         
         self.lbl_total_prod.config(text=f"{total_prod}")
         self.lbl_baixo_estoque.config(text=f"{baixo_estoque}")
@@ -181,12 +182,18 @@ class SistemaLogisticaApp:
             
         prods = database.get_products()
         for p in prods:
-            valores = (p["id"], p["name"], p["category"], f"R$ {p['price']:.2f}", p["stock"])
+            # Suporte a ambos os idiomas para transição suave
+            nome = p.get("nome", p.get("name", "Produto"))
+            cat = p.get("categoria", p.get("category", "Outros"))
+            preco = float(p.get("preco", p.get("price", 0)))
+            estoque = int(p.get("estoque", p.get("stock", 0)))
+            
+            valores = (p["id"], nome, cat, f"R$ {preco:.2f}", estoque)
             row_id = self.tree_estoque.insert("", tk.END, values=valores)
-            # Alerta visual para estoque zerado/baixo
-            if int(p["stock"]) == 0:
+            
+            if estoque == 0:
                 self.tree_estoque.item(row_id, tags=("zerado",))
-            elif int(p["stock"]) < 5:
+            elif estoque < 5:
                 self.tree_estoque.item(row_id, tags=("baixo",))
 
         self.tree_estoque.tag_configure("zerado", background="#ffcccc")
@@ -201,20 +208,25 @@ class SistemaLogisticaApp:
         orders.sort(key=lambda x: x["id"], reverse=True)
         
         for o in orders:
-            # Formatando itens para visualização rápida da prancheta
-            str_items = ", ".join([f"{i['quantity']}x {i.get('product_name','Item')}" for i in o.get("items", [])])
+            # Normalização de Pedidos (Firebase vs Mock)
+            c_nome = o.get("clienteNome", o.get("customer_name", "Cliente"))
+            total = float(o.get("total", 0))
+            status = o.get("status", "pendente").lower()
+            data_cv = o.get("dataCriacao", o.get("created_at", "--/--"))
+
+            # Formatando itens para visualização rápida
+            itens_lista = o.get("itens", o.get("items", []))
+            str_items = ", ".join([f"{i.get('quantidade', i.get('quantity', 1))}x {i.get('produtoNome', i.get('product_name', 'Item'))}" for i in itens_lista])
             if len(str_items) > 35: str_items = str_items[:35] + "..."
             
-            valores = (o["id"], o["customer_name"], str_items, f"R$ {o['total']:.2f}", str(o["status"]).upper(), o["created_at"])
+            valores = (o["id"], c_nome, str_items, f"R$ {total:.2f}", status.upper(), data_cv)
             row_id = self.tree_pedidos.insert("", tk.END, values=valores)
             
-            # Tags visuais de status
-            s = o["status"].lower()
-            if s == "pendente":
+            if status == "pendente":
                 self.tree_pedidos.item(row_id, tags=("pendente",))
-            elif s == "pago":
+            elif status == "pago":
                 self.tree_pedidos.item(row_id, tags=("pago",))
-            elif s == "enviado":
+            elif status == "enviado":
                 self.tree_pedidos.item(row_id, tags=("enviado",))
                 
         self.tree_pedidos.tag_configure("pendente", foreground="gray")
@@ -240,7 +252,7 @@ class SistemaLogisticaApp:
         ent_nome.pack(fill=tk.X, pady=(0, 10))
 
         ttk.Label(frame_mid, text="Categoria do Site:").pack(anchor=tk.W, pady=(0, 2))
-        cb_cat = ttk.Combobox(frame_mid, values=["Eletrônicos", "Moda", "Esportes", "Casa & Deco", "Beleza", "Livros", "Outros"], state="readonly")
+        cb_cat = ttk.Combobox(frame_mid, values=["Masculino", "Feminino", "Unissex", "Acessórios", "Promoções"], state="readonly")
         cb_cat.current(0)
         cb_cat.pack(fill=tk.X, pady=(0, 10))
 

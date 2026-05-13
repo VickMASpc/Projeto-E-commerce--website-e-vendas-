@@ -13,17 +13,28 @@ from datetime import datetime
 # mantiverem as assinaturas (entrada/saída).
 # ==============================================================================
 
-USE_FIREBASE = False # Mude para True quando tiver as credenciais
+USE_FIREBASE = True # Mude para True quando tiver o arquivo serviceAccountKey.json
 
-try:
-    if USE_FIREBASE:
+db = None
+
+if USE_FIREBASE:
+    try:
         import firebase_admin
         from firebase_admin import credentials, firestore
-        # cred = credentials.Certificate("path/to/serviceAccountKey.json")
-        # firebase_admin.initialize_app(cred)
-        # db = firestore.client()
-except ImportError:
-    USE_FIREBASE = False
+        
+        # O arquivo deve estar na mesma pasta ou o caminho completo deve ser fornecido
+        cred_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            db = firestore.client()
+            print("Firebase Initialized Successfully")
+        else:
+            print("Aviso: serviceAccountKey.json não encontrado. Operando em modo MOCK.")
+            USE_FIREBASE = False
+    except Exception as e:
+        print(f"Erro ao inicializar Firebase: {e}")
+        USE_FIREBASE = False
 
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "db_mock.json")
@@ -85,38 +96,70 @@ def _export_to_frontend(data):
 # ==========================================
 def get_products():
     """Retorna lista de dicionários de produtos."""
+    if USE_FIREBASE:
+        try:
+            docs = db.collection("produtos").get()
+            return [doc.to_dict() | {"id": doc.id} for doc in docs]
+        except Exception as e:
+            print(f"Erro ao buscar produtos no Firebase: {e}")
+            return []
+    
     data = _read_db()
     return data["produtos"]
 
-def add_product(name, description, price, stock, category):
+def add_product(nome, descricao, preco, estoque, categoria):
     """Adiciona um produto novo."""
-    data = _read_db()
-    # Gera um id simples baseado no tempo atual
-    new_id = f"prod-{int(datetime.now().timestamp())}"
     prod = {
-        "id": new_id,
-        "name": name,
-        "description": description,
-        "price": float(price),
-        "stock": int(stock),
-        "category": category,
+        "nome": nome,
+        "descricao": descricao,
+        "preco": float(preco),
+        "estoque": int(estoque),
+        "categoria": categoria,
         "image_url": ""
     }
+
+    if USE_FIREBASE:
+        try:
+            ref = db.collection("produtos").add(prod)
+            return ref[1].id
+        except Exception as e:
+            print(f"Erro ao salvar produto no Firebase: {e}")
+            return None
+
+    data = _read_db()
+    new_id = f"perf-{int(datetime.now().timestamp() % 1000000)}"
+    prod["id"] = new_id
     data["produtos"].append(prod)
     _write_db(data)
     return new_id
 
-def update_product_stock(product_id, new_stock):
+def update_product_stock(product_id, novo_estoque):
     """Atualiza número do estoque de um produto."""
+    if USE_FIREBASE:
+        try:
+            db.collection("produtos").document(product_id).update({
+                "estoque": int(novo_estoque)
+            })
+            return
+        except Exception as e:
+            print(f"Erro ao atualizar estoque no Firebase: {e}")
+    
     data = _read_db()
     for prod in data["produtos"]:
         if prod["id"] == product_id:
-            prod["stock"] = int(new_stock)
+            prod["estoque"] = int(novo_estoque)
             break
     _write_db(data)
 
 def delete_product(produto_id):
     """Remove um produto permanentemente."""
+    if USE_FIREBASE:
+        try:
+            db.collection("produtos").document(produto_id).delete()
+            return
+        except Exception as e:
+            print(f"Erro ao deletar no Firebase: {e}")
+
     data = _read_db()
     data["produtos"] = [p for p in data["produtos"] if p["id"] != produto_id]
     _write_db(data)
@@ -127,6 +170,14 @@ def delete_product(produto_id):
 # ==========================================
 def get_orders():
     """Retorna a fila de pedidos gerados pelo E-commerce."""
+    if USE_FIREBASE:
+        try:
+            docs = db.collection("pedidos").get()
+            return [doc.to_dict() | {"id": doc.id} for doc in docs]
+        except Exception as e:
+            print(f"Erro ao buscar pedidos no Firebase: {e}")
+            return []
+
     data = _read_db()
     return data["pedidos"]
 
@@ -135,6 +186,15 @@ def update_order_status(ord_id, novo_status):
     Logística pode atualizar o status do pedido,
     ex: de 'pago' para 'enviado'.
     """
+    if USE_FIREBASE:
+        try:
+            db.collection("pedidos").document(ord_id).update({
+                "status": novo_status
+            })
+            return
+        except Exception as e:
+            print(f"Erro ao atualizar pedido no Firebase: {e}")
+
     data = _read_db()
     for order in data["pedidos"]:
         if order["id"] == ord_id:
