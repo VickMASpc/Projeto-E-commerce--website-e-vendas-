@@ -50,7 +50,7 @@
             "name": "CK One",
             "description": "Fragrância revolucionária unissex, ícone de pureza e unidade.",
             "price": 350.0,
-            "stock": 60,
+            "stock": 58,
             "category": "Unissex",
             "image_url": ""
         }
@@ -121,6 +121,30 @@
             "id": "ord-003",
             "status": "enviado",
             "created_at": "13/05/2026 08:32"
+        },
+        {
+            "customer": {
+                "name": "VICTOR MONTEIRO DE ARAUJO SILVA",
+                "email": "vcmas09@gmail.com",
+                "phone": "11932275180",
+                "address": "Rua nova palmeira 615"
+            },
+            "cliente_telefone": "11932275180",
+            "cliente_endereco": "Rua nova palmeira 615",
+            "total": 700,
+            "customer_name": "VICTOR MONTEIRO DE ARAUJO SILVA",
+            "customer_email": "vcmas09@gmail.com",
+            "items": [
+                {
+                    "product_id": "perf-6",
+                    "product_name": "CK One",
+                    "quantity": 2,
+                    "unit_price": 350
+                }
+            ],
+            "id": "ord-004",
+            "status": "pago",
+            "created_at": "13/05/2026 20:05"
         }
     ],
     "vendas": []

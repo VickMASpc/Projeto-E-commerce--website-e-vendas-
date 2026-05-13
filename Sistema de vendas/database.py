@@ -109,25 +109,25 @@ def get_products():
 
 def add_product(nome, descricao, preco, estoque, categoria):
     """Adiciona um produto novo."""
+    new_id = f"perf-{int(datetime.now().timestamp() % 1000000)}"
     prod = {
-        "nome": nome,
-        "descricao": descricao,
-        "preco": float(preco),
-        "estoque": int(estoque),
-        "categoria": categoria,
+        "name": nome,
+        "description": descricao,
+        "price": float(preco),
+        "stock": int(estoque),
+        "category": categoria,
         "image_url": ""
     }
 
     if USE_FIREBASE:
         try:
-            ref = db.collection("produtos").add(prod)
-            return ref[1].id
+            db.collection("produtos").document(new_id).set(prod)
+            return new_id
         except Exception as e:
             print(f"Erro ao salvar produto no Firebase: {e}")
             return None
 
     data = _read_db()
-    new_id = f"perf-{int(datetime.now().timestamp() % 1000000)}"
     prod["id"] = new_id
     data["produtos"].append(prod)
     _write_db(data)
@@ -138,7 +138,7 @@ def update_product_stock(product_id, novo_estoque):
     if USE_FIREBASE:
         try:
             db.collection("produtos").document(product_id).update({
-                "estoque": int(novo_estoque)
+                "stock": int(novo_estoque)
             })
             return
         except Exception as e:
@@ -147,7 +147,7 @@ def update_product_stock(product_id, novo_estoque):
     data = _read_db()
     for prod in data["produtos"]:
         if prod["id"] == product_id:
-            prod["estoque"] = int(novo_estoque)
+            prod["stock"] = int(novo_estoque)
             break
     _write_db(data)
 

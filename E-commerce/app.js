@@ -51,18 +51,19 @@ const FirebaseDB = {
   /** Registra pedido no Firestore */
   async createOrder(orderData) {
     try {
-      // Gerando ID no padrão ord-xxx (usando final do timestamp para ser curto)
-      const orderId = `ord-${Date.now().toString().slice(-4)}`;
+      // Gerando ID no padrão ord-xxx (3 números exatos)
+      const randomThreeDigits = Math.floor(Math.random() * 900 + 100);
+      const orderId = `ord-${randomThreeDigits}`;
       
       const pedidoTraduzido = {
         clienteNome: orderData.customer?.name || "Cliente",
         clienteEmail: orderData.customer?.email || "",
         clienteTelefone: orderData.customer?.phone || "",
         clienteEndereco: orderData.customer?.address || "",
-        itens: orderData.items.map(it => ({
-          produtoNome: it.name || it.nome || "Produto",
-          preco: it.price || it.preco || 0,
-          quantidade: it.quantity || 1
+        itens: (orderData.items || orderData.itens || []).map(it => ({
+          produtoNome: it.name || it.nome || it.nome_prod || "Produto",
+          preco: it.price || it.preco || it.preco_unit || 0,
+          quantidade: it.quantity || it.quantidade || 1
         })),
         total: orderData.total,
         status: 'pendente',
@@ -74,6 +75,37 @@ const FirebaseDB = {
     } catch (err) {
       console.error("Erro ao criar pedido no Firebase:", err);
       throw err;
+    }
+  },
+
+  /** Inicializa produtos na página */
+  async initProducts(containerId, maxCount = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let products = [];
+    try {
+      // Tenta buscar do Firebase primeiro
+      products = await this.getProducts(maxCount || 50);
+    } catch (e) {
+      console.error("Falha ao buscar produtos do Firebase, usando fallback local:", e);
+    }
+
+    // Fallback para mock local
+    if (!products || products.length === 0) {
+      const hasLive = (typeof PRODUCTS_LIVE !== 'undefined' && PRODUCTS_LIVE.length > 0);
+      const staticData = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      products = hasLive ? PRODUCTS_LIVE : staticData;
+      if (maxCount) {
+          products = products.slice(0, maxCount);
+      }
+    }
+
+    // Armazena no window para a função de filtragem poder acessar
+    window.CURRENT_PRODUCTS = products;
+    
+    if (typeof window.renderProducts === 'function') {
+      window.renderProducts(containerId, products);
     }
   }
 };
@@ -244,19 +276,50 @@ const Cart = {
   }
 };
 
-// Inicializa badge do carrinho ao carregar
-Cart.updateBadge();
+// Wishlist — Persistência em localStorage
+const WISHLIST_KEY = 'minhaloja_wishlist';
+
+const Wishlist = {
+  getItems() {
+    try { return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || []; }
+    catch { return []; }
+  },
+  save(items) { localStorage.setItem(WISHLIST_KEY, JSON.stringify(items)); },
+  toggleItem(productId) {
+    let items = this.getItems();
+    if (items.includes(productId)) {
+      items = items.filter(id => id !== productId);
+    } else {
+      items.push(productId);
+    }
+    this.save(items);
+    return items.includes(productId);
+  },
+  hasItem(productId) {
+    return this.getItems().includes(productId);
+  }
+};
+
+window.Wishlist = Wishlist; // Exporta para uso global
 
 // Wishlist (Usa delegação de evento para produtos dinâmicos)
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.product-card__wishlist');
   if (btn) {
     e.stopPropagation();
-    const isActive = btn.classList.toggle('wishlist-active');
+    const card = btn.closest('.product-card');
+    if (!card) return;
+    const productId = card.id;
+    
+    const isActive = Wishlist.toggleItem(productId);
+    
     if (isActive) {
+      btn.classList.add('wishlist-active');
       btn.style.color = '#ef4444';
       btn.querySelector('svg path')?.setAttribute('fill', '#ef4444');
+      Cart.showToast('Adicionado aos favoritos ❤️');
     } else {
+      btn.classList.remove('wishlist-active');
       btn.style.color = '';
       btn.querySelector('svg path')?.removeAttribute('fill');
     }
@@ -302,13 +365,18 @@ function createProductCard(product) {
     ? `<div class="product-card__discount">Economia R$ ${(oldPrice - price).toFixed(2)}</div>` 
     : `<div class="product-card__discount" style="color:var(--clr-primary-600)">12x sem juros</div>`;
 
+  const inWishlist = typeof Wishlist !== 'undefined' ? Wishlist.hasItem(id) : false;
+  const wishColor = inWishlist ? 'color: #ef4444;' : '';
+  const wishFill = inWishlist ? 'fill="#ef4444"' : '';
+  const wishClass = inWishlist ? 'wishlist-active' : '';
+
   return `
     <article class="product-card animate-on-scroll" id="${id}" aria-label="Produto: ${name}">
       <div class="product-card__image">
         <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--clr-primary-100),var(--clr-primary-50));display:flex;align-items:center;justify-content:center;font-size:4rem;">${safeEmoji}</div>
         ${badgeHTML}
-        <button class="product-card__wishlist" aria-label="Adicionar aos favoritos">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <button class="product-card__wishlist ${wishClass}" style="${wishColor}" aria-label="Adicionar aos favoritos">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path ${wishFill} d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>
         <button class="product-card__add-cart" data-product-id="${id}" aria-label="Adicionar ${name} ao carrinho">+ Adicionar ao Carrinho</button>
       </div>
@@ -341,15 +409,15 @@ function renderProducts(containerId, productList = null) {
   if (!container) return;
 
   // Hierarquia de dados: 
-  // 1. productList (argumento explícito)
-  // 2. PRODUCTS_LIVE (dados do sistema Python)
-  // 3. PRODUCTS (fallback estático se o sistema estiver offline/vazio)
+  // 2. window.CURRENT_PRODUCTS (set by initProducts)
+  // 3. PRODUCTS_LIVE (dados do sistema Python)
+  // 4. PRODUCTS (fallback estático se o sistema estiver offline/vazio)
   
   const hasLive = (typeof PRODUCTS_LIVE !== 'undefined' && PRODUCTS_LIVE.length > 0);
   const liveData = hasLive ? PRODUCTS_LIVE : [];
   const staticData = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
   
-  const data = productList || (hasLive ? liveData : staticData);
+  const data = productList || (window.CURRENT_PRODUCTS && window.CURRENT_PRODUCTS.length > 0 ? window.CURRENT_PRODUCTS : (hasLive ? liveData : staticData));
   
   if (data.length === 0) {
     container.innerHTML = `

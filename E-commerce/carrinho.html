@@ -123,6 +123,31 @@
     </div>
   </main>
 
+  <footer class="footer" style="margin-top: 5rem;" id="footer">
+    <div class="footer__grid">
+      <div>
+        <div class="footer__brand-name">Grand<span>Parfum</span></div>
+        <p class="footer__desc">Qualidade superior e entrega garantida para todo o Brasil.</p>
+      </div>
+      <div>
+        <h3 class="footer__col-title">Links Úteis</h3>
+        <ul class="footer__links">
+          <li><a href="index.html" class="footer__link">Home</a></li>
+          <li><a href="produtos.html" class="footer__link">Produtos</a></li>
+          <li><a href="carrinho.html" class="footer__link">Carrinho</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="footer__col-title">Suporte</h3>
+        <ul class="footer__links">
+          <li><a href="javascript:Cart.showToast('Redirecionando para Central de Ajuda...')" class="footer__link">Central de Ajuda</a></li>
+          <li><a href="javascript:Cart.showToast('Rastreio em manutenção.')" class="footer__link">Rastrear Pedido</a></li>
+          <li><a href="javascript:Cart.showToast('Nossa política de devolução é de 30 dias.')" class="footer__link">Política de Devolução</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
   <!-- Firebase SDK -->
   <script type="importmap">
     {
@@ -142,7 +167,7 @@
     import { initializeApp } from "firebase/app";
     import firebaseConfig from "./firebase-config.js";
     
-    document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
       const cartContainer = document.getElementById('cart-content');
 
       function renderCart() {
@@ -212,6 +237,15 @@
               <span>Total</span>
               <span>R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
             </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <h3 style="font-size: 1rem; margin-bottom: 0.25rem;">Dados de Entrega</h3>
+              <input type="text" id="checkout-name" placeholder="Nome Completo" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
+              <input type="email" id="checkout-email" placeholder="E-mail" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
+              <input type="tel" id="checkout-phone" placeholder="Telefone" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
+              <input type="text" id="checkout-address" placeholder="Endereço de Entrega" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
+            </div>
+
             <button class="btn-primary btn-checkout" onclick="handleCheckout()">Finalizar Compra</button>
             <a href="produtos.html" class="btn-outline btn-checkout-secondary">Continuar Comprando</a>
           </aside>
@@ -244,15 +278,33 @@
         const shipping = subtotal > 199 ? 0 : 25;
         const total = subtotal + shipping;
 
+        const nameInput = document.getElementById('checkout-name').value;
+        const emailInput = document.getElementById('checkout-email').value;
+        const phoneInput = document.getElementById('checkout-phone').value;
+        const addressInput = document.getElementById('checkout-address').value;
+
+        if (!nameInput || !emailInput || !phoneInput || !addressInput) {
+            Cart.showToast('Por favor, preencha todos os dados de entrega. ⚠️');
+            return;
+        }
+
         const btn = document.querySelector('.btn-checkout');
         const originalText = btn.textContent;
         btn.textContent = 'Enviando Pedido... ⏳';
         btn.disabled = true;
         
-        // Dados do pedido (Simulando um cliente logado)
+        // Dados do pedido 
         const orderData = {
-          cliente_nome: "Victor (Cliente Web)",
-          cliente_email: "victor_web@example.com",
+          customer: {
+             name: nameInput,
+             email: emailInput,
+             phone: phoneInput,
+             address: addressInput
+          },
+          cliente_nome: nameInput,
+          cliente_email: emailInput,
+          cliente_telefone: phoneInput,
+          cliente_endereco: addressInput,
           itens: items.map(i => ({
             produto_id: i.id,
             nome_prod: i.name,
@@ -266,6 +318,18 @@
           // Integração Real com Firebase
           const orderId = await window.FirebaseDB.createOrder(orderData);
           console.log('Pedido confirmado via Firebase:', orderId);
+
+          // Integração com sistema Python
+          try {
+              await fetch('http://localhost:5000/order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(orderData)
+              });
+              console.log('Pedido sincronizado com o sistema Python local');
+          } catch (e) {
+              console.warn("Servidor Python offline ou falhou:", e);
+          }
 
           Cart.clear();
           cartContainer.innerHTML = `

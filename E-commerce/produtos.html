@@ -132,10 +132,9 @@
   <script src="products.js"></script>
   <script type="module" src="app.js"></script>
   <script type="module">
-    // Disponibiliza funções do módulo no escopo global
-    import firebaseConfig from "./firebase-config.js";
+    import './app.js';
     
-    document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', async () => {
       const grid = 'all-products-grid';
       const searchInput = document.getElementById('product-search');
       const filterBtns = document.querySelectorAll('.filter-btn');
@@ -143,23 +142,31 @@
       let currentCategory = 'all';
       let searchQuery = '';
 
+      if (window.FirebaseDB) {
+          await window.FirebaseDB.initProducts(grid);
+      }
+
       function updateDisplay() {
         const hasLive = (typeof PRODUCTS_LIVE !== 'undefined' && PRODUCTS_LIVE.length > 0);
-        const baseProducts = hasLive ? PRODUCTS_LIVE : (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []);
+        const staticData = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []);
+        const baseProducts = (window.CURRENT_PRODUCTS && window.CURRENT_PRODUCTS.length > 0) ? window.CURRENT_PRODUCTS : (hasLive ? PRODUCTS_LIVE : staticData);
         let filtered = baseProducts;
         
         if (currentCategory !== 'all') {
-          filtered = filtered.filter(p => p.category === currentCategory);
+          filtered = filtered.filter(p => p.category === currentCategory || p.categoria === currentCategory);
         }
         
         if (searchQuery) {
-          filtered = filtered.filter(p => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            p.description.toLowerCase().includes(searchQuery.toLowerCase())
-          );
+          filtered = filtered.filter(p => {
+             const n = p.name || p.nome || "";
+             const d = p.description || p.descricao || "";
+             return n.toLowerCase().includes(searchQuery.toLowerCase()) || d.toLowerCase().includes(searchQuery.toLowerCase());
+          });
         }
         
-        renderProducts(grid, filtered);
+        if (typeof window.renderProducts === 'function') {
+            window.renderProducts(grid, filtered);
+        }
       }
 
       // Filtros de Categoria
