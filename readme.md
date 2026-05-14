@@ -2,8 +2,13 @@
 * É necessária a extenção Live server e live preview para acessar o site localmente.
 
 # Como acessar
-1. Rode o aplictvo python para iniciar o servidor.
-2. abra o terminal dentro do projeto (crtl+') e rode o comando pip install firebase-admin.
+1. abra o terminal dentro do projeto (crtl+') e rode o comando:
+```bash
+
+pip install firebase-admin
+
+```
+2. Rode o aplictvo python para iniciar o servidor.
 3. No VS code, clique com o botão direito em index.html e selecione "Open with Live Server".
 
 # Firebase
