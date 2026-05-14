@@ -168,8 +168,25 @@ def delete_product(produto_id):
 # ==========================================
 # PEDIDOS E LOGÍSTICA
 # ==========================================
+def listen_to_orders(callback):
+    """
+    Configura um listener em tempo real para a coleção de pedidos no Firebase.
+    O callback será chamado sempre que houver mudanças.
+    """
+    if not USE_FIREBASE or db is None:
+        return None
+
+    def on_snapshot(col_snapshot, changes, read_time):
+        # Sempre que houver uma mudança, chamamos o callback
+        # Podemos passar os dados processados ou apenas notificar a mudança
+        callback()
+
+    # Registra o listener na coleção 'pedidos'
+    query_watch = db.collection("pedidos").on_snapshot(on_snapshot)
+    return query_watch
+
 def get_orders():
-    """Retorna a fila de pedidos gerados pelo E-commerce."""
+    """Retorna lista de dicionários de pedidos."""
     if USE_FIREBASE:
         try:
             docs = db.collection("pedidos").get()
@@ -177,27 +194,24 @@ def get_orders():
         except Exception as e:
             print(f"Erro ao buscar pedidos no Firebase: {e}")
             return []
-
+    
     data = _read_db()
     return data["pedidos"]
 
-def update_order_status(ord_id, novo_status):
-    """
-    Logística pode atualizar o status do pedido,
-    ex: de 'pago' para 'enviado'.
-    """
+def update_order_status(pedido_id, novo_status):
+    """Atualiza o status de um pedido."""
     if USE_FIREBASE:
         try:
-            db.collection("pedidos").document(ord_id).update({
+            db.collection("pedidos").document(pedido_id).update({
                 "status": novo_status
             })
             return
         except Exception as e:
-            print(f"Erro ao atualizar pedido no Firebase: {e}")
-
+            print(f"Erro ao atualizar status no Firebase: {e}")
+    
     data = _read_db()
-    for order in data["pedidos"]:
-        if order["id"] == ord_id:
-            order["status"] = novo_status
+    for ped in data["pedidos"]:
+        if ped["id"] == pedido_id:
+            ped["status"] = novo_status
             break
     _write_db(data)

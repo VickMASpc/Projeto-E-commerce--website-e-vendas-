@@ -46,6 +46,17 @@ class SistemaLogisticaApp:
         # Inicia servidor de integração em segundo plano
         self._start_api_server()
 
+        # Inicia listener em tempo real do Firebase (se habilitado)
+        if database.USE_FIREBASE:
+            database.listen_to_orders(lambda: self.root.after(0, self._refresh_realtime))
+
+    def _refresh_realtime(self):
+        """Atualização disparada por evento externo (Firebase)"""
+        self._refresh_all()
+        # Opcional: Notificar o usuário visualmente sem travar com popup se possível, 
+        # mas como já existe messagebox em outros lugares, vamos manter consistência.
+        # self.root.after(0, lambda: messagebox.showinfo("Atualização", "Novos dados recebidos do site!"))
+
 
 
     def _setup_dashboard(self):
