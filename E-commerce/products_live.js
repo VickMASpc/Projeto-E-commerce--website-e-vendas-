@@ -1,0 +1,99 @@
+/* Gerado automaticamente pelo Sistema de Vendas */
+const PRODUCTS_LIVE = [
+    {
+        "id": "perf-1",
+        "name": "Bleu de Chanel",
+        "description": "Fragrância amadeirada aromática para o homem moderno e sofisticado.",
+        "price": 850.0,
+        "stock": 45,
+        "category": "Masculino",
+        "image_url": ""
+    },
+    {
+        "id": "perf-2",
+        "name": "Dior Sauvage",
+        "description": "Uma composição radical e fresca, inspirada em espaços abertos e céu azul.",
+        "price": 790.0,
+        "stock": 30,
+        "category": "Masculino",
+        "image_url": ""
+    },
+    {
+        "id": "perf-3",
+        "name": "Chanel No. 5",
+        "description": "O clássico atemporal, a essência mítica da feminilidade.",
+        "price": 920.0,
+        "stock": 24,
+        "category": "Feminino",
+        "image_url": ""
+    },
+    {
+        "id": "perf-4",
+        "name": "Creed Aventus",
+        "description": "Uma fragrância frutada e amadeirada, celebrando força e sucesso.",
+        "price": 2450.0,
+        "stock": 10,
+        "category": "Nicho",
+        "image_url": ""
+    },
+    {
+        "id": "perf-5",
+        "name": "Tom Ford Lost Cherry",
+        "description": "Um perfume gourmand luxuoso com notas intensas de cereja negra.",
+        "price": 1850.0,
+        "stock": 12,
+        "category": "Nicho",
+        "image_url": ""
+    },
+    {
+        "id": "perf-6",
+        "name": "CK One",
+        "description": "Fragrância revolucionária unissex, ícone de pureza e unidade.",
+        "price": 350.0,
+        "stock": 60,
+        "category": "Unissex",
+        "image_url": ""
+    }
+];
+const ORDERS_LIVE = [
+    {
+        "id": "ord-001",
+        "customer_name": "Juliana Silva",
+        "customer_email": "juliana@example.com",
+        "items": [
+            {
+                "product_id": "perf-3",
+                "product_name": "Chanel No. 5",
+                "quantity": 1,
+                "unit_price": 920.0
+            }
+        ],
+        "total": 920.0,
+        "status": "enviado",
+        "created_at": "14/05/2026 07:33"
+    },
+    {
+        "customer": {
+            "name": "Victor",
+            "email": "Victor@gmail.com",
+            "phone": "11111111111",
+            "address": "Rua rua 111"
+        },
+        "cliente_telefone": "11111111111",
+        "cliente_endereco": "Rua rua 111",
+        "total": 920,
+        "customer_name": "Victor",
+        "customer_email": "Victor@gmail.com",
+        "items": [
+            {
+                "product_id": "perf-3",
+                "product_name": "Chanel No. 5",
+                "quantity": 1,
+                "unit_price": 920
+            }
+        ],
+        "id": "ord-002",
+        "status": "pago",
+        "created_at": "14/05/2026 12:02"
+    }
+];

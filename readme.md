@@ -29,5 +29,5 @@ pip install firebase-admin
 ## Problemas
 * Reiews placeholder
 * Dados de frete, email, telefone e endereço são placeholder
-* Nenhum dos acessos no rodapé são funcionais (exceto os da seção "Loja", que são redirects)
+* Nenhum dos acessos no rodapé são funcionais, são apenas toasts (exceto os da seção "Loja", que são redirects)
 * Sistema de favoritos está implementado em partes (é possível selecionar mas não registrar ou checar)

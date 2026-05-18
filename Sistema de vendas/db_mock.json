@@ -23,7 +23,7 @@
             "name": "Chanel No. 5",
             "description": "O clássico atemporal, a essência mítica da feminilidade.",
             "price": 920.0,
-            "stock": 25,
+            "stock": 24,
             "category": "Feminino",
             "image_url": ""
         },
@@ -71,6 +71,30 @@
             "total": 920.0,
             "status": "enviado",
             "created_at": "14/05/2026 07:33"
+        },
+        {
+            "customer": {
+                "name": "Victor",
+                "email": "Victor@gmail.com",
+                "phone": "11111111111",
+                "address": "Rua rua 111"
+            },
+            "cliente_telefone": "11111111111",
+            "cliente_endereco": "Rua rua 111",
+            "total": 920,
+            "customer_name": "Victor",
+            "customer_email": "Victor@gmail.com",
+            "items": [
+                {
+                    "product_id": "perf-3",
+                    "product_name": "Chanel No. 5",
+                    "quantity": 1,
+                    "unit_price": 920
+                }
+            ],
+            "id": "ord-002",
+            "status": "pago",
+            "created_at": "14/05/2026 12:02"
         }
     ],
     "vendas": []
