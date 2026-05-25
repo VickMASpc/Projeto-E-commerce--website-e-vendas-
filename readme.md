@@ -8,7 +8,7 @@
 pip install firebase-admin
 
 ```
-2. Rode o aplictvo python para iniciar o servidor.
+2. Rode o aplictvo python para iniciar o servidor. (!Pode ser necessário atualizar o arquivo `serviceAccountKey.json`")
 3. No VS code, clique com o botão direito em index.html e selecione "Open with Live Server".
 
 # Firebase
