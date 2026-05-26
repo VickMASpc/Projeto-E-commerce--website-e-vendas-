@@ -567,10 +567,21 @@ const btnSearch = document.getElementById('btn-search');
 
 if (btnSearch) {
   btnSearch.addEventListener('click', () => {
-    // TODO: abrir modal ou redirecionar para /produtos.html?q=
-    console.log('Busca clicada — implementar modal');
+    const term = prompt('O que você quer buscar?');
+    const q = (term || '').trim();
+    const target = q ? `produtos.html?q=${encodeURIComponent(q)}` : 'produtos.html';
+    window.location.href = target;
   });
 }
+
+// Clique no card leva para página do produto (exceto botões internos)
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.product-card');
+  if (!card) return;
+  if (e.target.closest('.product-card__add-cart') || e.target.closest('.product-card__wishlist')) return;
+  const id = card.id;
+  if (id) window.location.href = `produto.html?id=${encodeURIComponent(id)}`;
+});
 
 
 /* ============================================================

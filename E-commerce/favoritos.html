@@ -1,0 +1,8 @@
+<!doctype html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Favoritos — Grand Parfum</title><link rel='stylesheet' href='style.css'></head><body>
+<nav class='navbar scrolled'><div class='navbar__inner'><a class='navbar__logo' href='index.html'>Grand<span>Parfum</span></a><a href='carrinho.html' id='btn-cart' class='navbar__icon-btn'>🛒<span id='cart-count' class='navbar__cart-badge'>0</span></a></div></nav>
+<main class='section' style='padding-top:calc(var(--navbar-height) + 2rem)'><div class='section__container'><h1 class='section__title'>Meus Favoritos</h1><div id='fav-grid' class='products__grid'></div></div></main>
+<script type='importmap'>{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"}}</script>
+<script type='module' src='app.js'></script>
+<script type='module'>
+window.addEventListener('load', async ()=>{await window.FirebaseDB?.initProducts('fav-grid'); const ids=window.Wishlist?.getItems?.()||[]; const base=window.CURRENT_PRODUCTS||[]; const favs=base.filter(p=>ids.includes(p.id)); if(!favs.length){document.getElementById('fav-grid').innerHTML='<p class="section__subtitle">Você ainda não favoritou nenhum item.</p>';return;} window.renderProducts('fav-grid',favs);});
+</script></body></html>

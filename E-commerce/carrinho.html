@@ -318,16 +318,9 @@
           const orderId = await window.FirebaseDB.createOrder(orderData);
           console.log('Pedido confirmado via Firebase:', orderId);
 
-          // Integração com sistema Python
-          try {
-              await fetch('http://localhost:5000/order', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(orderData)
-              });
-              console.log('Pedido sincronizado com o sistema Python local');
-          } catch (e) {
-              console.warn("Servidor Python offline ou falhou:", e);
+          // Sincronização local desativada em produção (evita dependência de localhost para usuários finais)
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.info('Modo local detectado: sincronização com backend local pode ser implementada aqui.');
           }
 
           Cart.clear();
