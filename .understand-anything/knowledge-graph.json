@@ -1,0 +1,828 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "Grand Parfum",
+    "languages": [
+      "config",
+      "css",
+      "html",
+      "javascript",
+      "json",
+      "markdown",
+      "python",
+      "typescript"
+    ],
+    "frameworks": [
+      "Firebase",
+      "React",
+      "Tailwind CSS",
+      "Tkinter",
+      "Vite"
+    ],
+    "description": "Projeto beta que integra uma vitrine estática de perfumes, um sistema local de estoque e pedidos em Python/Tkinter e um dashboard React para métricas operacionais.",
+    "analyzedAt": "2026-05-27T16:44:26.452Z",
+    "gitCommitHash": "741d1384d2cc1096a1f2d1765afc27662a490d6c"
+  },
+  "nodes": [
+    {
+      "id": "file:E-commerce/app.js",
+      "type": "file",
+      "name": "app.js",
+      "filePath": "E-commerce/app.js",
+      "summary": "Runtime principal da vitrine: inicializa Firebase, monta busca, catálogo, favoritos, carrinho e checkout.",
+      "tags": [
+        "storefront",
+        "JavaScript",
+        "Firebase",
+        "carrinho",
+        "checkout",
+        "busca"
+      ]
+    },
+    {
+      "id": "file:E-commerce/carrinho.html",
+      "type": "file",
+      "name": "carrinho.html",
+      "filePath": "E-commerce/carrinho.html",
+      "summary": "Shell do carrinho e do checkout resumido da loja.",
+      "tags": [
+        "HTML",
+        "carrinho",
+        "checkout",
+        "storefront"
+      ]
+    },
+    {
+      "id": "file:E-commerce/favoritos.html",
+      "type": "file",
+      "name": "favoritos.html",
+      "filePath": "E-commerce/favoritos.html",
+      "summary": "Shell da lista de favoritos salvos localmente.",
+      "tags": [
+        "HTML",
+        "favoritos",
+        "storefront"
+      ]
+    },
+    {
+      "id": "config:E-commerce/firebase-config.js",
+      "type": "config",
+      "name": "firebase-config.js",
+      "filePath": "E-commerce/firebase-config.js",
+      "summary": "Configuração do Firebase usada pela vitrine para autenticação e Firestore.",
+      "tags": [
+        "configuração",
+        "Firebase",
+        "storefront"
+      ]
+    },
+    {
+      "id": "file:E-commerce/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "E-commerce/index.html",
+      "summary": "Página inicial da loja, com hero, categorias, destaques e pontos de entrada para a experiência de compra.",
+      "tags": [
+        "HTML",
+        "home",
+        "storefront",
+        "hero"
+      ]
+    },
+    {
+      "id": "file:E-commerce/products_live.js",
+      "type": "file",
+      "name": "products_live.js",
+      "filePath": "E-commerce/products_live.js",
+      "summary": "Snapshot gerado de produtos e pedidos que alimenta a vitrine estática quando o backend exporta os dados.",
+      "tags": [
+        "dados-gerados",
+        "catálogo",
+        "pedidos",
+        "storefront"
+      ]
+    },
+    {
+      "id": "file:E-commerce/produto.html",
+      "type": "file",
+      "name": "produto.html",
+      "filePath": "E-commerce/produto.html",
+      "summary": "Shell da página de detalhe do produto, com galeria, especificações e produtos relacionados.",
+      "tags": [
+        "HTML",
+        "detalhe",
+        "produto",
+        "storefront"
+      ]
+    },
+    {
+      "id": "file:E-commerce/produtos.html",
+      "type": "file",
+      "name": "produtos.html",
+      "filePath": "E-commerce/produtos.html",
+      "summary": "Página de catálogo com filtros por categoria, oferta, favoritos e busca em tempo real.",
+      "tags": [
+        "HTML",
+        "catálogo",
+        "filtros",
+        "storefront"
+      ]
+    },
+    {
+      "id": "file:E-commerce/style.css",
+      "type": "file",
+      "name": "style.css",
+      "filePath": "E-commerce/style.css",
+      "summary": "Folha de estilo global da vitrine, com a identidade visual e o layout responsivo da loja.",
+      "tags": [
+        "CSS",
+        "UI",
+        "layout",
+        "storefront"
+      ]
+    },
+    {
+      "id": "document:readme.md",
+      "type": "document",
+      "name": "readme.md",
+      "filePath": "readme.md",
+      "summary": "Visão geral do projeto Grand Parfum, com a vitrine estática, o sistema local de vendas e o dashboard analítico.",
+      "tags": [
+        "documentação",
+        "visão-geral",
+        "Grand Parfum",
+        "monorepo"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": "Sistema de análise de vendas/React app/.env.example",
+      "summary": "Exemplo de variável de ambiente para apontar o dashboard ao endpoint de métricas.",
+      "tags": [
+        "configuração",
+        "env",
+        "dashboard"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/eslint.config.js",
+      "type": "config",
+      "name": "eslint.config.js",
+      "filePath": "Sistema de análise de vendas/React app/eslint.config.js",
+      "summary": "Configuração do ESLint para o app React e seus arquivos TypeScript.",
+      "tags": [
+        "ESLint",
+        "configuração",
+        "React"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "Sistema de análise de vendas/React app/index.html",
+      "summary": "Documento HTML de entrada do app Vite que monta o root React.",
+      "tags": [
+        "HTML",
+        "Vite",
+        "entrypoint"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "Sistema de análise de vendas/React app/package.json",
+      "summary": "Manifesto do app React com scripts Vite, dependências de React, Recharts e Tailwind.",
+      "tags": [
+        "configuração",
+        "React",
+        "Vite",
+        "TypeScript"
+      ]
+    },
+    {
+      "id": "document:Sistema de análise de vendas/React app/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "Sistema de análise de vendas/React app/README.md",
+      "summary": "README do app React com instruções do template Vite + React + TypeScript.",
+      "tags": [
+        "documentação",
+        "React",
+        "Vite",
+        "template"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/src/App.css",
+      "type": "file",
+      "name": "App.css",
+      "filePath": "Sistema de análise de vendas/React app/src/App.css",
+      "summary": "Estilos do componente raiz e do layout-base do app React.",
+      "tags": [
+        "CSS",
+        "React",
+        "dashboard"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "Sistema de análise de vendas/React app/src/App.tsx",
+      "summary": "Wrapper mínimo que renderiza o componente SalesDashboard.",
+      "tags": [
+        "React",
+        "dashboard",
+        "componente"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/src/index.css",
+      "type": "file",
+      "name": "index.css",
+      "filePath": "Sistema de análise de vendas/React app/src/index.css",
+      "summary": "Estilos globais do app React com Tailwind e tema escuro.",
+      "tags": [
+        "CSS",
+        "Tailwind",
+        "global"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "filePath": "Sistema de análise de vendas/React app/src/main.tsx",
+      "summary": "Entry point do React que monta o app dentro de #root.",
+      "tags": [
+        "React",
+        "entrypoint",
+        "Vite"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "type": "file",
+      "name": "sistema_de_analise_de_vendas.tsx",
+      "filePath": "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "summary": "Painel de BI que consome /stats e renderiza KPIs, gráficos e atividades recentes.",
+      "tags": [
+        "React",
+        "dashboard",
+        "Recharts",
+        "API"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/tsconfig.app.json",
+      "type": "config",
+      "name": "tsconfig.app.json",
+      "filePath": "Sistema de análise de vendas/React app/tsconfig.app.json",
+      "summary": "Configuração TypeScript específica para o app browser.",
+      "tags": [
+        "TypeScript",
+        "configuração"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "Sistema de análise de vendas/React app/tsconfig.json",
+      "summary": "Configuração TypeScript raiz do projeto React.",
+      "tags": [
+        "TypeScript",
+        "configuração"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/tsconfig.node.json",
+      "type": "config",
+      "name": "tsconfig.node.json",
+      "filePath": "Sistema de análise de vendas/React app/tsconfig.node.json",
+      "summary": "Configuração TypeScript para arquivos Node e Vite.",
+      "tags": [
+        "TypeScript",
+        "Node",
+        "configuração"
+      ]
+    },
+    {
+      "id": "config:Sistema de análise de vendas/React app/vite.config.ts",
+      "type": "config",
+      "name": "vite.config.ts",
+      "filePath": "Sistema de análise de vendas/React app/vite.config.ts",
+      "summary": "Configuração do Vite com React e Tailwind, host exposto e porta de desenvolvimento.",
+      "tags": [
+        "Vite",
+        "React",
+        "Tailwind",
+        "configuração"
+      ]
+    },
+    {
+      "id": "file:Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx",
+      "type": "file",
+      "name": "sistema_de_analise_de_vendas.tsx",
+      "filePath": "Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx",
+      "summary": "Versão legada e simplificada do dashboard BI, com leitura direta de /stats no backend local.",
+      "tags": [
+        "dashboard",
+        "React",
+        "Recharts",
+        "legado"
+      ]
+    },
+    {
+      "id": "file:Sistema de vendas/database.py",
+      "type": "file",
+      "name": "database.py",
+      "filePath": "Sistema de vendas/database.py",
+      "summary": "Camada de persistência e agregação: normaliza produtos e pedidos, lê o JSON mock, integra Firebase e calcula métricas.",
+      "tags": [
+        "Python",
+        "persistência",
+        "Firebase",
+        "estoque",
+        "métricas"
+      ]
+    },
+    {
+      "id": "config:Sistema de vendas/db_mock.json",
+      "type": "config",
+      "name": "db_mock.json",
+      "filePath": "Sistema de vendas/db_mock.json",
+      "summary": "Banco mock com produtos, pedidos e vendas usado como fallback local.",
+      "tags": [
+        "dados",
+        "mock",
+        "estoque",
+        "pedidos"
+      ]
+    },
+    {
+      "id": "config:Sistema de vendas/serviceAccountKey.json",
+      "type": "config",
+      "name": "serviceAccountKey.json",
+      "filePath": "Sistema de vendas/serviceAccountKey.json",
+      "summary": "Credencial de conta de serviço do Firebase para acesso ao Firestore.",
+      "tags": [
+        "configuração",
+        "Firebase",
+        "segredo"
+      ]
+    },
+    {
+      "id": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "type": "file",
+      "name": "sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "filePath": "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "summary": "Aplicativo desktop em Tkinter para estoque e pedidos, com API HTTP local em localhost:5000.",
+      "tags": [
+        "Python",
+        "Tkinter",
+        "API",
+        "estoque",
+        "pedidos"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:E-commerce/app.js",
+      "target": "config:E-commerce/firebase-config.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "Importação direta declarada no código."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/React app/src/App.tsx",
+      "target": "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "Importação direta declarada no código."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "target": "file:Sistema de análise de vendas/React app/src/App.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "Importação direta declarada no código."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "target": "file:Sistema de análise de vendas/React app/src/index.css",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "Importação direta declarada no código."
+    },
+    {
+      "source": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "target": "file:Sistema de vendas/database.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "Importação direta declarada no código."
+    },
+    {
+      "source": "document:readme.md",
+      "target": "file:E-commerce/index.html",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O README principal apresenta a vitrine estática e o seu ponto de entrada."
+    },
+    {
+      "source": "document:readme.md",
+      "target": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O README principal explica como iniciar o sistema local de vendas."
+    },
+    {
+      "source": "document:readme.md",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O README principal descreve o dashboard React como parte do ecossistema."
+    },
+    {
+      "source": "document:Sistema de análise de vendas/React app/README.md",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O README do app React orienta a entrada do painel."
+    },
+    {
+      "source": "document:Sistema de análise de vendas/React app/README.md",
+      "target": "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O README do app React cobre o componente principal do dashboard."
+    },
+    {
+      "source": "file:E-commerce/app.js",
+      "target": "file:E-commerce/products_live.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O runtime da vitrine lê os dados gerados para montar catálogo e pedidos."
+    },
+    {
+      "source": "file:E-commerce/app.js",
+      "target": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O checkout envia pedidos para a API local de vendas."
+    },
+    {
+      "source": "config:E-commerce/firebase-config.js",
+      "target": "file:E-commerce/app.js",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "As credenciais do Firebase configuram a vitrine."
+    },
+    {
+      "source": "file:Sistema de vendas/database.py",
+      "target": "file:E-commerce/products_live.js",
+      "type": "writes_to",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O backend exporta o snapshot da vitrine para o arquivo gerado."
+    },
+    {
+      "source": "config:Sistema de vendas/db_mock.json",
+      "target": "file:Sistema de vendas/database.py",
+      "type": "reads_from",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O repositório local usa o JSON mock como base de persistência."
+    },
+    {
+      "source": "config:Sistema de vendas/serviceAccountKey.json",
+      "target": "file:Sistema de vendas/database.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "A chave de serviço habilita o acesso ao Firestore quando o modo Firebase está ativo."
+    },
+    {
+      "source": "file:E-commerce/index.html",
+      "target": "file:E-commerce/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página carrega o runtime principal da loja."
+    },
+    {
+      "source": "file:E-commerce/index.html",
+      "target": "file:E-commerce/style.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página depende da folha de estilo global da loja."
+    },
+    {
+      "source": "file:E-commerce/produtos.html",
+      "target": "file:E-commerce/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página carrega o runtime principal da loja."
+    },
+    {
+      "source": "file:E-commerce/produtos.html",
+      "target": "file:E-commerce/style.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página depende da folha de estilo global da loja."
+    },
+    {
+      "source": "file:E-commerce/produto.html",
+      "target": "file:E-commerce/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página carrega o runtime principal da loja."
+    },
+    {
+      "source": "file:E-commerce/produto.html",
+      "target": "file:E-commerce/style.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página depende da folha de estilo global da loja."
+    },
+    {
+      "source": "file:E-commerce/carrinho.html",
+      "target": "file:E-commerce/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página carrega o runtime principal da loja."
+    },
+    {
+      "source": "file:E-commerce/carrinho.html",
+      "target": "file:E-commerce/style.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página depende da folha de estilo global da loja."
+    },
+    {
+      "source": "file:E-commerce/favoritos.html",
+      "target": "file:E-commerce/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página carrega o runtime principal da loja."
+    },
+    {
+      "source": "file:E-commerce/favoritos.html",
+      "target": "file:E-commerce/style.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A página depende da folha de estilo global da loja."
+    },
+    {
+      "source": "file:E-commerce/index.html",
+      "target": "file:E-commerce/products_live.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A home carrega o snapshot local de produtos antes do runtime."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/React app/index.html",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O HTML de entrada do Vite monta o entry point do React."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/package.json",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O manifesto organiza scripts e dependências do app React."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/tsconfig.app.json",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O tsconfig do browser regula a compilação do entry point."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/tsconfig.json",
+      "target": "config:Sistema de análise de vendas/React app/tsconfig.app.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O tsconfig raiz referencia as variantes do projeto."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/tsconfig.json",
+      "target": "config:Sistema de análise de vendas/React app/tsconfig.node.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "O tsconfig raiz referencia a variante Node."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/tsconfig.node.json",
+      "target": "config:Sistema de análise de vendas/React app/vite.config.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A configuração Node apoia o build e a configuração do Vite."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/vite.config.ts",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "A configuração do Vite governa o app React e sua porta de desenvolvimento."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/eslint.config.js",
+      "target": "file:Sistema de análise de vendas/React app/src/main.tsx",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A configuração do lint cobre o código do painel."
+    },
+    {
+      "source": "config:Sistema de análise de vendas/React app/.env.example",
+      "target": "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "A variável de ambiente aponta o dashboard para o endpoint de métricas."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "target": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O painel consome as métricas publicadas pela API local de vendas."
+    },
+    {
+      "source": "file:Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx",
+      "target": "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "O protótipo legado também depende da API local de métricas."
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:visao-geral-e-documentacao",
+      "name": "Visão geral e documentação",
+      "description": "Documentação de nível de projeto e orientações gerais para navegar pelo ecossistema.",
+      "nodeIds": [
+        "document:readme.md",
+        "document:Sistema de análise de vendas/React app/README.md"
+      ]
+    },
+    {
+      "id": "layer:loja-e-commerce",
+      "name": "Loja e-commerce",
+      "description": "Vitrine estática, páginas HTML, runtime de front-end e snapshot de dados da loja.",
+      "nodeIds": [
+        "file:E-commerce/app.js",
+        "file:E-commerce/carrinho.html",
+        "file:E-commerce/favoritos.html",
+        "config:E-commerce/firebase-config.js",
+        "file:E-commerce/index.html",
+        "file:E-commerce/products_live.js",
+        "file:E-commerce/produto.html",
+        "file:E-commerce/produtos.html",
+        "file:E-commerce/style.css"
+      ]
+    },
+    {
+      "id": "layer:sistema-de-vendas",
+      "name": "Sistema de vendas",
+      "description": "Persistência, dados mock, credenciais Firebase e aplicativo desktop local de estoque e pedidos.",
+      "nodeIds": [
+        "file:Sistema de vendas/database.py",
+        "config:Sistema de vendas/db_mock.json",
+        "config:Sistema de vendas/serviceAccountKey.json",
+        "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py"
+      ]
+    },
+    {
+      "id": "layer:painel-analitico",
+      "name": "Painel analítico",
+      "description": "Dashboard React/Vite, configuração de build e o protótipo legado de BI.",
+      "nodeIds": [
+        "config:Sistema de análise de vendas/React app/.env.example",
+        "config:Sistema de análise de vendas/React app/eslint.config.js",
+        "file:Sistema de análise de vendas/React app/index.html",
+        "config:Sistema de análise de vendas/React app/package.json",
+        "file:Sistema de análise de vendas/React app/src/App.css",
+        "file:Sistema de análise de vendas/React app/src/App.tsx",
+        "file:Sistema de análise de vendas/React app/src/index.css",
+        "file:Sistema de análise de vendas/React app/src/main.tsx",
+        "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+        "config:Sistema de análise de vendas/React app/tsconfig.app.json",
+        "config:Sistema de análise de vendas/React app/tsconfig.json",
+        "config:Sistema de análise de vendas/React app/tsconfig.node.json",
+        "config:Sistema de análise de vendas/React app/vite.config.ts",
+        "file:Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Visão geral do projeto",
+      "description": "Comece pelo README para entender como a loja estática, o sistema local e o dashboard se encaixam.",
+      "nodeIds": [
+        "document:readme.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Entrada da vitrine",
+      "description": "Depois, siga para a home da loja e para o runtime JavaScript que monta catálogo, favoritos e checkout.",
+      "nodeIds": [
+        "file:E-commerce/index.html",
+        "file:E-commerce/app.js"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Catálogo e dados gerados",
+      "description": "Veja como as páginas de catálogo e o snapshot gerado mantêm a vitrine sincronizada com os dados locais.",
+      "nodeIds": [
+        "file:E-commerce/produtos.html",
+        "file:E-commerce/produto.html",
+        "file:E-commerce/products_live.js"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Sistema de vendas",
+      "description": "Entre no backend em Python para entender a persistência, o modo mock e a API local em localhost:5000.",
+      "nodeIds": [
+        "file:Sistema de vendas/database.py",
+        "file:Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+        "config:Sistema de vendas/db_mock.json"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Painel analítico",
+      "description": "Depois, acompanhe a montagem do dashboard React que consome as métricas expostas pela API local.",
+      "nodeIds": [
+        "file:Sistema de análise de vendas/React app/src/main.tsx",
+        "file:Sistema de análise de vendas/React app/src/App.tsx",
+        "file:Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Configuração do app React",
+      "description": "Os manifests e configs mostram como o app Vite é compilado, validado e servido em desenvolvimento.",
+      "nodeIds": [
+        "config:Sistema de análise de vendas/React app/package.json",
+        "config:Sistema de análise de vendas/React app/vite.config.ts",
+        "config:Sistema de análise de vendas/React app/tsconfig.json",
+        "config:Sistema de análise de vendas/React app/tsconfig.app.json",
+        "config:Sistema de análise de vendas/React app/tsconfig.node.json"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Protótipo legado",
+      "description": "Feche com o dashboard antigo na raiz, útil para comparar a evolução do painel de métricas.",
+      "nodeIds": [
+        "file:Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx"
+      ]
+    }
+  ]
+}
