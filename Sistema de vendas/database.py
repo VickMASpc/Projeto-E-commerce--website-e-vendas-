@@ -1,5 +1,6 @@
 import json
 import os
+from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime
 
@@ -325,6 +326,63 @@ def normalize_product(product):
     return normalized
 
 
+def _next_order_id(existing_orders):
+    highest = 0
+    for order in existing_orders:
+        raw_id = str(order.get("id", ""))
+        if raw_id.startswith("ord-") and raw_id[4:].isdigit():
+            highest = max(highest, int(raw_id[4:]))
+    return f"ord-{highest + 1:03d}"
+
+
+def _normalize_order_item(item):
+    product_id = (
+        item.get("product_id")
+        or item.get("produto_id")
+        or item.get("produtoId")
+        or item.get("id")
+        or ""
+    )
+    product_name = (
+        item.get("product_name")
+        or item.get("produtoNome")
+        or item.get("nome_prod")
+        or item.get("name")
+        or "Item"
+    )
+    quantity = _to_int(item.get("quantity", item.get("quantidade", 1)), 1)
+    unit_price = _to_float(item.get("unit_price", item.get("preco_unit", item.get("preco", 0))))
+
+    return {
+        "product_id": product_id,
+        "product_name": product_name,
+        "quantity": max(quantity, 1),
+        "unit_price": unit_price,
+    }
+
+
+def normalize_order(order, fallback_id=None):
+    customer = order.get("customer") or {}
+    items = order.get("items") or order.get("itens") or []
+    normalized_items = [_normalize_order_item(item) for item in items]
+    total = _to_float(
+        order.get("total"),
+        sum(item["quantity"] * item["unit_price"] for item in normalized_items),
+    )
+
+    return {
+        "id": order.get("id") or fallback_id or "",
+        "customer_name": order.get("customer_name") or order.get("clienteNome") or customer.get("name") or "Cliente",
+        "customer_email": order.get("customer_email") or order.get("clienteEmail") or customer.get("email") or "",
+        "customer_phone": order.get("customer_phone") or order.get("clienteTelefone") or customer.get("phone") or "",
+        "customer_address": order.get("customer_address") or order.get("clienteEndereco") or customer.get("address") or "",
+        "items": normalized_items,
+        "total": total,
+        "status": str(order.get("status") or "pendente").lower(),
+        "created_at": order.get("created_at") or order.get("dataCriacao") or datetime.now().strftime("%d/%m/%Y %H:%M"),
+    }
+
+
 def _initial_data():
     return {
         "produtos": [normalize_product(product) for product in SEED_PRODUCTS],
@@ -362,7 +420,7 @@ def _read_db():
         data = json.load(file)
 
     data["produtos"] = [normalize_product(product) for product in data.get("produtos", [])]
-    data.setdefault("pedidos", [])
+    data["pedidos"] = [normalize_order(order) for order in data.get("pedidos", [])]
     data.setdefault("vendas", [])
     return data
 
@@ -370,7 +428,7 @@ def _read_db():
 def _write_db(data):
     clean_data = {
         "produtos": [normalize_product(product) for product in data.get("produtos", [])],
-        "pedidos": data.get("pedidos", []),
+        "pedidos": [normalize_order(order) for order in data.get("pedidos", [])],
         "vendas": data.get("vendas", []),
     }
 
@@ -499,12 +557,48 @@ def get_orders():
     if USE_FIREBASE and db is not None:
         try:
             docs = db.collection("pedidos").get()
-            return [doc.to_dict() | {"id": doc.id} for doc in docs]
+            return [normalize_order(doc.to_dict() | {"id": doc.id}) for doc in docs]
         except Exception as error:
             print(f"Erro ao buscar pedidos no Firebase: {error}")
             return []
 
     return _read_db()["pedidos"]
+
+
+def create_local_order(order):
+    data = _read_db()
+    normalized = normalize_order(order, _next_order_id(data["pedidos"]))
+    if not normalized["items"]:
+        return {
+            "ok": False,
+            "message": "Pedido sem itens.",
+            "order_id": None,
+        }
+
+    products_by_id = {product["id"]: product for product in data["produtos"]}
+    insufficient_stock = []
+    for item in normalized["items"]:
+        product = products_by_id.get(item["product_id"])
+        if not product or int(product.get("stock", 0)) < item["quantity"]:
+            insufficient_stock.append(item["product_name"])
+
+    if insufficient_stock:
+        return {
+            "ok": False,
+            "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
+            "order_id": None,
+        }
+
+    for item in normalized["items"]:
+        product = products_by_id.get(item["product_id"])
+        if product:
+            product["stock"] = int(product.get("stock", 0)) - item["quantity"]
+
+    normalized["status"] = "pago"
+    normalized["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    data["pedidos"].append(normalized)
+    _write_db(data)
+    return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
 
 
 def update_order_status(pedido_id, novo_status):
@@ -521,3 +615,69 @@ def update_order_status(pedido_id, novo_status):
             order["status"] = novo_status
             break
     _write_db(data)
+
+
+def _parse_date(value):
+    for pattern in ("%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(str(value).replace("+00:00", "").replace("Z", ""), pattern)
+        except ValueError:
+            continue
+    return datetime.now()
+
+
+def get_stats():
+    products = get_products()
+    orders = get_orders()
+
+    paid_orders = [order for order in orders if order.get("status") in {"pago", "enviado", "pendente"}]
+    total_revenue = sum(_to_float(order.get("total")) for order in paid_orders)
+    total_orders = len(paid_orders)
+    average_ticket = total_revenue / total_orders if total_orders else 0
+
+    inventory_by_category = defaultdict(int)
+    product_names = {product["id"]: product["name"] for product in products}
+    for product in products:
+        inventory_by_category[product.get("category", "Outros")] += int(product.get("stock", 0))
+
+    sales_by_product = defaultdict(int)
+    sales_by_date = defaultdict(float)
+    recent_activity = []
+    for order in paid_orders:
+        created_at = _parse_date(order.get("created_at"))
+        sales_by_date[created_at.strftime("%d/%m")] += _to_float(order.get("total"))
+        recent_activity.append(
+            {
+                "id": order.get("id", ""),
+                "label": f"Pedido {order.get('id', '')} - {order.get('status', 'pendente')}",
+                "customer": order.get("customer_name", "Cliente"),
+                "created_at": order.get("created_at", ""),
+            }
+        )
+        for item in order.get("items", []):
+            name = item.get("product_name") or product_names.get(item.get("product_id"), "Item")
+            sales_by_product[name] += _to_int(item.get("quantity"), 1)
+
+    top_products = sorted(
+        ({"name": name, "sales": quantity} for name, quantity in sales_by_product.items()),
+        key=lambda item: item["sales"],
+        reverse=True,
+    )[:5]
+
+    sales_over_time = [
+        {"date": date, "sales": total}
+        for date, total in sorted(sales_by_date.items())
+    ]
+
+    return {
+        "totalRevenue": round(total_revenue, 2),
+        "totalOrders": total_orders,
+        "averageTicket": round(average_ticket, 2),
+        "inventoryStatus": [
+            {"name": category, "value": quantity}
+            for category, quantity in sorted(inventory_by_category.items())
+        ],
+        "salesOverTime": sales_over_time,
+        "topProducts": top_products,
+        "recentActivity": recent_activity[-5:][::-1],
+    }

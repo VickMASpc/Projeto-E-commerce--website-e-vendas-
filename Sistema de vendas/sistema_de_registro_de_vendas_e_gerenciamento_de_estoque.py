@@ -1,7 +1,6 @@
 import json
 import threading
 import tkinter as tk
-from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from tkinter import messagebox, ttk
 
@@ -528,78 +527,42 @@ class SistemaLogisticaApp:
                 def do_OPTIONS(self):
                     self.send_response(200)
                     self.send_header("Access-Control-Allow-Origin", "*")
-                    self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                    self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
                     self.send_header("Access-Control-Allow-Headers", "Content-Type")
                     self.end_headers()
 
+                def _send_json(self, status_code, payload):
+                    self.send_response(status_code)
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+
+                def do_GET(self):
+                    if self.path != "/stats":
+                        self._send_json(404, {"status": "error", "message": "Rota nao encontrada."})
+                        return
+
+                    self._send_json(200, database.get_stats())
+
                 def do_POST(self):
                     if self.path != "/order":
-                        self.send_response(404)
-                        self.end_headers()
+                        self._send_json(404, {"status": "error", "message": "Rota nao encontrada."})
                         return
 
-                    content_length = int(self.headers["Content-Length"])
-                    order = json.loads(self.rfile.read(content_length))
-                    data = database._read_db()
-
-                    insufficient_stock = []
-                    items_key = "items" if "items" in order else "itens"
-                    for item in order.get(items_key, []):
-                        product_id = item.get("product_id") or item.get("produto_id")
-                        quantity = item.get("quantity") or item.get("quantidade", 0)
-                        product_name = item.get("product_name") or item.get("nome_prod", product_id)
-                        product = next((entry for entry in data["produtos"] if entry["id"] == product_id), None)
-                        if not product or int(product.get("stock", 0)) < quantity:
-                            insufficient_stock.append(product_name)
-
-                    if insufficient_stock:
-                        self.send_response(400)
-                        self.send_header("Access-Control-Allow-Origin", "*")
-                        self.send_header("Content-Type", "application/json")
-                        self.end_headers()
-                        self.wfile.write(
-                            json.dumps(
-                                {
-                                    "status": "error",
-                                    "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
-                                }
-                            ).encode()
-                        )
+                    try:
+                        content_length = int(self.headers.get("Content-Length", 0))
+                        order = json.loads(self.rfile.read(content_length) or b"{}")
+                    except (ValueError, json.JSONDecodeError):
+                        self._send_json(400, {"status": "error", "message": "Pedido invalido."})
                         return
 
-                    for item in order.get(items_key, []):
-                        product_id = item.get("product_id") or item.get("produto_id")
-                        quantity = item.get("quantity") or item.get("quantidade", 0)
-                        for product in data["produtos"]:
-                            if product["id"] == product_id:
-                                product["stock"] = int(product.get("stock", 0)) - quantity
-                                break
+                    result = database.create_local_order(order)
+                    if not result["ok"]:
+                        self._send_json(400, {"status": "error", "message": result["message"]})
+                        return
 
-                    if "cliente_nome" in order:
-                        order["customer_name"] = order.pop("cliente_nome")
-                    if "cliente_email" in order:
-                        order["customer_email"] = order.pop("cliente_email")
-                    if "itens" in order:
-                        order["items"] = order.pop("itens")
-
-                    for item in order.get("items", []):
-                        if "produto_id" in item:
-                            item["product_id"] = item.pop("produto_id")
-                        if "nome_prod" in item:
-                            item["product_name"] = item.pop("nome_prod")
-                        if "quantidade" in item:
-                            item["quantity"] = item.pop("quantidade")
-                        if "preco_unit" in item:
-                            item["unit_price"] = item.pop("preco_unit")
-
-                    order["id"] = f"ord-{len(data['pedidos']) + 1:03d}"
-                    order["status"] = "pago"
-                    order["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-                    data["pedidos"].append(order)
-                    database._write_db(data)
-
-                    customer_name = order.get("customer_name", "Cliente")
+                    customer_name = database.normalize_order(order).get("customer_name", "Cliente")
                     self.server.app_instance.root.after(0, self.server.app_instance._refresh_all)
                     self.server.app_instance.root.after(
                         0,
@@ -609,11 +572,7 @@ class SistemaLogisticaApp:
                         ),
                     )
 
-                    self.send_response(200)
-                    self.send_header("Access-Control-Allow-Origin", "*")
-                    self.send_header("Content-Type", "application/json")
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"status": "success", "order_id": order["id"]}).encode())
+                    self._send_json(200, {"status": "success", "order_id": result["order_id"]})
 
             server_address = ("", 5000)
             httpd = HTTPServer(server_address, OrderHandler)

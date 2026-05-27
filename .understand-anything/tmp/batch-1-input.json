@@ -1,0 +1,33 @@
+{
+  "projectRoot": "C:\\Users\\VictorMonteiroDeArau\\Downloads\\DUmp\\Todos\\Projeto-E-commerce--website-e-vendas-",
+  "batchFiles": [
+    {
+      "path": "Sistema de análise de vendas/React app/src/App.tsx",
+      "language": "typescript",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/main.tsx",
+      "language": "typescript",
+      "sizeLines": 10,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "language": "typescript",
+      "sizeLines": 365,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "Sistema de análise de vendas/React app/src/App.tsx": [
+      "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx"
+    ],
+    "Sistema de análise de vendas/React app/src/main.tsx": [
+      "Sistema de análise de vendas/React app/src/App.tsx",
+      "Sistema de análise de vendas/React app/src/index.css"
+    ],
+    "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx": []
+  }
+}

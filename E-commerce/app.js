@@ -18,6 +18,7 @@ const PAGE = document.body.dataset.page || "home";
 const CART_KEY = "minhaloja_cart";
 const WISHLIST_KEY = "minhaloja_wishlist";
 const DEFAULT_PRODUCT_LIMIT = 60;
+const MAX_CART_QUANTITY = 99;
 
 const CATEGORY_THEMES = {
   Masculino: { start: "#0f172a", end: "#1e293b", accent: "#d4af37", emoji: "🖤" },
@@ -197,14 +198,44 @@ const FirebaseDB = {
 
   async createOrder(orderData) {
     try {
-      const randomThreeDigits = Math.floor(Math.random() * 900 + 100);
-      const orderId = `ord-${randomThreeDigits}`;
+      const localOrderPayload = {
+        customer: orderData.customer || {},
+        total: orderData.total || 0,
+        items: (orderData.items || []).map((item) => ({
+          product_id: item.product_id || item.id || "",
+          product_name: item.name || item.product_name || "Produto",
+          quantity: item.quantity || 1,
+          unit_price: item.price || item.unit_price || 0,
+        })),
+      };
+
+      let localResponse = null;
+      try {
+        localResponse = await fetch("http://localhost:5000/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(localOrderPayload),
+        });
+      } catch {
+        localResponse = null;
+      }
+
+      if (localResponse) {
+        const result = await localResponse.json().catch(() => ({}));
+        if (!localResponse.ok) {
+          throw new Error(result.message || "Pedido recusado pelo sistema local.");
+        }
+        return result.order_id;
+      }
+
+      const orderId = `ord-${Date.now().toString().slice(-6)}`;
       const payload = {
         clienteNome: orderData.customer?.name || "Cliente",
         clienteEmail: orderData.customer?.email || "",
         clienteTelefone: orderData.customer?.phone || "",
         clienteEndereco: orderData.customer?.address || "",
         itens: (orderData.items || []).map((item) => ({
+          produtoId: item.product_id || item.id || "",
           produtoNome: item.name || item.product_name || "Produto",
           preco: item.price || item.unit_price || 0,
           quantidade: item.quantity || 1,
@@ -217,7 +248,7 @@ const FirebaseDB = {
       await setDoc(doc(db, "pedidos", orderId), payload);
       return orderId;
     } catch (error) {
-      console.error("Erro ao criar pedido no Firebase:", error);
+      console.error("Erro ao criar pedido:", error);
       throw error;
     }
   },
@@ -342,7 +373,10 @@ function normalizeProduct(rawProduct) {
     olfactiveFamily:
       merged.olfactiveFamily || merged.familiaOlfativa || "Amadeirado",
     occasion:
-      merged.occasion || merged.ocasiacao || "Uso versatil ao longo do dia",
+      merged.occasion ||
+      merged.ocasiao ||
+      merged.ocasiacao ||
+      "Uso versatil ao longo do dia",
     topNotes:
       parseList(merged.topNotes || merged.notasTopo).length > 0
         ? parseList(merged.topNotes || merged.notasTopo)
@@ -359,7 +393,7 @@ function normalizeProduct(rawProduct) {
       highlights.length > 0
         ? highlights
         : [
-            "Curadoria premium com envio seguro",
+            "Curadoria premium com envio cuidadoso",
             "Produto original com garantia de procedencia",
             "Detalhes completos disponiveis na pagina do item",
           ],
@@ -483,6 +517,8 @@ function createProductCard(product) {
     ? `<div class="product-card__price-old">${formatPrice(product.oldPrice)}</div>`
     : "";
   const wishlistActive = Wishlist.hasItem(product.id);
+  const isAvailable = product.stock > 0;
+  const wishlistLabel = wishlistActive ? "Remover dos favoritos" : "Adicionar aos favoritos";
 
   return `
     <article class="product-card animate-on-scroll" id="${product.id}" aria-label="Produto: ${product.name}">
@@ -491,14 +527,19 @@ function createProductCard(product) {
         ${badge}
         <button
           class="product-card__wishlist ${wishlistActive ? "wishlist-active" : ""}"
-          aria-label="Adicionar ${product.name} aos favoritos"
+          aria-label="${wishlistLabel}: ${product.name}"
+          title="${wishlistLabel}"
         >
           <svg width="16" height="16" fill="${wishlistActive ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
-        <button class="product-card__add-cart" data-product-id="${product.id}">
-          Adicionar ao carrinho
+        <button
+          class="product-card__add-cart"
+          data-product-id="${product.id}"
+          ${isAvailable ? "" : "disabled"}
+        >
+          ${isAvailable ? "Adicionar ao carrinho" : "Indisponivel"}
         </button>
       </div>
       <div class="product-card__body">
@@ -547,6 +588,18 @@ function renderProducts(containerId, productList = []) {
 }
 
 const Cart = {
+  getProduct(productId) {
+    return productCache?.find((entry) => entry.id === productId) || null;
+  },
+
+  getStockLimit(productId) {
+    const product = this.getProduct(productId);
+    if (!product) {
+      return MAX_CART_QUANTITY;
+    }
+    return Math.max(0, Number.parseInt(product.stock, 10) || 0);
+  },
+
   getItems() {
     try {
       const saved = JSON.parse(localStorage.getItem(CART_KEY)) || [];
@@ -558,7 +611,8 @@ const Cart = {
         imageUrl: item.imageUrl || "",
         category: item.category || "Produto",
         brand: item.brand || "Maison",
-        qty: Number.parseInt(item.qty, 10) || 1,
+        stock: Number.parseInt(item.stock, 10) || this.getStockLimit(item.id),
+        qty: Math.max(1, Number.parseInt(item.qty, 10) || 1),
       }));
     } catch {
       return [];
@@ -566,7 +620,18 @@ const Cart = {
   },
 
   save(items) {
-    localStorage.setItem(CART_KEY, JSON.stringify(items));
+    const normalizedItems = items
+      .map((item) => {
+        const stockLimit = Math.min(
+          MAX_CART_QUANTITY,
+          Number.parseInt(item.stock, 10) || this.getStockLimit(item.id),
+        );
+        const qty = Math.max(1, Math.min(Number.parseInt(item.qty, 10) || 1, stockLimit || 1));
+        return { ...item, stock: stockLimit, qty };
+      })
+      .filter((item) => item.stock !== 0);
+
+    localStorage.setItem(CART_KEY, JSON.stringify(normalizedItems));
     this.updateBadge();
   },
 
@@ -582,12 +647,21 @@ const Cart = {
             category: "Produto",
             brand: "Maison",
             imageUrl: "",
+            stock: MAX_CART_QUANTITY,
           };
+
+    const stockLimit = Math.min(MAX_CART_QUANTITY, Number.parseInt(product.stock, 10) || 0);
+    if (stockLimit <= 0) {
+      this.showToast(`${product.name} esta indisponivel no momento.`);
+      return false;
+    }
 
     const items = this.getItems();
     const existing = items.find((entry) => entry.id === product.id);
+    const requestedQty = Math.max(1, Number.parseInt(quantity, 10) || 1);
     if (existing) {
-      existing.qty += quantity;
+      existing.stock = stockLimit;
+      existing.qty = Math.min(existing.qty + requestedQty, stockLimit);
     } else {
       items.push({
         id: product.id,
@@ -597,11 +671,17 @@ const Cart = {
         imageUrl: product.imageUrl,
         category: product.category,
         brand: product.brand,
-        qty: quantity,
+        stock: stockLimit,
+        qty: Math.min(requestedQty, stockLimit),
       });
     }
     this.save(items);
-    this.showToast(`${product.name} adicionado ao carrinho.`);
+    this.showToast(
+      requestedQty > stockLimit
+        ? `${product.name} adicionado com limite de estoque.`
+        : `${product.name} adicionado ao carrinho.`,
+    );
+    return true;
   },
 
   removeItem(productId) {
@@ -663,6 +743,7 @@ const Wishlist = {
 
   save(items) {
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
+    this.updateBadge();
   },
 
   hasItem(productId) {
@@ -675,6 +756,17 @@ const Wishlist = {
     const nextItems = exists ? items.filter((id) => id !== productId) : [...items, productId];
     this.save(nextItems);
     return !exists;
+  },
+
+  updateBadge() {
+    const badge = document.getElementById("wishlist-count");
+    if (!badge) {
+      return;
+    }
+
+    const count = this.getItems().length;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? "inline-flex" : "none";
   },
 };
 
@@ -737,6 +829,7 @@ function buildHeader() {
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
               </svg>
+              <span class="navbar__cart-badge" id="wishlist-count">0</span>
             </a>
             <a href="carrinho.html" class="navbar__icon-btn" id="btn-cart" aria-label="Carrinho de compras (0 itens)">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -1254,9 +1347,11 @@ function renderProductDetail(product) {
         <div class="detail-actions">
           <label class="detail-qty">
             <span>Qtd.</span>
-            <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="1">
+            <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="${product.stock > 0 ? 1 : 0}" ${product.stock > 0 ? "" : "disabled"}>
           </label>
-          <button class="btn-primary" id="detail-add-cart">Adicionar ao carrinho</button>
+          <button class="btn-primary" id="detail-add-cart" ${product.stock > 0 ? "" : "disabled"}>
+            ${product.stock > 0 ? "Adicionar ao carrinho" : "Indisponivel"}
+          </button>
           <button class="btn-outline btn-outline--dark" id="detail-favorite">
             ${Wishlist.hasItem(product.id) ? "Remover favorito" : "Salvar favorito"}
           </button>
@@ -1337,7 +1432,12 @@ function renderProductDetail(product) {
   });
 
   document.getElementById("detail-add-cart")?.addEventListener("click", () => {
-    const quantity = Number.parseInt(document.getElementById("detail-qty")?.value || "1", 10) || 1;
+    const quantityInput = document.getElementById("detail-qty");
+    const quantity = Number.parseInt(quantityInput?.value || "1", 10) || 1;
+    if (quantity > product.stock && quantityInput) {
+      quantityInput.value = String(product.stock);
+      Cart.showToast(`Ajustamos para o estoque disponivel: ${product.stock}.`);
+    }
     Cart.addItem(product, undefined, undefined, undefined, quantity);
   });
 
@@ -1387,7 +1487,7 @@ async function initFavoritesPage() {
     favoritesGrid.innerHTML = `
       <div class="empty-state">
         <h2>Sua lista esta vazia</h2>
-        <p>Salve produtos para comparar depois e montar sua colecao.</p>
+        <p>Use o coracao nos cards para salvar perfumes e comparar depois.</p>
         <a class="btn-primary" href="produtos.html">Explorar produtos</a>
       </div>
     `;
@@ -1494,7 +1594,14 @@ function updateCartQuantity(productId, delta) {
     return;
   }
 
-  item.qty += delta;
+  const stockLimit = Math.min(MAX_CART_QUANTITY, item.stock || Cart.getStockLimit(productId));
+  const nextQty = item.qty + delta;
+  if (delta > 0 && nextQty > stockLimit) {
+    Cart.showToast(`Limite de estoque atingido para ${item.name}.`);
+    return;
+  }
+
+  item.qty = nextQty;
   if (item.qty <= 0) {
     Cart.removeItem(productId);
   } else {
@@ -1510,6 +1617,12 @@ async function handleCheckout() {
   const address = document.getElementById("checkout-address")?.value.trim();
   const button = document.getElementById("checkout-submit");
   const items = Cart.getItems();
+
+  if (!items.length) {
+    Cart.showToast("Adicione produtos ao carrinho antes de finalizar.");
+    renderCartPage();
+    return;
+  }
 
   if (!name || !email || !phone || !address) {
     Cart.showToast("Preencha todos os dados de entrega.");
@@ -1528,7 +1641,10 @@ async function handleCheckout() {
       customer: { name, email, phone, address },
       total,
       items: items.map((item) => ({
+        id: item.id,
+        product_id: item.id,
         name: item.name,
+        product_name: item.name,
         unit_price: item.price,
         quantity: item.qty,
       })),
@@ -1539,7 +1655,7 @@ async function handleCheckout() {
     Cart.showToast(`Pedido ${orderId} confirmado.`);
   } catch (error) {
     console.error(error);
-    Cart.showToast("Nao foi possivel concluir o pedido agora.");
+    Cart.showToast(error.message || "Nao foi possivel concluir o pedido agora.");
   } finally {
     if (button) {
       button.disabled = false;
@@ -1609,6 +1725,7 @@ async function initPage() {
   renderSiteChrome();
   setupNavbarBehavior();
   Cart.updateBadge();
+  Wishlist.updateBadge();
   setupIntersectionObserver();
   setupGlobalInteractions();
   setupCartPageActions();
