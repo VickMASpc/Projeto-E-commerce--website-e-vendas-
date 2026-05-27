@@ -1,0 +1,55 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "E-commerce/carrinho.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 48,
+      "nonEmptyLines": 44,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/favoritos.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 48,
+      "nonEmptyLines": 44,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/index.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 220,
+      "nonEmptyLines": 202,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/produto.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 49,
+      "nonEmptyLines": 45,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/produtos.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 81,
+      "nonEmptyLines": 75,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/style.css",
+      "language": "css",
+      "fileCategory": "markup",
+      "totalLines": 1990,
+      "nonEmptyLines": 1707,
+      "metrics": {}
+    }
+  ]
+}

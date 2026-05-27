@@ -1,0 +1,6395 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 14,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 17,
+      "nonEmptyLines": 14,
+      "metrics": {}
+    },
+    {
+      "path": "E-commerce/app.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 1757,
+      "nonEmptyLines": 1580,
+      "functions": [
+        {
+          "name": "normalizeText",
+          "startLine": 267,
+          "endLine": 273,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "toNumber",
+          "startLine": 275,
+          "endLine": 278,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "toBoolean",
+          "startLine": 280,
+          "endLine": 288,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "parseList",
+          "startLine": 290,
+          "endLine": 301,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "guessBrand",
+          "startLine": 303,
+          "endLine": 307,
+          "params": [
+            "productName"
+          ]
+        },
+        {
+          "name": "toCategoryKey",
+          "startLine": 309,
+          "endLine": 315,
+          "params": [
+            "category"
+          ]
+        },
+        {
+          "name": "getCategoryTheme",
+          "startLine": 317,
+          "endLine": 319,
+          "params": [
+            "category"
+          ]
+        },
+        {
+          "name": "buildDefaultNotes",
+          "startLine": 321,
+          "endLine": 334,
+          "params": [
+            "name"
+          ]
+        },
+        {
+          "name": "normalizeProduct",
+          "startLine": 336,
+          "endLine": 410,
+          "params": [
+            "rawProduct"
+          ]
+        },
+        {
+          "name": "productMatchesQuery",
+          "startLine": 412,
+          "endLine": 436,
+          "params": [
+            "product",
+            "term"
+          ]
+        },
+        {
+          "name": "loadProductCatalog",
+          "startLine": 438,
+          "endLine": 459,
+          "params": []
+        },
+        {
+          "name": "formatPrice",
+          "startLine": 461,
+          "endLine": 465,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "getProductGallery",
+          "startLine": 467,
+          "endLine": 481,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "createProductVisual",
+          "startLine": 483,
+          "endLine": 508,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "createProductCard",
+          "startLine": 510,
+          "endLine": 568,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "renderProducts",
+          "startLine": 570,
+          "endLine": 588,
+          "params": [
+            "containerId"
+          ]
+        },
+        {
+          "name": "navHref",
+          "startLine": 773,
+          "endLine": 778,
+          "params": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "buildHeader",
+          "startLine": 780,
+          "endLine": 863,
+          "params": []
+        },
+        {
+          "name": "buildFooter",
+          "startLine": 865,
+          "endLine": 922,
+          "params": []
+        },
+        {
+          "name": "renderSiteChrome",
+          "startLine": 924,
+          "endLine": 934,
+          "params": []
+        },
+        {
+          "name": "setupNavbarBehavior",
+          "startLine": 936,
+          "endLine": 969,
+          "params": []
+        },
+        {
+          "name": "renderSearchResults",
+          "startLine": 971,
+          "endLine": 1017,
+          "params": [
+            "resultsContainer",
+            "products",
+            "queryText"
+          ]
+        },
+        {
+          "name": "setupSiteSearch",
+          "startLine": 1019,
+          "endLine": 1056,
+          "params": []
+        },
+        {
+          "name": "setupIntersectionObserver",
+          "startLine": 1058,
+          "endLine": 1076,
+          "params": []
+        },
+        {
+          "name": "observeAnimatedElements",
+          "startLine": 1078,
+          "endLine": 1083,
+          "params": [
+            "scope"
+          ]
+        },
+        {
+          "name": "setupGlobalInteractions",
+          "startLine": 1085,
+          "endLine": 1128,
+          "params": []
+        },
+        {
+          "name": "getFeaturedProducts",
+          "startLine": 1130,
+          "endLine": 1137,
+          "params": [
+            "products"
+          ]
+        },
+        {
+          "name": "initHomePage",
+          "startLine": 1139,
+          "endLine": 1147,
+          "params": []
+        },
+        {
+          "name": "matchesCategory",
+          "startLine": 1149,
+          "endLine": 1154,
+          "params": [
+            "product",
+            "category"
+          ]
+        },
+        {
+          "name": "initProductsPage",
+          "startLine": 1156,
+          "endLine": 1252,
+          "params": []
+        },
+        {
+          "name": "createListChips",
+          "startLine": 1254,
+          "endLine": 1256,
+          "params": [
+            "items"
+          ]
+        },
+        {
+          "name": "createSpecificationItem",
+          "startLine": 1258,
+          "endLine": 1265,
+          "params": [
+            "label",
+            "value"
+          ]
+        },
+        {
+          "name": "getStockCopy",
+          "startLine": 1267,
+          "endLine": 1275,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "renderGalleryStage",
+          "startLine": 1277,
+          "endLine": 1283,
+          "params": [
+            "product",
+            "asset"
+          ]
+        },
+        {
+          "name": "renderProductDetail",
+          "startLine": 1285,
+          "endLine": 1449,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "initProductPage",
+          "startLine": 1451,
+          "endLine": 1474,
+          "params": []
+        },
+        {
+          "name": "initFavoritesPage",
+          "startLine": 1476,
+          "endLine": 1498,
+          "params": []
+        },
+        {
+          "name": "createCartMedia",
+          "startLine": 1500,
+          "endLine": 1510,
+          "params": [
+            "item"
+          ]
+        },
+        {
+          "name": "renderCartPage",
+          "startLine": 1512,
+          "endLine": 1588,
+          "params": []
+        },
+        {
+          "name": "updateCartQuantity",
+          "startLine": 1590,
+          "endLine": 1611,
+          "params": [
+            "productId",
+            "delta"
+          ]
+        },
+        {
+          "name": "handleCheckout",
+          "startLine": 1613,
+          "endLine": 1665,
+          "params": []
+        },
+        {
+          "name": "setupCartPageActions",
+          "startLine": 1667,
+          "endLine": 1694,
+          "params": []
+        },
+        {
+          "name": "initNewsletter",
+          "startLine": 1696,
+          "endLine": 1722,
+          "params": []
+        },
+        {
+          "name": "initPage",
+          "startLine": 1724,
+          "endLine": 1750,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getProducts",
+          "callee": "query",
+          "lineNumber": 177
+        },
+        {
+          "caller": "getProducts",
+          "callee": "collection",
+          "lineNumber": 177
+        },
+        {
+          "caller": "getProducts",
+          "callee": "limit",
+          "lineNumber": 177
+        },
+        {
+          "caller": "getProducts",
+          "callee": "getDocs",
+          "lineNumber": 178
+        },
+        {
+          "caller": "getProducts",
+          "callee": "snapshot.docs.map",
+          "lineNumber": 179
+        },
+        {
+          "caller": "getProducts",
+          "callee": "entry.data",
+          "lineNumber": 179
+        },
+        {
+          "caller": "getProducts",
+          "callee": "console.error",
+          "lineNumber": 181
+        },
+        {
+          "caller": "addNewsletterEmail",
+          "callee": "addDoc",
+          "lineNumber": 188
+        },
+        {
+          "caller": "addNewsletterEmail",
+          "callee": "collection",
+          "lineNumber": 188
+        },
+        {
+          "caller": "addNewsletterEmail",
+          "callee": "console.error",
+          "lineNumber": 194
+        },
+        {
+          "caller": "createOrder",
+          "callee": "(orderData.items || []).map",
+          "lineNumber": 204
+        },
+        {
+          "caller": "createOrder",
+          "callee": "fetch",
+          "lineNumber": 214
+        },
+        {
+          "caller": "createOrder",
+          "callee": "JSON.stringify",
+          "lineNumber": 217
+        },
+        {
+          "caller": "createOrder",
+          "callee": "localResponse.json().catch",
+          "lineNumber": 224
+        },
+        {
+          "caller": "createOrder",
+          "callee": "localResponse.json",
+          "lineNumber": 224
+        },
+        {
+          "caller": "createOrder",
+          "callee": "Date.now().toString().slice",
+          "lineNumber": 231
+        },
+        {
+          "caller": "createOrder",
+          "callee": "Date.now().toString",
+          "lineNumber": 231
+        },
+        {
+          "caller": "createOrder",
+          "callee": "Date.now",
+          "lineNumber": 231
+        },
+        {
+          "caller": "createOrder",
+          "callee": "(orderData.items || []).map",
+          "lineNumber": 237
+        },
+        {
+          "caller": "createOrder",
+          "callee": "new Date().toISOString",
+          "lineNumber": 245
+        },
+        {
+          "caller": "createOrder",
+          "callee": "setDoc",
+          "lineNumber": 248
+        },
+        {
+          "caller": "createOrder",
+          "callee": "doc",
+          "lineNumber": 248
+        },
+        {
+          "caller": "createOrder",
+          "callee": "console.error",
+          "lineNumber": 251
+        },
+        {
+          "caller": "initProducts",
+          "callee": "loadProductCatalog",
+          "lineNumber": 257
+        },
+        {
+          "caller": "initProducts",
+          "callee": "products.slice",
+          "lineNumber": 258
+        },
+        {
+          "caller": "initProducts",
+          "callee": "renderProducts",
+          "lineNumber": 262
+        },
+        {
+          "caller": "normalizeText",
+          "callee": "String(value || \"\")\r\n    .normalize(\"NFD\")\r\n    .replace(/[\\u0300-\\u036f]/g, \"\")\r\n    .toLowerCase()\r\n    .trim",
+          "lineNumber": 268
+        },
+        {
+          "caller": "normalizeText",
+          "callee": "String(value || \"\")\r\n    .normalize(\"NFD\")\r\n    .replace(/[\\u0300-\\u036f]/g, \"\")\r\n    .toLowerCase",
+          "lineNumber": 268
+        },
+        {
+          "caller": "normalizeText",
+          "callee": "String(value || \"\")\r\n    .normalize(\"NFD\")\r\n    .replace",
+          "lineNumber": 268
+        },
+        {
+          "caller": "normalizeText",
+          "callee": "String(value || \"\")\r\n    .normalize",
+          "lineNumber": 268
+        },
+        {
+          "caller": "normalizeText",
+          "callee": "String",
+          "lineNumber": 268
+        },
+        {
+          "caller": "toNumber",
+          "callee": "Number.parseFloat",
+          "lineNumber": 276
+        },
+        {
+          "caller": "toNumber",
+          "callee": "Number.isFinite",
+          "lineNumber": 277
+        },
+        {
+          "caller": "toBoolean",
+          "callee": "[\"true\", \"1\", \"sim\", \"yes\"].includes",
+          "lineNumber": 287
+        },
+        {
+          "caller": "toBoolean",
+          "callee": "normalizeText",
+          "lineNumber": 287
+        },
+        {
+          "caller": "parseList",
+          "callee": "Array.isArray",
+          "lineNumber": 291
+        },
+        {
+          "caller": "parseList",
+          "callee": "value.map((item) => String(item).trim()).filter",
+          "lineNumber": 292
+        },
+        {
+          "caller": "parseList",
+          "callee": "value.map",
+          "lineNumber": 292
+        },
+        {
+          "caller": "parseList",
+          "callee": "String(item).trim",
+          "lineNumber": 292
+        },
+        {
+          "caller": "parseList",
+          "callee": "String",
+          "lineNumber": 292
+        },
+        {
+          "caller": "parseList",
+          "callee": "String(value)\r\n    .split(/\\r?\\n|,|;|\\|/)\r\n    .map((item) => item.trim())\r\n    .filter",
+          "lineNumber": 297
+        },
+        {
+          "caller": "parseList",
+          "callee": "String(value)\r\n    .split(/\\r?\\n|,|;|\\|/)\r\n    .map",
+          "lineNumber": 297
+        },
+        {
+          "caller": "parseList",
+          "callee": "String(value)\r\n    .split",
+          "lineNumber": 297
+        },
+        {
+          "caller": "parseList",
+          "callee": "String",
+          "lineNumber": 297
+        },
+        {
+          "caller": "parseList",
+          "callee": "item.trim",
+          "lineNumber": 299
+        },
+        {
+          "caller": "guessBrand",
+          "callee": "String",
+          "lineNumber": 304
+        },
+        {
+          "caller": "guessBrand",
+          "callee": "matches.find",
+          "lineNumber": 306
+        },
+        {
+          "caller": "guessBrand",
+          "callee": "name.includes",
+          "lineNumber": 306
+        },
+        {
+          "caller": "toCategoryKey",
+          "callee": "normalizeText",
+          "lineNumber": 310
+        },
+        {
+          "caller": "toCategoryKey",
+          "callee": "Object.keys(CATEGORY_THEMES).find",
+          "lineNumber": 311
+        },
+        {
+          "caller": "toCategoryKey",
+          "callee": "Object.keys",
+          "lineNumber": 311
+        },
+        {
+          "caller": "toCategoryKey",
+          "callee": "normalizeText",
+          "lineNumber": 312
+        },
+        {
+          "caller": "getCategoryTheme",
+          "callee": "toCategoryKey",
+          "lineNumber": 318
+        },
+        {
+          "caller": "buildDefaultNotes",
+          "callee": "normalizeText(name).includes",
+          "lineNumber": 322
+        },
+        {
+          "caller": "buildDefaultNotes",
+          "callee": "normalizeText",
+          "lineNumber": 322
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "buildDefaultNotes",
+          "lineNumber": 339
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "getCategoryTheme",
+          "lineNumber": 341
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 342
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 350
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "guessBrand",
+          "lineNumber": 355
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toNumber",
+          "lineNumber": 365
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toNumber",
+          "lineNumber": 366
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "Number.parseInt",
+          "lineNumber": 367
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "merged.id?.toUpperCase",
+          "lineNumber": 369
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 381
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 382
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 385
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 386
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 389
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "parseList",
+          "lineNumber": 390
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toNumber",
+          "lineNumber": 400
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "Number.parseInt",
+          "lineNumber": 401
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toBoolean",
+          "lineNumber": 402
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toNumber",
+          "lineNumber": 402
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "toBoolean",
+          "lineNumber": 403
+        },
+        {
+          "caller": "normalizeProduct",
+          "callee": "gallery.filter",
+          "lineNumber": 406
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "normalizeText",
+          "lineNumber": 413
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "[\r\n    product.name,\r\n    product.brand,\r\n    product.category,\r\n    product.tagline,\r\n    product.description,\r\n    product.longDescription,\r\n    product.olfactiveFamily,\r\n    product.occasion,\r\n    product.topNotes.join(\" \"),\r\n    product.heartNotes.join(\" \"),\r\n    product.baseNotes.join(\" \"),\r\n    product.highlights.join(\" \"),\r\n  ]\r\n    .map((item) => normalizeText(item))\r\n    .join",
+          "lineNumber": 418
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "[\r\n    product.name,\r\n    product.brand,\r\n    product.category,\r\n    product.tagline,\r\n    product.description,\r\n    product.longDescription,\r\n    product.olfactiveFamily,\r\n    product.occasion,\r\n    product.topNotes.join(\" \"),\r\n    product.heartNotes.join(\" \"),\r\n    product.baseNotes.join(\" \"),\r\n    product.highlights.join(\" \"),\r\n  ]\r\n    .map",
+          "lineNumber": 418
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "product.topNotes.join",
+          "lineNumber": 427
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "product.heartNotes.join",
+          "lineNumber": 428
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "product.baseNotes.join",
+          "lineNumber": 429
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "product.highlights.join",
+          "lineNumber": 430
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "normalizeText",
+          "lineNumber": 432
+        },
+        {
+          "caller": "productMatchesQuery",
+          "callee": "haystack.includes",
+          "lineNumber": 435
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "productCache.slice",
+          "lineNumber": 440
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "(async () => {\r\n      let products = await FirebaseDB.getProducts(DEFAULT_PRODUCT_LIMIT);\r\n      if (!products.length && Array.isArray(window.PRODUCTS_LIVE)) {\r\n        products = window.PRODUCTS_LIVE;\r\n      }\r\n      productCache = products.map(normalizeProduct);\r\n      window.CURRENT_PRODUCTS = productCache;\r\n      return productCache;\r\n    })().finally",
+          "lineNumber": 444
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "(async () => {\r\n      let products = await FirebaseDB.getProducts(DEFAULT_PRODUCT_LIMIT);\r\n      if (!products.length && Array.isArray(window.PRODUCTS_LIVE)) {\r\n        products = window.PRODUCTS_LIVE;\r\n      }\r\n      productCache = products.map(normalizeProduct);\r\n      window.CURRENT_PRODUCTS = productCache;\r\n      return productCache;\r\n    })",
+          "lineNumber": 444
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "FirebaseDB.getProducts",
+          "lineNumber": 445
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "Array.isArray",
+          "lineNumber": 446
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "products.map",
+          "lineNumber": 449
+        },
+        {
+          "caller": "loadProductCatalog",
+          "callee": "catalog.slice",
+          "lineNumber": 458
+        },
+        {
+          "caller": "formatPrice",
+          "callee": "toNumber(value).toLocaleString",
+          "lineNumber": 462
+        },
+        {
+          "caller": "formatPrice",
+          "callee": "toNumber",
+          "lineNumber": 462
+        },
+        {
+          "caller": "getProductGallery",
+          "callee": "product.images.map",
+          "lineNumber": 469
+        },
+        {
+          "caller": "createProductVisual",
+          "callee": "getCategoryTheme",
+          "lineNumber": 484
+        },
+        {
+          "caller": "createProductCard",
+          "callee": "formatPrice",
+          "lineNumber": 517
+        },
+        {
+          "caller": "createProductCard",
+          "callee": "Wishlist.hasItem",
+          "lineNumber": 519
+        },
+        {
+          "caller": "createProductCard",
+          "callee": "createProductVisual",
+          "lineNumber": 526
+        },
+        {
+          "caller": "createProductCard",
+          "callee": "getProductGallery",
+          "lineNumber": 526
+        },
+        {
+          "caller": "createProductCard",
+          "callee": "formatPrice",
+          "lineNumber": 560
+        },
+        {
+          "caller": "renderProducts",
+          "callee": "document.getElementById",
+          "lineNumber": 571
+        },
+        {
+          "caller": "renderProducts",
+          "callee": "productList.map(createProductCard).join",
+          "lineNumber": 586
+        },
+        {
+          "caller": "renderProducts",
+          "callee": "productList.map",
+          "lineNumber": 586
+        },
+        {
+          "caller": "renderProducts",
+          "callee": "observeAnimatedElements",
+          "lineNumber": 587
+        },
+        {
+          "caller": "getProduct",
+          "callee": "productCache?.find",
+          "lineNumber": 592
+        },
+        {
+          "caller": "getStockLimit",
+          "callee": "this.getProduct",
+          "lineNumber": 596
+        },
+        {
+          "caller": "getStockLimit",
+          "callee": "Math.max",
+          "lineNumber": 600
+        },
+        {
+          "caller": "getStockLimit",
+          "callee": "Number.parseInt",
+          "lineNumber": 600
+        },
+        {
+          "caller": "getItems",
+          "callee": "JSON.parse",
+          "lineNumber": 605
+        },
+        {
+          "caller": "getItems",
+          "callee": "localStorage.getItem",
+          "lineNumber": 605
+        },
+        {
+          "caller": "getItems",
+          "callee": "saved.map",
+          "lineNumber": 606
+        },
+        {
+          "caller": "getItems",
+          "callee": "toNumber",
+          "lineNumber": 609
+        },
+        {
+          "caller": "getItems",
+          "callee": "Number.parseInt",
+          "lineNumber": 614
+        },
+        {
+          "caller": "getItems",
+          "callee": "this.getStockLimit",
+          "lineNumber": 614
+        },
+        {
+          "caller": "getItems",
+          "callee": "Math.max",
+          "lineNumber": 615
+        },
+        {
+          "caller": "getItems",
+          "callee": "Number.parseInt",
+          "lineNumber": 615
+        },
+        {
+          "caller": "save",
+          "callee": "items\n      .map((item) => {\n        const stockLimit = Math.min(\n          MAX_CART_QUANTITY,\n          Number.parseInt(item.stock, 10) || this.getStockLimit(item.id),\n        );\n        const qty = Math.max(1, Math.min(Number.parseInt(item.qty, 10) || 1, stockLimit || 1));\n        return { ...item, stock: stockLimit, qty };\n      })\n      .filter",
+          "lineNumber": 623
+        },
+        {
+          "caller": "save",
+          "callee": "items\n      .map",
+          "lineNumber": 623
+        },
+        {
+          "caller": "save",
+          "callee": "Math.min",
+          "lineNumber": 625
+        },
+        {
+          "caller": "save",
+          "callee": "Number.parseInt",
+          "lineNumber": 627
+        },
+        {
+          "caller": "save",
+          "callee": "this.getStockLimit",
+          "lineNumber": 627
+        },
+        {
+          "caller": "save",
+          "callee": "Math.max",
+          "lineNumber": 629
+        },
+        {
+          "caller": "save",
+          "callee": "Math.min",
+          "lineNumber": 629
+        },
+        {
+          "caller": "save",
+          "callee": "Number.parseInt",
+          "lineNumber": 629
+        },
+        {
+          "caller": "save",
+          "callee": "localStorage.setItem",
+          "lineNumber": 634
+        },
+        {
+          "caller": "save",
+          "callee": "JSON.stringify",
+          "lineNumber": 634
+        },
+        {
+          "caller": "save",
+          "callee": "this.updateBadge",
+          "lineNumber": 635
+        },
+        {
+          "caller": "addItem",
+          "callee": "normalizeProduct",
+          "lineNumber": 641
+        },
+        {
+          "caller": "addItem",
+          "callee": "Math.min",
+          "lineNumber": 653
+        },
+        {
+          "caller": "addItem",
+          "callee": "Number.parseInt",
+          "lineNumber": 653
+        },
+        {
+          "caller": "addItem",
+          "callee": "this.showToast",
+          "lineNumber": 655
+        },
+        {
+          "caller": "addItem",
+          "callee": "this.getItems",
+          "lineNumber": 659
+        },
+        {
+          "caller": "addItem",
+          "callee": "items.find",
+          "lineNumber": 660
+        },
+        {
+          "caller": "addItem",
+          "callee": "Math.max",
+          "lineNumber": 661
+        },
+        {
+          "caller": "addItem",
+          "callee": "Number.parseInt",
+          "lineNumber": 661
+        },
+        {
+          "caller": "addItem",
+          "callee": "Math.min",
+          "lineNumber": 664
+        },
+        {
+          "caller": "addItem",
+          "callee": "items.push",
+          "lineNumber": 666
+        },
+        {
+          "caller": "addItem",
+          "callee": "Math.min",
+          "lineNumber": 675
+        },
+        {
+          "caller": "addItem",
+          "callee": "this.save",
+          "lineNumber": 678
+        },
+        {
+          "caller": "addItem",
+          "callee": "this.showToast",
+          "lineNumber": 679
+        },
+        {
+          "caller": "removeItem",
+          "callee": "this.save",
+          "lineNumber": 688
+        },
+        {
+          "caller": "removeItem",
+          "callee": "this.getItems().filter",
+          "lineNumber": 688
+        },
+        {
+          "caller": "removeItem",
+          "callee": "this.getItems",
+          "lineNumber": 688
+        },
+        {
+          "caller": "clear",
+          "callee": "localStorage.removeItem",
+          "lineNumber": 692
+        },
+        {
+          "caller": "clear",
+          "callee": "this.updateBadge",
+          "lineNumber": 693
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "document.getElementById",
+          "lineNumber": 697
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "this.getItems().reduce",
+          "lineNumber": 698
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "this.getItems",
+          "lineNumber": 698
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "document.getElementById",
+          "lineNumber": 705
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "cartButton.setAttribute",
+          "lineNumber": 707
+        },
+        {
+          "caller": "showToast",
+          "callee": "document.getElementById",
+          "lineNumber": 715
+        },
+        {
+          "caller": "showToast",
+          "callee": "oldToast.remove",
+          "lineNumber": 717
+        },
+        {
+          "caller": "showToast",
+          "callee": "document.createElement",
+          "lineNumber": 720
+        },
+        {
+          "caller": "showToast",
+          "callee": "toast.setAttribute",
+          "lineNumber": 723
+        },
+        {
+          "caller": "showToast",
+          "callee": "toast.setAttribute",
+          "lineNumber": 724
+        },
+        {
+          "caller": "showToast",
+          "callee": "document.body.appendChild",
+          "lineNumber": 726
+        },
+        {
+          "caller": "showToast",
+          "callee": "window.setTimeout",
+          "lineNumber": 728
+        },
+        {
+          "caller": "showToast",
+          "callee": "toast.classList.add",
+          "lineNumber": 729
+        },
+        {
+          "caller": "showToast",
+          "callee": "window.setTimeout",
+          "lineNumber": 730
+        },
+        {
+          "caller": "showToast",
+          "callee": "toast.remove",
+          "lineNumber": 730
+        },
+        {
+          "caller": "getItems",
+          "callee": "JSON.parse",
+          "lineNumber": 738
+        },
+        {
+          "caller": "getItems",
+          "callee": "localStorage.getItem",
+          "lineNumber": 738
+        },
+        {
+          "caller": "save",
+          "callee": "localStorage.setItem",
+          "lineNumber": 745
+        },
+        {
+          "caller": "save",
+          "callee": "JSON.stringify",
+          "lineNumber": 745
+        },
+        {
+          "caller": "save",
+          "callee": "this.updateBadge",
+          "lineNumber": 746
+        },
+        {
+          "caller": "hasItem",
+          "callee": "this.getItems().includes",
+          "lineNumber": 750
+        },
+        {
+          "caller": "hasItem",
+          "callee": "this.getItems",
+          "lineNumber": 750
+        },
+        {
+          "caller": "toggleItem",
+          "callee": "this.getItems",
+          "lineNumber": 754
+        },
+        {
+          "caller": "toggleItem",
+          "callee": "items.includes",
+          "lineNumber": 755
+        },
+        {
+          "caller": "toggleItem",
+          "callee": "items.filter",
+          "lineNumber": 756
+        },
+        {
+          "caller": "toggleItem",
+          "callee": "this.save",
+          "lineNumber": 757
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "document.getElementById",
+          "lineNumber": 762
+        },
+        {
+          "caller": "updateBadge",
+          "callee": "this.getItems",
+          "lineNumber": 767
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "navHref",
+          "lineNumber": 784
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "navHref",
+          "lineNumber": 785
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "navHref",
+          "lineNumber": 786
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "links\r\n              .map(\r\n                (link) => `\r\n                  <li>\r\n                    <a class=\"navbar__link ${PAGE === link.page ? \"is-active\" : \"\"}\" href=\"${link.href}\">\r\n                      ${link.label}\r\n                    </a>\r\n                  </li>\r\n                `,\r\n              )\r\n              .join",
+          "lineNumber": 814
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "links\r\n              .map",
+          "lineNumber": 814
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "links\r\n          .map((link) => `<a href=\"${link.href}\" class=\"mobile-menu__link\">${link.label}</a>`)\r\n          .join",
+          "lineNumber": 854
+        },
+        {
+          "caller": "buildHeader",
+          "callee": "links\r\n          .map",
+          "lineNumber": 854
+        },
+        {
+          "caller": "buildFooter",
+          "callee": "navHref",
+          "lineNumber": 897
+        },
+        {
+          "caller": "buildFooter",
+          "callee": "navHref",
+          "lineNumber": 904
+        },
+        {
+          "caller": "renderSiteChrome",
+          "callee": "document.querySelector",
+          "lineNumber": 925
+        },
+        {
+          "caller": "renderSiteChrome",
+          "callee": "document.querySelector",
+          "lineNumber": 926
+        },
+        {
+          "caller": "renderSiteChrome",
+          "callee": "buildHeader",
+          "lineNumber": 929
+        },
+        {
+          "caller": "renderSiteChrome",
+          "callee": "buildFooter",
+          "lineNumber": 932
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "document.getElementById",
+          "lineNumber": 937
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "document.getElementById",
+          "lineNumber": 938
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "document.getElementById",
+          "lineNumber": 939
+        },
+        {
+          "caller": "syncNavbarState",
+          "callee": "navbar.classList.toggle",
+          "lineNumber": 947
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "syncNavbarState",
+          "lineNumber": 950
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "window.addEventListener",
+          "lineNumber": 951
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "hamburger.addEventListener",
+          "lineNumber": 954
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "hamburger.setAttribute",
+          "lineNumber": 957
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "String",
+          "lineNumber": 957
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "document.body.classList.toggle",
+          "lineNumber": 958
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "mobileMenu.querySelectorAll(\"a\").forEach",
+          "lineNumber": 961
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "mobileMenu.querySelectorAll",
+          "lineNumber": 961
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "link.addEventListener",
+          "lineNumber": 962
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "hamburger.setAttribute",
+          "lineNumber": 964
+        },
+        {
+          "caller": "setupNavbarBehavior",
+          "callee": "document.body.classList.remove",
+          "lineNumber": 965
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "queryText.trim",
+          "lineNumber": 972
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "products.filter((product) => productMatchesQuery(product, queryText)).slice",
+          "lineNumber": 979
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "products.filter",
+          "lineNumber": 979
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "productMatchesQuery",
+          "lineNumber": 979
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "matches\r\n        .map(\r\n          (product) => `\r\n            <a class=\"search-result\" href=\"produto.html?id=${encodeURIComponent(product.id)}\">\r\n              <div class=\"search-result__media\">\r\n                ${createProductVisual(product, \"search\", getProductGallery(product)[0])}\r\n              </div>\r\n              <div class=\"search-result__content\">\r\n                <strong>${product.name}</strong>\r\n                <span>${product.brand} · ${product.category}</span>\r\n              </div>\r\n              <span class=\"search-result__price\">${formatPrice(product.price)}</span>\r\n            </a>\r\n          `,\r\n        )\r\n        .join",
+          "lineNumber": 994
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "matches\r\n        .map",
+          "lineNumber": 994
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "encodeURIComponent",
+          "lineNumber": 997
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "createProductVisual",
+          "lineNumber": 999
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "getProductGallery",
+          "lineNumber": 999
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "formatPrice",
+          "lineNumber": 1005
+        },
+        {
+          "caller": "renderSearchResults",
+          "callee": "encodeURIComponent",
+          "lineNumber": 1011
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "document.getElementById",
+          "lineNumber": 1020
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "document.getElementById",
+          "lineNumber": 1021
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "document.getElementById",
+          "lineNumber": 1022
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "loadProductCatalog",
+          "lineNumber": 1027
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "new URLSearchParams(window.location.search).get",
+          "lineNumber": 1028
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "searchInput.addEventListener",
+          "lineNumber": 1033
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "renderSearchResults",
+          "lineNumber": 1034
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "searchInput.addEventListener",
+          "lineNumber": 1037
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "renderSearchResults",
+          "lineNumber": 1038
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "searchForm.addEventListener",
+          "lineNumber": 1041
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "event.preventDefault",
+          "lineNumber": 1042
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "searchInput.value.trim",
+          "lineNumber": 1043
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "encodeURIComponent",
+          "lineNumber": 1045
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "document.addEventListener",
+          "lineNumber": 1049
+        },
+        {
+          "caller": "setupSiteSearch",
+          "callee": "searchForm.contains",
+          "lineNumber": 1050
+        },
+        {
+          "caller": "setupIntersectionObserver",
+          "callee": "entries.forEach",
+          "lineNumber": 1061
+        },
+        {
+          "caller": "setupIntersectionObserver",
+          "callee": "entry.target.classList.add",
+          "lineNumber": 1065
+        },
+        {
+          "caller": "setupIntersectionObserver",
+          "callee": "observer.unobserve",
+          "lineNumber": 1066
+        },
+        {
+          "caller": "setupIntersectionObserver",
+          "callee": "observeAnimatedElements",
+          "lineNumber": 1075
+        },
+        {
+          "caller": "observeAnimatedElements",
+          "callee": "scope.querySelectorAll(\".animate-on-scroll\").forEach",
+          "lineNumber": 1082
+        },
+        {
+          "caller": "observeAnimatedElements",
+          "callee": "scope.querySelectorAll",
+          "lineNumber": 1082
+        },
+        {
+          "caller": "observeAnimatedElements",
+          "callee": "observer.observe",
+          "lineNumber": 1082
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "document.addEventListener",
+          "lineNumber": 1086
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.target.closest",
+          "lineNumber": 1087
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.preventDefault",
+          "lineNumber": 1089
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "Cart.showToast",
+          "lineNumber": 1090
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.target.closest",
+          "lineNumber": 1094
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.preventDefault",
+          "lineNumber": 1096
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.stopPropagation",
+          "lineNumber": 1097
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "wishlistButton.closest",
+          "lineNumber": 1098
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "Wishlist.toggleItem",
+          "lineNumber": 1102
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "wishlistButton.classList.toggle",
+          "lineNumber": 1103
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "Cart.showToast",
+          "lineNumber": 1104
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "initFavoritesPage",
+          "lineNumber": 1106
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.target.closest",
+          "lineNumber": 1111
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.preventDefault",
+          "lineNumber": 1113
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.stopPropagation",
+          "lineNumber": 1114
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "productCache?.find",
+          "lineNumber": 1116
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "Cart.addItem",
+          "lineNumber": 1118
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "event.target.closest",
+          "lineNumber": 1123
+        },
+        {
+          "caller": "setupGlobalInteractions",
+          "callee": "encodeURIComponent",
+          "lineNumber": 1125
+        },
+        {
+          "caller": "getFeaturedProducts",
+          "callee": "[...products].sort",
+          "lineNumber": 1131
+        },
+        {
+          "caller": "getFeaturedProducts",
+          "callee": "scored.slice",
+          "lineNumber": 1136
+        },
+        {
+          "caller": "initHomePage",
+          "callee": "document.getElementById",
+          "lineNumber": 1140
+        },
+        {
+          "caller": "initHomePage",
+          "callee": "loadProductCatalog",
+          "lineNumber": 1145
+        },
+        {
+          "caller": "initHomePage",
+          "callee": "renderProducts",
+          "lineNumber": 1146
+        },
+        {
+          "caller": "initHomePage",
+          "callee": "getFeaturedProducts",
+          "lineNumber": 1146
+        },
+        {
+          "caller": "matchesCategory",
+          "callee": "normalizeText",
+          "lineNumber": 1150
+        },
+        {
+          "caller": "matchesCategory",
+          "callee": "normalizeText",
+          "lineNumber": 1153
+        },
+        {
+          "caller": "matchesCategory",
+          "callee": "normalizeText",
+          "lineNumber": 1153
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1158
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1164
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1165
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 1166
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 1167
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "loadProductCatalog",
+          "lineNumber": 1168
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "params.get",
+          "lineNumber": 1170
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "params.get",
+          "lineNumber": 1171
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "params.get",
+          "lineNumber": 1172
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "filterButtons.forEach",
+          "lineNumber": 1179
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "button.classList.toggle",
+          "lineNumber": 1180
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "normalizeText",
+          "lineNumber": 1182
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "normalizeText",
+          "lineNumber": 1182
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "viewButtons.forEach",
+          "lineNumber": 1185
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "button.classList.toggle",
+          "lineNumber": 1186
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "normalizeText",
+          "lineNumber": 1188
+        },
+        {
+          "caller": "syncButtons",
+          "callee": "normalizeText",
+          "lineNumber": 1188
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "normalizeText",
+          "lineNumber": 1195
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "nextParams.set",
+          "lineNumber": 1196
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "nextParams.set",
+          "lineNumber": 1199
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "normalizeText",
+          "lineNumber": 1201
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "nextParams.set",
+          "lineNumber": 1202
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "nextParams.toString",
+          "lineNumber": 1204
+        },
+        {
+          "caller": "syncUrl",
+          "callee": "window.history.replaceState",
+          "lineNumber": 1205
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "products\r\n      .filter((product) => matchesCategory(product, activeCategory))\r\n      .filter",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "products\r\n      .filter",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "matchesCategory",
+          "lineNumber": 1210
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "productMatchesQuery",
+          "lineNumber": 1211
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "normalizeText",
+          "lineNumber": 1213
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "filtered.filter",
+          "lineNumber": 1214
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "normalizeText",
+          "lineNumber": 1216
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "filtered.filter",
+          "lineNumber": 1217
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "normalizeText",
+          "lineNumber": 1219
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "Wishlist.getItems",
+          "lineNumber": 1220
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "filtered.filter",
+          "lineNumber": 1221
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "wishlistIds.includes",
+          "lineNumber": 1221
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "renderProducts",
+          "lineNumber": 1224
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "syncButtons",
+          "lineNumber": 1228
+        },
+        {
+          "caller": "renderPageProducts",
+          "callee": "syncUrl",
+          "lineNumber": 1229
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "filterButtons.forEach",
+          "lineNumber": 1232
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "button.addEventListener",
+          "lineNumber": 1233
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "renderPageProducts",
+          "lineNumber": 1235
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "viewButtons.forEach",
+          "lineNumber": 1239
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "button.addEventListener",
+          "lineNumber": 1240
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "renderPageProducts",
+          "lineNumber": 1242
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "pageSearch?.addEventListener",
+          "lineNumber": 1246
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "event.target.value.trim",
+          "lineNumber": 1247
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "renderPageProducts",
+          "lineNumber": 1248
+        },
+        {
+          "caller": "initProductsPage",
+          "callee": "renderPageProducts",
+          "lineNumber": 1251
+        },
+        {
+          "caller": "createListChips",
+          "callee": "items.map((item) => `<span class=\"detail-chip\">${item}</span>`).join",
+          "lineNumber": 1255
+        },
+        {
+          "caller": "createListChips",
+          "callee": "items.map",
+          "lineNumber": 1255
+        },
+        {
+          "caller": "renderGalleryStage",
+          "callee": "createProductVisual",
+          "lineNumber": 1280
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1286
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1287
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "getProductGallery",
+          "lineNumber": 1292
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "encodeURIComponent",
+          "lineNumber": 1299
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "renderGalleryStage",
+          "lineNumber": 1305
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "gallery\r\n            .map(\r\n              (asset, index) => `\r\n                <button class=\"detail-thumb ${index === 0 ? \"is-active\" : \"\"}\" type=\"button\" data-gallery-index=\"${index}\">\r\n                  ${createProductVisual(product, \"thumb\", asset)}\r\n                </button>\r\n              `,\r\n            )\r\n            .join",
+          "lineNumber": 1309
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "gallery\r\n            .map",
+          "lineNumber": 1309
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createProductVisual",
+          "lineNumber": 1313
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "product.rating.toFixed",
+          "lineNumber": 1328
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "formatPrice",
+          "lineNumber": 1332
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "formatPrice",
+          "lineNumber": 1333
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "getStockCopy",
+          "lineNumber": 1338
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createListChips",
+          "lineNumber": 1344
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Math.max",
+          "lineNumber": 1350
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Wishlist.hasItem",
+          "lineNumber": 1356
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1361
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1362
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1363
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1364
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1365
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createSpecificationItem",
+          "lineNumber": 1366
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createListChips",
+          "lineNumber": 1380
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createListChips",
+          "lineNumber": 1384
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "createListChips",
+          "lineNumber": 1388
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "product.highlights.map((item) => `<li>${item}</li>`).join",
+          "lineNumber": 1397
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "product.highlights.map",
+          "lineNumber": 1397
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "productCache.filter",
+          "lineNumber": 1412
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "normalizeText",
+          "lineNumber": 1413
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "normalizeText",
+          "lineNumber": 1413
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "productCache.filter",
+          "lineNumber": 1415
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "sameCategory.some",
+          "lineNumber": 1418
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "[...sameCategory, ...fallbackProducts].slice",
+          "lineNumber": 1420
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "renderProducts",
+          "lineNumber": 1421
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1423
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 1424
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "thumbs.forEach",
+          "lineNumber": 1425
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "thumbButton.addEventListener",
+          "lineNumber": 1426
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Number.parseInt",
+          "lineNumber": 1427
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "thumbs.forEach",
+          "lineNumber": 1428
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "button.classList.remove",
+          "lineNumber": 1428
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "thumbButton.classList.add",
+          "lineNumber": 1429
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "renderGalleryStage",
+          "lineNumber": 1430
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById(\"detail-add-cart\")?.addEventListener",
+          "lineNumber": 1434
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1434
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1435
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Number.parseInt",
+          "lineNumber": 1436
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "String",
+          "lineNumber": 1438
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Cart.showToast",
+          "lineNumber": 1439
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Cart.addItem",
+          "lineNumber": 1441
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById(\"detail-favorite\")?.addEventListener",
+          "lineNumber": 1444
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "document.getElementById",
+          "lineNumber": 1444
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Wishlist.toggleItem",
+          "lineNumber": 1445
+        },
+        {
+          "caller": "renderProductDetail",
+          "callee": "Cart.showToast",
+          "lineNumber": 1447
+        },
+        {
+          "caller": "initProductPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1452
+        },
+        {
+          "caller": "initProductPage",
+          "callee": "new URLSearchParams(window.location.search).get",
+          "lineNumber": 1457
+        },
+        {
+          "caller": "initProductPage",
+          "callee": "loadProductCatalog",
+          "lineNumber": 1458
+        },
+        {
+          "caller": "initProductPage",
+          "callee": "products.find",
+          "lineNumber": 1459
+        },
+        {
+          "caller": "initProductPage",
+          "callee": "renderProductDetail",
+          "lineNumber": 1473
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1477
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "Wishlist.getItems",
+          "lineNumber": 1482
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "loadProductCatalog",
+          "lineNumber": 1483
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "products.filter",
+          "lineNumber": 1484
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "ids.includes",
+          "lineNumber": 1484
+        },
+        {
+          "caller": "initFavoritesPage",
+          "callee": "renderProducts",
+          "lineNumber": 1497
+        },
+        {
+          "caller": "createCartMedia",
+          "callee": "getCategoryTheme",
+          "lineNumber": 1501
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "document.getElementById",
+          "lineNumber": 1513
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "Cart.getItems",
+          "lineNumber": 1518
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "items.reduce",
+          "lineNumber": 1530
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "items\r\n          .map(\r\n            (item) => `\r\n              <article class=\"cart-item\" data-cart-id=\"${item.id}\">\r\n                ${createCartMedia(item)}\r\n                <div class=\"cart-item__body\">\r\n                  <h3>${item.name}</h3>\r\n                  <p>${item.brand} · ${item.category}</p>\r\n                  <strong>${formatPrice(item.price)}</strong>\r\n                </div>\r\n                <div class=\"cart-item__controls\">\r\n                  <button type=\"button\" class=\"qty-btn\" data-cart-action=\"decrease\" data-cart-id=\"${item.id}\">-</button>\r\n                  <span class=\"qty-value\">${item.qty}</span>\r\n                  <button type=\"button\" class=\"qty-btn\" data-cart-action=\"increase\" data-cart-id=\"${item.id}\">+</button>\r\n                </div>\r\n                <button type=\"button\" class=\"cart-remove\" data-cart-action=\"remove\" data-cart-id=\"${item.id}\">\r\n                  Remover\r\n                </button>\r\n              </article>\r\n            `,\r\n          )\r\n          .join",
+          "lineNumber": 1537
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "items\r\n          .map",
+          "lineNumber": 1537
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "createCartMedia",
+          "lineNumber": 1541
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "formatPrice",
+          "lineNumber": 1545
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "formatPrice",
+          "lineNumber": 1565
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "formatPrice",
+          "lineNumber": 1569
+        },
+        {
+          "caller": "renderCartPage",
+          "callee": "formatPrice",
+          "lineNumber": 1573
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Cart.getItems",
+          "lineNumber": 1591
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "items.find",
+          "lineNumber": 1592
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Math.min",
+          "lineNumber": 1597
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Cart.getStockLimit",
+          "lineNumber": 1597
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Cart.showToast",
+          "lineNumber": 1600
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Cart.removeItem",
+          "lineNumber": 1606
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "Cart.save",
+          "lineNumber": 1608
+        },
+        {
+          "caller": "updateCartQuantity",
+          "callee": "renderCartPage",
+          "lineNumber": 1610
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById(\"checkout-name\")?.value.trim",
+          "lineNumber": 1614
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById",
+          "lineNumber": 1614
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById(\"checkout-email\")?.value.trim",
+          "lineNumber": 1615
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById",
+          "lineNumber": 1615
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById(\"checkout-phone\")?.value.trim",
+          "lineNumber": 1616
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById",
+          "lineNumber": 1616
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById(\"checkout-address\")?.value.trim",
+          "lineNumber": 1617
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById",
+          "lineNumber": 1617
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "document.getElementById",
+          "lineNumber": 1618
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.getItems",
+          "lineNumber": 1619
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.showToast",
+          "lineNumber": 1622
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "renderCartPage",
+          "lineNumber": 1623
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.showToast",
+          "lineNumber": 1628
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "items.reduce",
+          "lineNumber": 1632
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "FirebaseDB.createOrder",
+          "lineNumber": 1640
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "items.map",
+          "lineNumber": 1643
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.clear",
+          "lineNumber": 1653
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "renderCartPage",
+          "lineNumber": 1654
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.showToast",
+          "lineNumber": 1655
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "console.error",
+          "lineNumber": 1657
+        },
+        {
+          "caller": "handleCheckout",
+          "callee": "Cart.showToast",
+          "lineNumber": 1658
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "document.addEventListener",
+          "lineNumber": 1668
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "event.target.closest",
+          "lineNumber": 1673
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "Cart.removeItem",
+          "lineNumber": 1678
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "renderCartPage",
+          "lineNumber": 1679
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "updateCartQuantity",
+          "lineNumber": 1682
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "updateCartQuantity",
+          "lineNumber": 1685
+        },
+        {
+          "caller": "setupCartPageActions",
+          "callee": "handleCheckout",
+          "lineNumber": 1691
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "document.getElementById",
+          "lineNumber": 1697
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "form.addEventListener",
+          "lineNumber": 1702
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "event.preventDefault",
+          "lineNumber": 1703
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "document.getElementById",
+          "lineNumber": 1704
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "document.getElementById",
+          "lineNumber": 1705
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "input?.value.trim",
+          "lineNumber": 1706
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test",
+          "lineNumber": 1708
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "Cart.showToast",
+          "lineNumber": 1709
+        },
+        {
+          "caller": "initNewsletter",
+          "callee": "FirebaseDB.addNewsletterEmail",
+          "lineNumber": 1715
+        },
+        {
+          "caller": "initPage",
+          "callee": "renderSiteChrome",
+          "lineNumber": 1725
+        },
+        {
+          "caller": "initPage",
+          "callee": "setupNavbarBehavior",
+          "lineNumber": 1726
+        },
+        {
+          "caller": "initPage",
+          "callee": "Cart.updateBadge",
+          "lineNumber": 1727
+        },
+        {
+          "caller": "initPage",
+          "callee": "Wishlist.updateBadge",
+          "lineNumber": 1728
+        },
+        {
+          "caller": "initPage",
+          "callee": "setupIntersectionObserver",
+          "lineNumber": 1729
+        },
+        {
+          "caller": "initPage",
+          "callee": "setupGlobalInteractions",
+          "lineNumber": 1730
+        },
+        {
+          "caller": "initPage",
+          "callee": "setupCartPageActions",
+          "lineNumber": 1731
+        },
+        {
+          "caller": "initPage",
+          "callee": "initNewsletter",
+          "lineNumber": 1732
+        },
+        {
+          "caller": "initPage",
+          "callee": "setupSiteSearch",
+          "lineNumber": 1733
+        },
+        {
+          "caller": "initPage",
+          "callee": "initHomePage",
+          "lineNumber": 1736
+        },
+        {
+          "caller": "initPage",
+          "callee": "initProductsPage",
+          "lineNumber": 1739
+        },
+        {
+          "caller": "initPage",
+          "callee": "initProductPage",
+          "lineNumber": 1742
+        },
+        {
+          "caller": "initPage",
+          "callee": "initFavoritesPage",
+          "lineNumber": 1745
+        },
+        {
+          "caller": "initPage",
+          "callee": "renderCartPage",
+          "lineNumber": 1748
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 44,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "E-commerce/firebase-config.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "E-commerce/products_live.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 324,
+      "nonEmptyLines": 324,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "readme.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 62,
+      "nonEmptyLines": 43,
+      "sections": [
+        {
+          "heading": "Grand Parfum - E-commerce e Sistema de Vendas",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Como rodar",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Funcionalidades",
+          "level": 2,
+          "line": 30
+        },
+        {
+          "heading": "Observacoes de beta",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "Verificacao sem navegador",
+          "level": 2,
+          "line": 48
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/eslint.config.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 22,
+      "nonEmptyLines": 21,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/App.css",
+      "language": "css",
+      "fileCategory": "markup",
+      "totalLines": 184,
+      "nonEmptyLines": 158,
+      "metrics": {}
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/index.css",
+      "language": "css",
+      "fileCategory": "markup",
+      "totalLines": 31,
+      "nonEmptyLines": 26,
+      "metrics": {}
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/vite.config.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 176,
+      "nonEmptyLines": 161,
+      "functions": [
+        {
+          "name": "formatCurrency",
+          "startLine": 33,
+          "endLine": 33,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "SalesDashboard",
+          "startLine": 35,
+          "endLine": 164,
+          "params": []
+        },
+        {
+          "name": "KPIItem",
+          "startLine": 166,
+          "endLine": 174,
+          "params": [
+            "{ title, value, trend }"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "formatCurrency",
+          "callee": "Number(value || 0).toLocaleString",
+          "lineNumber": 33
+        },
+        {
+          "caller": "formatCurrency",
+          "callee": "Number",
+          "lineNumber": 33
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useState",
+          "lineNumber": 36
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useState",
+          "lineNumber": 37
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useEffect",
+          "lineNumber": 39
+        },
+        {
+          "caller": "fetchData",
+          "callee": "fetch",
+          "lineNumber": 42
+        },
+        {
+          "caller": "fetchData",
+          "callee": "response.json",
+          "lineNumber": 44
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setData",
+          "lineNumber": 45
+        },
+        {
+          "caller": "fetchData",
+          "callee": "console.error",
+          "lineNumber": 47
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setData",
+          "lineNumber": 48
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setLoading",
+          "lineNumber": 50
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "fetchData",
+          "lineNumber": 54
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "data.inventoryStatus.reduce",
+          "lineNumber": 61
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "Number",
+          "lineNumber": 61
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "formatCurrency",
+          "lineNumber": 83
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "formatCurrency",
+          "lineNumber": 85
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "recentActivity.map",
+          "lineNumber": 147
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de vendas/database.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 683,
+      "nonEmptyLines": 592,
+      "functions": [
+        {
+          "name": "_to_float",
+          "startLine": 253,
+          "endLine": 257,
+          "params": [
+            "value",
+            "fallback"
+          ]
+        },
+        {
+          "name": "_to_int",
+          "startLine": 260,
+          "endLine": 264,
+          "params": [
+            "value",
+            "fallback"
+          ]
+        },
+        {
+          "name": "_to_bool",
+          "startLine": 267,
+          "endLine": 272,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "_parse_list",
+          "startLine": 275,
+          "endLine": 284,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "normalize_product",
+          "startLine": 287,
+          "endLine": 326,
+          "params": [
+            "product"
+          ]
+        },
+        {
+          "name": "_next_order_id",
+          "startLine": 329,
+          "endLine": 335,
+          "params": [
+            "existing_orders"
+          ]
+        },
+        {
+          "name": "_normalize_order_item",
+          "startLine": 338,
+          "endLine": 361,
+          "params": [
+            "item"
+          ]
+        },
+        {
+          "name": "normalize_order",
+          "startLine": 364,
+          "endLine": 383,
+          "params": [
+            "order",
+            "fallback_id"
+          ]
+        },
+        {
+          "name": "_initial_data",
+          "startLine": 386,
+          "endLine": 408,
+          "params": []
+        },
+        {
+          "name": "_init_db",
+          "startLine": 411,
+          "endLine": 414,
+          "params": []
+        },
+        {
+          "name": "_read_db",
+          "startLine": 417,
+          "endLine": 425,
+          "params": []
+        },
+        {
+          "name": "_write_db",
+          "startLine": 428,
+          "endLine": 438,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "_export_to_frontend",
+          "startLine": 441,
+          "endLine": 454,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "get_products",
+          "startLine": 457,
+          "endLine": 466,
+          "params": []
+        },
+        {
+          "name": "add_product",
+          "startLine": 469,
+          "endLine": 496,
+          "params": [
+            "nome",
+            "descricao",
+            "preco",
+            "estoque",
+            "categoria",
+            "detalhes"
+          ]
+        },
+        {
+          "name": "update_product",
+          "startLine": 499,
+          "endLine": 520,
+          "params": [
+            "product_id",
+            "dados"
+          ]
+        },
+        {
+          "name": "update_product_stock",
+          "startLine": 523,
+          "endLine": 530,
+          "params": [
+            "product_id",
+            "novo_estoque"
+          ]
+        },
+        {
+          "name": "delete_product",
+          "startLine": 533,
+          "endLine": 543,
+          "params": [
+            "produto_id"
+          ]
+        },
+        {
+          "name": "listen_to_orders",
+          "startLine": 546,
+          "endLine": 553,
+          "params": [
+            "callback"
+          ]
+        },
+        {
+          "name": "get_orders",
+          "startLine": 556,
+          "endLine": 565,
+          "params": []
+        },
+        {
+          "name": "create_local_order",
+          "startLine": 568,
+          "endLine": 601,
+          "params": [
+            "order"
+          ]
+        },
+        {
+          "name": "update_order_status",
+          "startLine": 604,
+          "endLine": 617,
+          "params": [
+            "pedido_id",
+            "novo_status"
+          ]
+        },
+        {
+          "name": "_parse_date",
+          "startLine": 620,
+          "endLine": 626,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "get_stats",
+          "startLine": 629,
+          "endLine": 683,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "_to_float",
+          "line": 253,
+          "isDefault": false
+        },
+        {
+          "name": "_to_int",
+          "line": 260,
+          "isDefault": false
+        },
+        {
+          "name": "_to_bool",
+          "line": 267,
+          "isDefault": false
+        },
+        {
+          "name": "_parse_list",
+          "line": 275,
+          "isDefault": false
+        },
+        {
+          "name": "normalize_product",
+          "line": 287,
+          "isDefault": false
+        },
+        {
+          "name": "_next_order_id",
+          "line": 329,
+          "isDefault": false
+        },
+        {
+          "name": "_normalize_order_item",
+          "line": 338,
+          "isDefault": false
+        },
+        {
+          "name": "normalize_order",
+          "line": 364,
+          "isDefault": false
+        },
+        {
+          "name": "_initial_data",
+          "line": 386,
+          "isDefault": false
+        },
+        {
+          "name": "_init_db",
+          "line": 411,
+          "isDefault": false
+        },
+        {
+          "name": "_read_db",
+          "line": 417,
+          "isDefault": false
+        },
+        {
+          "name": "_write_db",
+          "line": 428,
+          "isDefault": false
+        },
+        {
+          "name": "_export_to_frontend",
+          "line": 441,
+          "isDefault": false
+        },
+        {
+          "name": "get_products",
+          "line": 457,
+          "isDefault": false
+        },
+        {
+          "name": "add_product",
+          "line": 469,
+          "isDefault": false
+        },
+        {
+          "name": "update_product",
+          "line": 499,
+          "isDefault": false
+        },
+        {
+          "name": "update_product_stock",
+          "line": 523,
+          "isDefault": false
+        },
+        {
+          "name": "delete_product",
+          "line": 533,
+          "isDefault": false
+        },
+        {
+          "name": "listen_to_orders",
+          "line": 546,
+          "isDefault": false
+        },
+        {
+          "name": "get_orders",
+          "line": 556,
+          "isDefault": false
+        },
+        {
+          "name": "create_local_order",
+          "line": 568,
+          "isDefault": false
+        },
+        {
+          "name": "update_order_status",
+          "line": 604,
+          "isDefault": false
+        },
+        {
+          "name": "_parse_date",
+          "line": 620,
+          "isDefault": false
+        },
+        {
+          "name": "get_stats",
+          "line": 629,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_to_float",
+          "callee": "float",
+          "lineNumber": 255
+        },
+        {
+          "caller": "_to_float",
+          "callee": "str(value).replace",
+          "lineNumber": 255
+        },
+        {
+          "caller": "_to_float",
+          "callee": "str",
+          "lineNumber": 255
+        },
+        {
+          "caller": "_to_int",
+          "callee": "int",
+          "lineNumber": 262
+        },
+        {
+          "caller": "_to_int",
+          "callee": "float",
+          "lineNumber": 262
+        },
+        {
+          "caller": "_to_bool",
+          "callee": "isinstance",
+          "lineNumber": 268
+        },
+        {
+          "caller": "_to_bool",
+          "callee": "isinstance",
+          "lineNumber": 270
+        },
+        {
+          "caller": "_to_bool",
+          "callee": "str(value).strip().lower",
+          "lineNumber": 272
+        },
+        {
+          "caller": "_to_bool",
+          "callee": "str(value).strip",
+          "lineNumber": 272
+        },
+        {
+          "caller": "_to_bool",
+          "callee": "str",
+          "lineNumber": 272
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "isinstance",
+          "lineNumber": 276
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "str(item).strip",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "str",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "str(item).strip",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "str",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "str",
+          "lineNumber": 281
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "text.replace",
+          "lineNumber": 283
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "item.strip",
+          "lineNumber": 284
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "text.split",
+          "lineNumber": 284
+        },
+        {
+          "caller": "_parse_list",
+          "callee": "item.strip",
+          "lineNumber": 284
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "deepcopy",
+          "lineNumber": 288
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.update",
+          "lineNumber": 289
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 292
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 293
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 293
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 294
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 294
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 295
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 295
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 296
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 296
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 297
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 297
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 297
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 297
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_float",
+          "lineNumber": 298
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 298
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 298
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_float",
+          "lineNumber": 299
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 299
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 299
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_int",
+          "lineNumber": 300
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 300
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 300
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 301
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 301
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 302
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 302
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 303
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 303
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 304
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 304
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 305
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 305
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 305
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 306
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 306
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 307
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 307
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 308
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 308
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_parse_list",
+          "lineNumber": 309
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 309
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 309
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_parse_list",
+          "lineNumber": 310
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 310
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 310
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_parse_list",
+          "lineNumber": 311
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 311
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 311
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_parse_list",
+          "lineNumber": 312
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 312
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 312
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_float",
+          "lineNumber": 313
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 313
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_int",
+          "lineNumber": 314
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 314
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_bool",
+          "lineNumber": 315
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 315
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 315
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_to_bool",
+          "lineNumber": 316
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 316
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 316
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "_parse_list",
+          "lineNumber": 317
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 317
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 317
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "merged.get",
+          "lineNumber": 317
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "normalized[\"images\"].insert",
+          "lineNumber": 321
+        },
+        {
+          "caller": "normalize_product",
+          "callee": "normalized[\"id\"].upper",
+          "lineNumber": 324
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "str",
+          "lineNumber": 332
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "order.get",
+          "lineNumber": 332
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "raw_id.startswith",
+          "lineNumber": 333
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "raw_id[4:].isdigit",
+          "lineNumber": 333
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "max",
+          "lineNumber": 334
+        },
+        {
+          "caller": "_next_order_id",
+          "callee": "int",
+          "lineNumber": 334
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 340
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 341
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 342
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 343
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 347
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 348
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 349
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 350
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "_to_int",
+          "lineNumber": 353
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 353
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 353
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "_to_float",
+          "lineNumber": 354
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 354
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 354
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "item.get",
+          "lineNumber": 354
+        },
+        {
+          "caller": "_normalize_order_item",
+          "callee": "max",
+          "lineNumber": 359
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 365
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 366
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 366
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "_normalize_order_item",
+          "lineNumber": 367
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "_to_float",
+          "lineNumber": 368
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 369
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "sum",
+          "lineNumber": 370
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 374
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 375
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 375
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "customer.get",
+          "lineNumber": 375
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 376
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 376
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "customer.get",
+          "lineNumber": 376
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 377
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 377
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "customer.get",
+          "lineNumber": 377
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 378
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 378
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "customer.get",
+          "lineNumber": 378
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "str(order.get(\"status\") or \"pendente\").lower",
+          "lineNumber": 381
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "str",
+          "lineNumber": 381
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 381
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 382
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "order.get",
+          "lineNumber": 382
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "datetime.now().strftime",
+          "lineNumber": 382
+        },
+        {
+          "caller": "normalize_order",
+          "callee": "datetime.now",
+          "lineNumber": 382
+        },
+        {
+          "caller": "_initial_data",
+          "callee": "normalize_product",
+          "lineNumber": 388
+        },
+        {
+          "caller": "_initial_data",
+          "callee": "datetime.now().strftime",
+          "lineNumber": 404
+        },
+        {
+          "caller": "_initial_data",
+          "callee": "datetime.now",
+          "lineNumber": 404
+        },
+        {
+          "caller": "_init_db",
+          "callee": "os.path.exists",
+          "lineNumber": 412
+        },
+        {
+          "caller": "_init_db",
+          "callee": "open",
+          "lineNumber": 413
+        },
+        {
+          "caller": "_init_db",
+          "callee": "json.dump",
+          "lineNumber": 414
+        },
+        {
+          "caller": "_init_db",
+          "callee": "_initial_data",
+          "lineNumber": 414
+        },
+        {
+          "caller": "_read_db",
+          "callee": "_init_db",
+          "lineNumber": 418
+        },
+        {
+          "caller": "_read_db",
+          "callee": "open",
+          "lineNumber": 419
+        },
+        {
+          "caller": "_read_db",
+          "callee": "json.load",
+          "lineNumber": 420
+        },
+        {
+          "caller": "_read_db",
+          "callee": "normalize_product",
+          "lineNumber": 422
+        },
+        {
+          "caller": "_read_db",
+          "callee": "data.get",
+          "lineNumber": 422
+        },
+        {
+          "caller": "_read_db",
+          "callee": "normalize_order",
+          "lineNumber": 423
+        },
+        {
+          "caller": "_read_db",
+          "callee": "data.get",
+          "lineNumber": 423
+        },
+        {
+          "caller": "_read_db",
+          "callee": "data.setdefault",
+          "lineNumber": 424
+        },
+        {
+          "caller": "_write_db",
+          "callee": "normalize_product",
+          "lineNumber": 430
+        },
+        {
+          "caller": "_write_db",
+          "callee": "data.get",
+          "lineNumber": 430
+        },
+        {
+          "caller": "_write_db",
+          "callee": "normalize_order",
+          "lineNumber": 431
+        },
+        {
+          "caller": "_write_db",
+          "callee": "data.get",
+          "lineNumber": 431
+        },
+        {
+          "caller": "_write_db",
+          "callee": "data.get",
+          "lineNumber": 432
+        },
+        {
+          "caller": "_write_db",
+          "callee": "open",
+          "lineNumber": 435
+        },
+        {
+          "caller": "_write_db",
+          "callee": "json.dump",
+          "lineNumber": 436
+        },
+        {
+          "caller": "_write_db",
+          "callee": "_export_to_frontend",
+          "lineNumber": 438
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "os.path.join",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "os.path.dirname",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "os.path.dirname",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "os.path.exists",
+          "lineNumber": 443
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "os.path.join",
+          "lineNumber": 446
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "json.dumps",
+          "lineNumber": 448
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "json.dumps",
+          "lineNumber": 449
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "open",
+          "lineNumber": 453
+        },
+        {
+          "caller": "_export_to_frontend",
+          "callee": "file.write",
+          "lineNumber": 454
+        },
+        {
+          "caller": "get_products",
+          "callee": "db.collection(\"produtos\").get",
+          "lineNumber": 460
+        },
+        {
+          "caller": "get_products",
+          "callee": "db.collection",
+          "lineNumber": 460
+        },
+        {
+          "caller": "get_products",
+          "callee": "normalize_product",
+          "lineNumber": 461
+        },
+        {
+          "caller": "get_products",
+          "callee": "doc.to_dict",
+          "lineNumber": 461
+        },
+        {
+          "caller": "get_products",
+          "callee": "print",
+          "lineNumber": 463
+        },
+        {
+          "caller": "get_products",
+          "callee": "_read_db",
+          "lineNumber": 466
+        },
+        {
+          "caller": "add_product",
+          "callee": "int",
+          "lineNumber": 470
+        },
+        {
+          "caller": "add_product",
+          "callee": "datetime.now().timestamp",
+          "lineNumber": 470
+        },
+        {
+          "caller": "add_product",
+          "callee": "datetime.now",
+          "lineNumber": 470
+        },
+        {
+          "caller": "add_product",
+          "callee": "payload.update",
+          "lineNumber": 480
+        },
+        {
+          "caller": "add_product",
+          "callee": "normalize_product",
+          "lineNumber": 482
+        },
+        {
+          "caller": "add_product",
+          "callee": "db.collection(\"produtos\").document(new_id).set",
+          "lineNumber": 487
+        },
+        {
+          "caller": "add_product",
+          "callee": "db.collection(\"produtos\").document",
+          "lineNumber": 487
+        },
+        {
+          "caller": "add_product",
+          "callee": "db.collection",
+          "lineNumber": 487
+        },
+        {
+          "caller": "add_product",
+          "callee": "print",
+          "lineNumber": 490
+        },
+        {
+          "caller": "add_product",
+          "callee": "_read_db",
+          "lineNumber": 493
+        },
+        {
+          "caller": "add_product",
+          "callee": "data[\"produtos\"].append",
+          "lineNumber": 494
+        },
+        {
+          "caller": "add_product",
+          "callee": "_write_db",
+          "lineNumber": 495
+        },
+        {
+          "caller": "update_product",
+          "callee": "normalize_product",
+          "lineNumber": 500
+        },
+        {
+          "caller": "update_product",
+          "callee": "db.collection(\"produtos\").document(product_id).set",
+          "lineNumber": 504
+        },
+        {
+          "caller": "update_product",
+          "callee": "db.collection(\"produtos\").document",
+          "lineNumber": 504
+        },
+        {
+          "caller": "update_product",
+          "callee": "db.collection",
+          "lineNumber": 504
+        },
+        {
+          "caller": "update_product",
+          "callee": "print",
+          "lineNumber": 507
+        },
+        {
+          "caller": "update_product",
+          "callee": "_read_db",
+          "lineNumber": 510
+        },
+        {
+          "caller": "update_product",
+          "callee": "enumerate",
+          "lineNumber": 512
+        },
+        {
+          "caller": "update_product",
+          "callee": "_write_db",
+          "lineNumber": 519
+        },
+        {
+          "caller": "update_product_stock",
+          "callee": "get_products",
+          "lineNumber": 524
+        },
+        {
+          "caller": "update_product_stock",
+          "callee": "next",
+          "lineNumber": 525
+        },
+        {
+          "caller": "update_product_stock",
+          "callee": "_to_int",
+          "lineNumber": 529
+        },
+        {
+          "caller": "update_product_stock",
+          "callee": "update_product",
+          "lineNumber": 530
+        },
+        {
+          "caller": "delete_product",
+          "callee": "db.collection(\"produtos\").document(produto_id).delete",
+          "lineNumber": 536
+        },
+        {
+          "caller": "delete_product",
+          "callee": "db.collection(\"produtos\").document",
+          "lineNumber": 536
+        },
+        {
+          "caller": "delete_product",
+          "callee": "db.collection",
+          "lineNumber": 536
+        },
+        {
+          "caller": "delete_product",
+          "callee": "print",
+          "lineNumber": 539
+        },
+        {
+          "caller": "delete_product",
+          "callee": "_read_db",
+          "lineNumber": 541
+        },
+        {
+          "caller": "delete_product",
+          "callee": "_write_db",
+          "lineNumber": 543
+        },
+        {
+          "caller": "on_snapshot",
+          "callee": "callback",
+          "lineNumber": 551
+        },
+        {
+          "caller": "listen_to_orders",
+          "callee": "db.collection(\"pedidos\").on_snapshot",
+          "lineNumber": 553
+        },
+        {
+          "caller": "listen_to_orders",
+          "callee": "db.collection",
+          "lineNumber": 553
+        },
+        {
+          "caller": "get_orders",
+          "callee": "db.collection(\"pedidos\").get",
+          "lineNumber": 559
+        },
+        {
+          "caller": "get_orders",
+          "callee": "db.collection",
+          "lineNumber": 559
+        },
+        {
+          "caller": "get_orders",
+          "callee": "normalize_order",
+          "lineNumber": 560
+        },
+        {
+          "caller": "get_orders",
+          "callee": "doc.to_dict",
+          "lineNumber": 560
+        },
+        {
+          "caller": "get_orders",
+          "callee": "print",
+          "lineNumber": 562
+        },
+        {
+          "caller": "get_orders",
+          "callee": "_read_db",
+          "lineNumber": 565
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "_read_db",
+          "lineNumber": 569
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "normalize_order",
+          "lineNumber": 570
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "_next_order_id",
+          "lineNumber": 570
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "products_by_id.get",
+          "lineNumber": 581
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "int",
+          "lineNumber": 582
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "product.get",
+          "lineNumber": 582
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "insufficient_stock.append",
+          "lineNumber": 583
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "', '.join",
+          "lineNumber": 588
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "products_by_id.get",
+          "lineNumber": 593
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "int",
+          "lineNumber": 595
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "product.get",
+          "lineNumber": 595
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "datetime.now().strftime",
+          "lineNumber": 598
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "datetime.now",
+          "lineNumber": 598
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "data[\"pedidos\"].append",
+          "lineNumber": 599
+        },
+        {
+          "caller": "create_local_order",
+          "callee": "_write_db",
+          "lineNumber": 600
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "db.collection(\"pedidos\").document(pedido_id).update",
+          "lineNumber": 607
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "db.collection(\"pedidos\").document",
+          "lineNumber": 607
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "db.collection",
+          "lineNumber": 607
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "print",
+          "lineNumber": 610
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "_read_db",
+          "lineNumber": 612
+        },
+        {
+          "caller": "update_order_status",
+          "callee": "_write_db",
+          "lineNumber": 617
+        },
+        {
+          "caller": "_parse_date",
+          "callee": "datetime.strptime",
+          "lineNumber": 623
+        },
+        {
+          "caller": "_parse_date",
+          "callee": "str(value).replace(\"+00:00\", \"\").replace",
+          "lineNumber": 623
+        },
+        {
+          "caller": "_parse_date",
+          "callee": "str(value).replace",
+          "lineNumber": 623
+        },
+        {
+          "caller": "_parse_date",
+          "callee": "str",
+          "lineNumber": 623
+        },
+        {
+          "caller": "_parse_date",
+          "callee": "datetime.now",
+          "lineNumber": 626
+        },
+        {
+          "caller": "get_stats",
+          "callee": "get_products",
+          "lineNumber": 630
+        },
+        {
+          "caller": "get_stats",
+          "callee": "get_orders",
+          "lineNumber": 631
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 633
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sum",
+          "lineNumber": 634
+        },
+        {
+          "caller": "get_stats",
+          "callee": "_to_float",
+          "lineNumber": 634
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 634
+        },
+        {
+          "caller": "get_stats",
+          "callee": "len",
+          "lineNumber": 635
+        },
+        {
+          "caller": "get_stats",
+          "callee": "defaultdict",
+          "lineNumber": 638
+        },
+        {
+          "caller": "get_stats",
+          "callee": "product.get",
+          "lineNumber": 641
+        },
+        {
+          "caller": "get_stats",
+          "callee": "int",
+          "lineNumber": 641
+        },
+        {
+          "caller": "get_stats",
+          "callee": "product.get",
+          "lineNumber": 641
+        },
+        {
+          "caller": "get_stats",
+          "callee": "defaultdict",
+          "lineNumber": 643
+        },
+        {
+          "caller": "get_stats",
+          "callee": "defaultdict",
+          "lineNumber": 644
+        },
+        {
+          "caller": "get_stats",
+          "callee": "_parse_date",
+          "lineNumber": 647
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 647
+        },
+        {
+          "caller": "get_stats",
+          "callee": "created_at.strftime",
+          "lineNumber": 648
+        },
+        {
+          "caller": "get_stats",
+          "callee": "_to_float",
+          "lineNumber": 648
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 648
+        },
+        {
+          "caller": "get_stats",
+          "callee": "recent_activity.append",
+          "lineNumber": 649
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 651
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 652
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 652
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 653
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 654
+        },
+        {
+          "caller": "get_stats",
+          "callee": "order.get",
+          "lineNumber": 657
+        },
+        {
+          "caller": "get_stats",
+          "callee": "item.get",
+          "lineNumber": 658
+        },
+        {
+          "caller": "get_stats",
+          "callee": "product_names.get",
+          "lineNumber": 658
+        },
+        {
+          "caller": "get_stats",
+          "callee": "item.get",
+          "lineNumber": 658
+        },
+        {
+          "caller": "get_stats",
+          "callee": "_to_int",
+          "lineNumber": 659
+        },
+        {
+          "caller": "get_stats",
+          "callee": "item.get",
+          "lineNumber": 659
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sorted",
+          "lineNumber": 661
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sales_by_product.items",
+          "lineNumber": 662
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sorted",
+          "lineNumber": 669
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sales_by_date.items",
+          "lineNumber": 669
+        },
+        {
+          "caller": "get_stats",
+          "callee": "round",
+          "lineNumber": 673
+        },
+        {
+          "caller": "get_stats",
+          "callee": "round",
+          "lineNumber": 675
+        },
+        {
+          "caller": "get_stats",
+          "callee": "sorted",
+          "lineNumber": 678
+        },
+        {
+          "caller": "get_stats",
+          "callee": "inventory_by_category.items",
+          "lineNumber": 678
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 24,
+        "functionCount": 24,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de vendas/db_mock.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 324,
+      "nonEmptyLines": 324,
+      "sections": [
+        {
+          "heading": "produtos",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "pedidos",
+          "level": 1,
+          "line": 267
+        },
+        {
+          "heading": "vendas",
+          "level": 1,
+          "line": 323
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "Sistema de vendas/serviceAccountKey.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 13,
+      "nonEmptyLines": 13,
+      "sections": [
+        {
+          "heading": "type",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "project_id",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "private_key_id",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "private_key",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "client_email",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "client_id",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "auth_uri",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "token_uri",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "auth_provider_x509_cert_url",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "client_x509_cert_url",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "universe_domain",
+          "level": 1,
+          "line": 12
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 11
+      }
+    },
+    {
+      "path": "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 589,
+      "nonEmptyLines": 493,
+      "classes": [
+        {
+          "name": "SistemaLogisticaApp",
+          "startLine": 45,
+          "endLine": 583,
+          "methods": [
+            "__init__",
+            "_refresh_realtime",
+            "_setup_dashboard",
+            "_setup_estoque",
+            "_setup_pedidos",
+            "_refresh_all",
+            "_update_dashboard",
+            "_load_products",
+            "_load_orders",
+            "_get_selected_product",
+            "_abrir_modal_produto",
+            "_editar_produto",
+            "_deletar_produto",
+            "_abrir_modal_att_estoque",
+            "_dispatch_order",
+            "_start_api_server"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SistemaLogisticaApp",
+          "line": 45,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "self.root.title",
+          "lineNumber": 48
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.root.geometry",
+          "lineNumber": 49
+        },
+        {
+          "caller": "__init__",
+          "callee": "ttk.Style",
+          "lineNumber": 51
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.theme_names",
+          "lineNumber": 52
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.theme_use",
+          "lineNumber": 53
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.configure",
+          "lineNumber": 55
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.configure",
+          "lineNumber": 56
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.configure",
+          "lineNumber": 57
+        },
+        {
+          "caller": "__init__",
+          "callee": "style.configure",
+          "lineNumber": 58
+        },
+        {
+          "caller": "__init__",
+          "callee": "ttk.Notebook",
+          "lineNumber": 60
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.notebook.pack",
+          "lineNumber": 61
+        },
+        {
+          "caller": "__init__",
+          "callee": "ttk.Frame",
+          "lineNumber": 63
+        },
+        {
+          "caller": "__init__",
+          "callee": "ttk.Frame",
+          "lineNumber": 64
+        },
+        {
+          "caller": "__init__",
+          "callee": "ttk.Frame",
+          "lineNumber": 65
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.notebook.add",
+          "lineNumber": 67
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.notebook.add",
+          "lineNumber": 68
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.notebook.add",
+          "lineNumber": 69
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._setup_dashboard",
+          "lineNumber": 71
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._setup_estoque",
+          "lineNumber": 72
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._setup_pedidos",
+          "lineNumber": 73
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._refresh_all",
+          "lineNumber": 74
+        },
+        {
+          "caller": "__init__",
+          "callee": "self._start_api_server",
+          "lineNumber": 75
+        },
+        {
+          "caller": "__init__",
+          "callee": "database.listen_to_orders",
+          "lineNumber": 78
+        },
+        {
+          "caller": "__init__",
+          "callee": "self.root.after",
+          "lineNumber": 78
+        },
+        {
+          "caller": "_refresh_realtime",
+          "callee": "self._refresh_all",
+          "lineNumber": 81
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label(\r\n            self.tab_dashboard,\r\n            text=\"Resumo operacional do e-commerce\",\r\n            style=\"Header.TLabel\",\r\n        ).pack",
+          "lineNumber": 84
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 84
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Frame",
+          "lineNumber": 90
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "frame_cards.pack",
+          "lineNumber": 91
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "range",
+          "lineNumber": 92
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "frame_cards.columnconfigure",
+          "lineNumber": 93
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Frame",
+          "lineNumber": 95
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "card1.grid",
+          "lineNumber": 96
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label(card1, text=\"Total de produtos\").pack",
+          "lineNumber": 97
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 97
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 98
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "self.lbl_total_prod.pack",
+          "lineNumber": 99
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Frame",
+          "lineNumber": 101
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "card2.grid",
+          "lineNumber": 102
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label(card2, text=\"Itens com baixo estoque (<5)\").pack",
+          "lineNumber": 103
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 103
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 104
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "self.lbl_baixo_estoque.pack",
+          "lineNumber": 110
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Frame",
+          "lineNumber": 112
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "card3.grid",
+          "lineNumber": 113
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label(card3, text=\"Pedidos prontos para envio\").pack",
+          "lineNumber": 114
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 114
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Label",
+          "lineNumber": 115
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "self.lbl_pedidos_pendentes.pack",
+          "lineNumber": 121
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Button(\r\n            self.tab_dashboard,\r\n            text=\"Atualizar dashboard\",\r\n            command=self._refresh_all,\r\n        ).pack",
+          "lineNumber": 123
+        },
+        {
+          "caller": "_setup_dashboard",
+          "callee": "ttk.Button",
+          "lineNumber": 123
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Frame",
+          "lineNumber": 130
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "top_frame.pack",
+          "lineNumber": 131
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Label(\r\n            top_frame,\r\n            text=\"Gestao centralizada de inventario e conteudo das paginas de produto\",\r\n            style=\"Header.TLabel\",\r\n        ).pack",
+          "lineNumber": 133
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Label",
+          "lineNumber": 133
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button(top_frame, text=\"Excluir\", command=self._deletar_produto).pack",
+          "lineNumber": 139
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button",
+          "lineNumber": 139
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button(top_frame, text=\"Modificar quantidade\", command=self._abrir_modal_att_estoque).pack",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button(top_frame, text=\"Editar detalhes\", command=self._editar_produto).pack",
+          "lineNumber": 141
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button",
+          "lineNumber": 141
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button(top_frame, text=\"Adicionar novo produto\", command=lambda: self._abrir_modal_produto()).pack",
+          "lineNumber": 142
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Button",
+          "lineNumber": 142
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self._abrir_modal_produto",
+          "lineNumber": 142
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Treeview",
+          "lineNumber": 145
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.heading",
+          "lineNumber": 147
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.heading",
+          "lineNumber": 148
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.heading",
+          "lineNumber": 149
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.heading",
+          "lineNumber": 150
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.heading",
+          "lineNumber": 151
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.column",
+          "lineNumber": 153
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.column",
+          "lineNumber": 154
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.column",
+          "lineNumber": 155
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.column",
+          "lineNumber": 156
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.column",
+          "lineNumber": 157
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "ttk.Scrollbar",
+          "lineNumber": 159
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "scroll_y.pack",
+          "lineNumber": 160
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.configure",
+          "lineNumber": 161
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.pack",
+          "lineNumber": 162
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self.tree_estoque.bind",
+          "lineNumber": 164
+        },
+        {
+          "caller": "_setup_estoque",
+          "callee": "self._editar_produto",
+          "lineNumber": 164
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Frame",
+          "lineNumber": 167
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "top_frame.pack",
+          "lineNumber": 168
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Label(\r\n            top_frame,\r\n            text=\"Controle de pedidos e expedicao\",\r\n            style=\"Header.TLabel\",\r\n        ).pack",
+          "lineNumber": 170
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Label",
+          "lineNumber": 170
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Button(\r\n            top_frame,\r\n            text=\"Marcar pedido selecionado como enviado\",\r\n            command=self._dispatch_order,\r\n        ).pack",
+          "lineNumber": 176
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Button",
+          "lineNumber": 176
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Treeview",
+          "lineNumber": 183
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 185
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 186
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 187
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 188
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 189
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.heading",
+          "lineNumber": 190
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 192
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 193
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 194
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 195
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 196
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.column",
+          "lineNumber": 197
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "ttk.Scrollbar",
+          "lineNumber": 199
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "scroll_y.pack",
+          "lineNumber": 200
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.configure",
+          "lineNumber": 201
+        },
+        {
+          "caller": "_setup_pedidos",
+          "callee": "self.tree_pedidos.pack",
+          "lineNumber": 202
+        },
+        {
+          "caller": "_refresh_all",
+          "callee": "self._load_products",
+          "lineNumber": 205
+        },
+        {
+          "caller": "_refresh_all",
+          "callee": "self._load_orders",
+          "lineNumber": 206
+        },
+        {
+          "caller": "_refresh_all",
+          "callee": "self._update_dashboard",
+          "lineNumber": 207
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "database.get_products",
+          "lineNumber": 210
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "len",
+          "lineNumber": 211
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "sum",
+          "lineNumber": 212
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "int",
+          "lineNumber": 212
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "product.get",
+          "lineNumber": 212
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "database.get_orders",
+          "lineNumber": 214
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "sum",
+          "lineNumber": 215
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "order.get(\"status\", \"\").lower",
+          "lineNumber": 216
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "order.get",
+          "lineNumber": 216
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "self.lbl_total_prod.config",
+          "lineNumber": 219
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "str",
+          "lineNumber": 219
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "self.lbl_baixo_estoque.config",
+          "lineNumber": 220
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "str",
+          "lineNumber": 220
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "self.lbl_pedidos_pendentes.config",
+          "lineNumber": 221
+        },
+        {
+          "caller": "_update_dashboard",
+          "callee": "str",
+          "lineNumber": 221
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.get_children",
+          "lineNumber": 224
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.delete",
+          "lineNumber": 225
+        },
+        {
+          "caller": "_load_products",
+          "callee": "database.get_products",
+          "lineNumber": 227
+        },
+        {
+          "caller": "_load_products",
+          "callee": "product.get",
+          "lineNumber": 230
+        },
+        {
+          "caller": "_load_products",
+          "callee": "product.get",
+          "lineNumber": 231
+        },
+        {
+          "caller": "_load_products",
+          "callee": "float",
+          "lineNumber": 232
+        },
+        {
+          "caller": "_load_products",
+          "callee": "product.get",
+          "lineNumber": 232
+        },
+        {
+          "caller": "_load_products",
+          "callee": "int",
+          "lineNumber": 233
+        },
+        {
+          "caller": "_load_products",
+          "callee": "product.get",
+          "lineNumber": 233
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.insert",
+          "lineNumber": 235
+        },
+        {
+          "caller": "_load_products",
+          "callee": "int",
+          "lineNumber": 236
+        },
+        {
+          "caller": "_load_products",
+          "callee": "product.get",
+          "lineNumber": 236
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.item",
+          "lineNumber": 238
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.item",
+          "lineNumber": 240
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.tag_configure",
+          "lineNumber": 242
+        },
+        {
+          "caller": "_load_products",
+          "callee": "self.tree_estoque.tag_configure",
+          "lineNumber": 243
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.get_children",
+          "lineNumber": 246
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.delete",
+          "lineNumber": 247
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "database.get_orders",
+          "lineNumber": 249
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "orders.sort",
+          "lineNumber": 250
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 253
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 253
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "float",
+          "lineNumber": 254
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 254
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get(\"status\", \"pendente\").lower",
+          "lineNumber": 255
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 255
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 256
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 256
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 258
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "order.get",
+          "lineNumber": 258
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "\", \".join",
+          "lineNumber": 259
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "entry.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "entry.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "entry.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "entry.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "len",
+          "lineNumber": 263
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "status.upper",
+          "lineNumber": 271
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.insert",
+          "lineNumber": 274
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.item",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.item",
+          "lineNumber": 279
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.item",
+          "lineNumber": 281
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.tag_configure",
+          "lineNumber": 283
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.tag_configure",
+          "lineNumber": 284
+        },
+        {
+          "caller": "_load_orders",
+          "callee": "self.tree_pedidos.tag_configure",
+          "lineNumber": 285
+        },
+        {
+          "caller": "_get_selected_product",
+          "callee": "self.tree_estoque.selection",
+          "lineNumber": 288
+        },
+        {
+          "caller": "_get_selected_product",
+          "callee": "self.tree_estoque.item",
+          "lineNumber": 292
+        },
+        {
+          "caller": "_get_selected_product",
+          "callee": "next",
+          "lineNumber": 293
+        },
+        {
+          "caller": "_get_selected_product",
+          "callee": "database.get_products",
+          "lineNumber": 293
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "tk.Toplevel",
+          "lineNumber": 297
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "win.title",
+          "lineNumber": 298
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "win.geometry",
+          "lineNumber": 299
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "win.transient",
+          "lineNumber": 300
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "win.grab_set",
+          "lineNumber": 301
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Frame",
+          "lineNumber": 303
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "outer.pack",
+          "lineNumber": 304
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "tk.Canvas",
+          "lineNumber": 306
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Scrollbar",
+          "lineNumber": 307
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.configure",
+          "lineNumber": 308
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "scrollbar.pack",
+          "lineNumber": 309
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.pack",
+          "lineNumber": 310
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Frame",
+          "lineNumber": 312
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.create_window",
+          "lineNumber": 313
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "form_frame.bind",
+          "lineNumber": 315
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.configure",
+          "lineNumber": 317
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.bbox",
+          "lineNumber": 317
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.bind",
+          "lineNumber": 319
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "canvas.itemconfigure",
+          "lineNumber": 321
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Label(\r\n            form_frame,\r\n            text=\"Campos da pagina de produto\",\r\n            style=\"Header.TLabel\",\r\n        ).pack",
+          "lineNumber": 324
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Label",
+          "lineNumber": 324
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Label(form_frame, text=field[\"label\"]).pack",
+          "lineNumber": 335
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Label",
+          "lineNumber": 335
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Entry",
+          "lineNumber": 338
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "entry.pack",
+          "lineNumber": 339
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "entry.insert",
+          "lineNumber": 340
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "str",
+          "lineNumber": 340
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "values.get",
+          "lineNumber": 340
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Combobox",
+          "lineNumber": 344
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "combo.pack",
+          "lineNumber": 345
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "values.get",
+          "lineNumber": 346
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "combo.set",
+          "lineNumber": 347
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "tk.BooleanVar",
+          "lineNumber": 351
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "bool",
+          "lineNumber": 351
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "values.get",
+          "lineNumber": 351
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Checkbutton",
+          "lineNumber": 352
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "check.pack",
+          "lineNumber": 353
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "tk.Text",
+          "lineNumber": 358
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "field.get",
+          "lineNumber": 358
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "text_widget.pack",
+          "lineNumber": 359
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "values.get",
+          "lineNumber": 360
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "isinstance",
+          "lineNumber": 361
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "\"\\n\".join",
+          "lineNumber": 362
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "text_widget.insert",
+          "lineNumber": 363
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "str",
+          "lineNumber": 363
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get().strip",
+          "lineNumber": 369
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get",
+          "lineNumber": 369
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get().strip",
+          "lineNumber": 371
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get",
+          "lineNumber": 371
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get",
+          "lineNumber": 373
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get(\"1.0\", \"end\").strip",
+          "lineNumber": 374
+        },
+        {
+          "caller": "read_field",
+          "callee": "widget.get",
+          "lineNumber": 374
+        },
+        {
+          "caller": "save_product",
+          "callee": "read_field",
+          "lineNumber": 379
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showerror",
+          "lineNumber": 381
+        },
+        {
+          "caller": "save_product",
+          "callee": "float",
+          "lineNumber": 390
+        },
+        {
+          "caller": "save_product",
+          "callee": "str(payload.get(\"price\", \"0\")).replace",
+          "lineNumber": 390
+        },
+        {
+          "caller": "save_product",
+          "callee": "str",
+          "lineNumber": 390
+        },
+        {
+          "caller": "save_product",
+          "callee": "payload.get",
+          "lineNumber": 390
+        },
+        {
+          "caller": "save_product",
+          "callee": "float",
+          "lineNumber": 391
+        },
+        {
+          "caller": "save_product",
+          "callee": "str(payload.get(\"oldPrice\") or \"0\").replace",
+          "lineNumber": 391
+        },
+        {
+          "caller": "save_product",
+          "callee": "str",
+          "lineNumber": 391
+        },
+        {
+          "caller": "save_product",
+          "callee": "payload.get",
+          "lineNumber": 391
+        },
+        {
+          "caller": "save_product",
+          "callee": "int",
+          "lineNumber": 392
+        },
+        {
+          "caller": "save_product",
+          "callee": "float",
+          "lineNumber": 392
+        },
+        {
+          "caller": "save_product",
+          "callee": "payload.get",
+          "lineNumber": 392
+        },
+        {
+          "caller": "save_product",
+          "callee": "float",
+          "lineNumber": 393
+        },
+        {
+          "caller": "save_product",
+          "callee": "str(payload.get(\"rating\") or \"4.8\").replace",
+          "lineNumber": 393
+        },
+        {
+          "caller": "save_product",
+          "callee": "str",
+          "lineNumber": 393
+        },
+        {
+          "caller": "save_product",
+          "callee": "payload.get",
+          "lineNumber": 393
+        },
+        {
+          "caller": "save_product",
+          "callee": "int",
+          "lineNumber": 394
+        },
+        {
+          "caller": "save_product",
+          "callee": "float",
+          "lineNumber": 394
+        },
+        {
+          "caller": "save_product",
+          "callee": "payload.get",
+          "lineNumber": 394
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showerror",
+          "lineNumber": 396
+        },
+        {
+          "caller": "save_product",
+          "callee": "database.update_product",
+          "lineNumber": 405
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showerror",
+          "lineNumber": 407
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 409
+        },
+        {
+          "caller": "save_product",
+          "callee": "database.add_product",
+          "lineNumber": 411
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showerror",
+          "lineNumber": 420
+        },
+        {
+          "caller": "save_product",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 422
+        },
+        {
+          "caller": "save_product",
+          "callee": "self._refresh_all",
+          "lineNumber": 424
+        },
+        {
+          "caller": "save_product",
+          "callee": "win.destroy",
+          "lineNumber": 425
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Button(\r\n            form_frame,\r\n            text=\"Salvar e sincronizar produto\",\r\n            command=save_product,\r\n        ).pack",
+          "lineNumber": 427
+        },
+        {
+          "caller": "_abrir_modal_produto",
+          "callee": "ttk.Button",
+          "lineNumber": 427
+        },
+        {
+          "caller": "_editar_produto",
+          "callee": "self._get_selected_product",
+          "lineNumber": 434
+        },
+        {
+          "caller": "_editar_produto",
+          "callee": "messagebox.showwarning",
+          "lineNumber": 436
+        },
+        {
+          "caller": "_editar_produto",
+          "callee": "self._abrir_modal_produto",
+          "lineNumber": 438
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "self._get_selected_product",
+          "lineNumber": 441
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "messagebox.showwarning",
+          "lineNumber": 443
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "messagebox.askyesno",
+          "lineNumber": 446
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "database.delete_product",
+          "lineNumber": 451
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "self._refresh_all",
+          "lineNumber": 452
+        },
+        {
+          "caller": "_deletar_produto",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 453
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "self._get_selected_product",
+          "lineNumber": 456
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "messagebox.showwarning",
+          "lineNumber": 458
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "tk.Toplevel",
+          "lineNumber": 461
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "win.title",
+          "lineNumber": 462
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "win.geometry",
+          "lineNumber": 463
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "win.transient",
+          "lineNumber": 464
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "win.grab_set",
+          "lineNumber": 465
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Frame",
+          "lineNumber": 467
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "frame.pack",
+          "lineNumber": 468
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label(frame, text=\"Atualizacao de estoque\", style=\"Header.TLabel\").pack",
+          "lineNumber": 470
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label",
+          "lineNumber": 470
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label(frame, text=f\"Produto: {product['name']}\").pack",
+          "lineNumber": 471
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label",
+          "lineNumber": 471
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label(frame, text=f\"Estoque atual: {product.get('stock', 0)} unidades\").pack",
+          "lineNumber": 472
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label",
+          "lineNumber": 472
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "product.get",
+          "lineNumber": 472
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label(frame, text=\"Novo estoque\").pack",
+          "lineNumber": 473
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Label",
+          "lineNumber": 473
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Entry",
+          "lineNumber": 475
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "entry.pack",
+          "lineNumber": 476
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "entry.focus",
+          "lineNumber": 477
+        },
+        {
+          "caller": "update_stock",
+          "callee": "int",
+          "lineNumber": 481
+        },
+        {
+          "caller": "update_stock",
+          "callee": "float",
+          "lineNumber": 481
+        },
+        {
+          "caller": "update_stock",
+          "callee": "entry.get",
+          "lineNumber": 481
+        },
+        {
+          "caller": "update_stock",
+          "callee": "database.update_product_stock",
+          "lineNumber": 484
+        },
+        {
+          "caller": "update_stock",
+          "callee": "self._refresh_all",
+          "lineNumber": 485
+        },
+        {
+          "caller": "update_stock",
+          "callee": "win.destroy",
+          "lineNumber": 486
+        },
+        {
+          "caller": "update_stock",
+          "callee": "messagebox.showerror",
+          "lineNumber": 488
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "entry.bind",
+          "lineNumber": 490
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Button(frame, text=\"Atualizar estoque\", command=update_stock).pack",
+          "lineNumber": 491
+        },
+        {
+          "caller": "_abrir_modal_att_estoque",
+          "callee": "ttk.Button",
+          "lineNumber": 491
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "self.tree_pedidos.selection",
+          "lineNumber": 494
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "messagebox.showwarning",
+          "lineNumber": 496
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "self.tree_pedidos.item",
+          "lineNumber": 499
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "values[4].lower",
+          "lineNumber": 501
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 504
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "messagebox.askyesno",
+          "lineNumber": 508
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "messagebox.askyesno",
+          "lineNumber": 515
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "database.update_order_status",
+          "lineNumber": 520
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "self._refresh_all",
+          "lineNumber": 521
+        },
+        {
+          "caller": "_dispatch_order",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 522
+        },
+        {
+          "caller": "do_OPTIONS",
+          "callee": "self.send_response",
+          "lineNumber": 528
+        },
+        {
+          "caller": "do_OPTIONS",
+          "callee": "self.send_header",
+          "lineNumber": 529
+        },
+        {
+          "caller": "do_OPTIONS",
+          "callee": "self.send_header",
+          "lineNumber": 530
+        },
+        {
+          "caller": "do_OPTIONS",
+          "callee": "self.send_header",
+          "lineNumber": 531
+        },
+        {
+          "caller": "do_OPTIONS",
+          "callee": "self.end_headers",
+          "lineNumber": 532
+        },
+        {
+          "caller": "_send_json",
+          "callee": "self.send_response",
+          "lineNumber": 535
+        },
+        {
+          "caller": "_send_json",
+          "callee": "self.send_header",
+          "lineNumber": 536
+        },
+        {
+          "caller": "_send_json",
+          "callee": "self.send_header",
+          "lineNumber": 537
+        },
+        {
+          "caller": "_send_json",
+          "callee": "self.end_headers",
+          "lineNumber": 538
+        },
+        {
+          "caller": "_send_json",
+          "callee": "self.wfile.write",
+          "lineNumber": 539
+        },
+        {
+          "caller": "_send_json",
+          "callee": "json.dumps(payload, ensure_ascii=False).encode",
+          "lineNumber": 539
+        },
+        {
+          "caller": "_send_json",
+          "callee": "json.dumps",
+          "lineNumber": 539
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self._send_json",
+          "lineNumber": 543
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self._send_json",
+          "lineNumber": 546
+        },
+        {
+          "caller": "do_GET",
+          "callee": "database.get_stats",
+          "lineNumber": 546
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self._send_json",
+          "lineNumber": 550
+        },
+        {
+          "caller": "do_POST",
+          "callee": "int",
+          "lineNumber": 554
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self.headers.get",
+          "lineNumber": 554
+        },
+        {
+          "caller": "do_POST",
+          "callee": "json.loads",
+          "lineNumber": 555
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self.rfile.read",
+          "lineNumber": 555
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self._send_json",
+          "lineNumber": 557
+        },
+        {
+          "caller": "do_POST",
+          "callee": "database.create_local_order",
+          "lineNumber": 560
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self._send_json",
+          "lineNumber": 562
+        },
+        {
+          "caller": "do_POST",
+          "callee": "database.normalize_order(order).get",
+          "lineNumber": 565
+        },
+        {
+          "caller": "do_POST",
+          "callee": "database.normalize_order",
+          "lineNumber": 565
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self.server.app_instance.root.after",
+          "lineNumber": 566
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self.server.app_instance.root.after",
+          "lineNumber": 567
+        },
+        {
+          "caller": "do_POST",
+          "callee": "messagebox.showinfo",
+          "lineNumber": 569
+        },
+        {
+          "caller": "do_POST",
+          "callee": "self._send_json",
+          "lineNumber": 575
+        },
+        {
+          "caller": "run_server",
+          "callee": "HTTPServer",
+          "lineNumber": 578
+        },
+        {
+          "caller": "run_server",
+          "callee": "print",
+          "lineNumber": 580
+        },
+        {
+          "caller": "run_server",
+          "callee": "httpd.serve_forever",
+          "lineNumber": 581
+        },
+        {
+          "caller": "_start_api_server",
+          "callee": "threading.Thread(target=run_server, daemon=True).start",
+          "lineNumber": 583
+        },
+        {
+          "caller": "_start_api_server",
+          "callee": "threading.Thread",
+          "lineNumber": 583
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    }
+  ]
+}

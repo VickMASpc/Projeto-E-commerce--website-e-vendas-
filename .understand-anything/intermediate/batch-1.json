@@ -1,0 +1,220 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "Sistema de análise de vendas/React app/src/App.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 5,
+      "functions": [
+        {
+          "name": "App",
+          "startLine": 3,
+          "endLine": 5,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/main.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 365,
+      "nonEmptyLines": 341,
+      "functions": [
+        {
+          "name": "formatCurrency",
+          "startLine": 68,
+          "endLine": 72,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "KPIItem",
+          "startLine": 81,
+          "endLine": 101,
+          "params": [
+            "{\n  title,\n  value,\n  trend,\n}"
+          ]
+        },
+        {
+          "name": "EmptyChartMessage",
+          "startLine": 103,
+          "endLine": 109,
+          "params": [
+            "{ message }"
+          ]
+        },
+        {
+          "name": "SalesDashboard",
+          "startLine": 111,
+          "endLine": 365,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SalesDashboard",
+          "line": 111,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "formatCurrency",
+          "callee": "Number(value || 0).toLocaleString",
+          "lineNumber": 69
+        },
+        {
+          "caller": "formatCurrency",
+          "callee": "Number",
+          "lineNumber": 69
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useState",
+          "lineNumber": 112
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useState",
+          "lineNumber": 113
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useState",
+          "lineNumber": 114
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "useEffect",
+          "lineNumber": 116
+        },
+        {
+          "caller": "fetchData",
+          "callee": "fetch",
+          "lineNumber": 119
+        },
+        {
+          "caller": "fetchData",
+          "callee": "response.json",
+          "lineNumber": 124
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setData",
+          "lineNumber": 125
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setIsOffline",
+          "lineNumber": 133
+        },
+        {
+          "caller": "fetchData",
+          "callee": "console.error",
+          "lineNumber": 135
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setData",
+          "lineNumber": 136
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setIsOffline",
+          "lineNumber": 137
+        },
+        {
+          "caller": "fetchData",
+          "callee": "setLoading",
+          "lineNumber": 139
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "fetchData",
+          "lineNumber": 143
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "data.inventoryStatus.reduce",
+          "lineNumber": 154
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "Number",
+          "lineNumber": 155
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "formatCurrency",
+          "lineNumber": 198
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "formatCurrency",
+          "lineNumber": 204
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "formatCurrency",
+          "lineNumber": 246
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "Number",
+          "lineNumber": 246
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "data.inventoryStatus.map",
+          "lineNumber": 280
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "Number",
+          "lineNumber": 293
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "Number",
+          "lineNumber": 324
+        },
+        {
+          "caller": "SalesDashboard",
+          "callee": "recentActivity.map",
+          "lineNumber": 340
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    }
+  ]
+}

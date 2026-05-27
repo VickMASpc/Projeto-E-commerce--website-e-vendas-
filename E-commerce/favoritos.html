@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Carrinho Grand Parfum com resumo de pedido, dados de entrega e o mesmo layout base da home.">
-  <title>Carrinho - Grand Parfum</title>
+  <meta name="description" content="Lista de favoritos Grand Parfum com o mesmo header, footer e grade do restante da loja.">
+  <title>Favoritos - Grand Parfum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="cart">
+<body data-page="favorites">
   <div data-site-header></div>
 
   <main class="page-main">
     <section class="page-hero">
       <div class="section__container">
         <div class="page-hero__copy">
-          <div class="page-kicker">Resumo da compra</div>
-          <h1 class="page-title">Checkout mais claro, sem pagina paralela.</h1>
-          <p class="page-subtitle">Mesma identidade, mesmo header e um resumo de compra mais limpo para fechar o pedido com menos atrito.</p>
+          <div class="page-kicker">Sua selecao salva</div>
+          <h1 class="page-title">Favoritos em um layout consistente.</h1>
+          <p class="page-subtitle">Os mesmos cards do catalogo e os mesmos atalhos do restante da loja, sem mudar de linguagem visual.</p>
         </div>
       </div>
     </section>
 
     <section class="section" style="padding-top: 1rem;">
       <div class="section__container">
-        <div id="cart-content"></div>
+        <div class="products__grid" id="favorites-grid"></div>
       </div>
     </section>
   </main>
