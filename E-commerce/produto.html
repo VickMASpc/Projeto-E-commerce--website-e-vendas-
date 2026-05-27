@@ -1,8 +1,49 @@
-<!doctype html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Produto — Grand Parfum</title><link rel='stylesheet' href='style.css'></head><body>
-<nav class='navbar scrolled'><div class='navbar__inner'><a class='navbar__logo' href='index.html'>Grand<span>Parfum</span></a></div></nav>
-<main class='section' style='padding-top:calc(var(--navbar-height) + 2rem)'><div class='section__container'><a href='produtos.html' class='btn-outline'>← Voltar</a><div id='product-view' style='margin-top:1.5rem'></div></div></main>
-<script type='importmap'>{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"}}</script>
-<script type='module' src='app.js'></script>
-<script type='module'>
-window.addEventListener('load', async ()=>{const id=new URLSearchParams(location.search).get('id'); await window.FirebaseDB?.initProducts('product-view'); const base=window.CURRENT_PRODUCTS||[]; const p=base.find(x=>x.id===id); const el=document.getElementById('product-view'); if(!p){el.innerHTML='<h1>Produto não encontrado</h1>';return;} const n=p.name||p.nome, d=p.description||p.descricao||'Sem descrição', price=parseFloat(p.price||p.preco||0), cat=p.category||p.categoria||'Perfume'; el.innerHTML=`<h1 class='section__title'>${n}</h1><p class='section__eyebrow'>${cat}</p><p style='margin:1rem 0;color:var(--clr-neutral-600)'>${d}</p><h2 style='margin:1rem 0'>R$ ${price.toLocaleString('pt-BR',{minimumFractionDigits:2})}</h2><button class='btn-primary' id='buy'>Adicionar ao carrinho</button>`; document.getElementById('buy').onclick=()=>window.Cart?.addItem(p.id,n,price,p.imageEmoji||'📦');});
-</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Detalhes completos do produto Grand Parfum com galeria, notas olfativas, especificacoes e produtos relacionados.">
+  <title>Produto - Grand Parfum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="product">
+  <div data-site-header></div>
+
+  <main class="page-main">
+    <section class="section" style="padding-top: 1rem;">
+      <div class="section__container">
+        <div id="product-detail"></div>
+      </div>
+    </section>
+
+    <section class="section section--light" aria-labelledby="related-title">
+      <div class="section__container">
+        <header class="section__header">
+          <span class="section__eyebrow">Continue navegando</span>
+          <h2 class="section__title" id="related-title">Mais produtos para comparar</h2>
+          <p class="section__subtitle">Sugestoes relacionadas para manter a navegação fluida sem voltar para uma grade incompleta.</p>
+        </header>
+        <div class="products__grid" id="related-products"></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="products_live.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

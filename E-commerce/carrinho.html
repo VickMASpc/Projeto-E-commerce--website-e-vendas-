@@ -3,152 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Carrinho — Grand Parfum</title>
+  <meta name="description" content="Carrinho Grand Parfum com resumo de pedido, dados de entrega e o mesmo layout base da home.">
+  <title>Carrinho - Grand Parfum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .cart-page { padding-top: calc(var(--navbar-height) + 3rem); min-height: 80vh; }
-    .cart-grid {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 2rem;
-      align-items: start;
-    }
-    @media (max-width: 992px) {
-      .cart-grid { grid-template-columns: 1fr; }
-    }
-    
-    .cart-items {
-      background: #fff;
-      border: 1px solid var(--clr-neutral-200);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-    }
-    .cart-item {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      padding: 1.5rem 0;
-      border-bottom: 1px solid var(--clr-neutral-100);
-    }
-    .cart-item:last-child { border-bottom: none; }
-    .cart-item__image {
-      width: 100px; height: 100px;
-      border-radius: var(--radius-lg);
-      background: var(--clr-neutral-50);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.5rem; flex-shrink: 0;
-    }
-    .cart-item__info { flex-grow: 1; }
-    .cart-item__name { font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem; }
-    .cart-item__category { font-size: 0.8rem; color: var(--clr-neutral-400); text-transform: uppercase; }
-    .cart-item__price { font-weight: 800; color: var(--clr-primary-700); margin-top: 0.5rem; }
-    
-    .cart-item__actions { display: flex; align-items: center; gap: 1.5rem; }
-    .qty-controls {
-      display: flex; align-items: center; gap: 0.75rem;
-      background: var(--clr-neutral-50);
-      padding: 0.5rem; border-radius: var(--radius-full);
-    }
-    .qty-btn {
-      width: 28px; height: 28px; border-radius: 50%;
-      border: none; background: #fff; color: var(--clr-neutral-800);
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; transition: background var(--transition-fast);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .qty-btn:hover { background: var(--clr-primary-500); color: #fff; }
-    .qty-val { font-weight: 600; font-size: 0.9rem; min-width: 1.5rem; text-align: center; }
-    
-    .btn-remove {
-      background: none; border: none; color: var(--clr-danger);
-      font-size: 0.8rem; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; gap: 0.25rem;
-      transition: opacity 0.2s;
-    }
-    .btn-remove:hover { opacity: 0.7; }
-
-    .summary-card {
-      background: #fff;
-      border: 1px solid var(--clr-neutral-200);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      position: sticky; top: calc(var(--navbar-height) + 2rem);
-    }
-    .summary-title { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 1.5rem; }
-    .summary-row { display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--clr-neutral-600); }
-    .summary-row--total {
-      border-top: 1px solid var(--clr-neutral-100);
-      padding-top: 1rem; margin-top: 1rem;
-      font-weight: 800; font-size: 1.25rem; color: var(--clr-neutral-900);
-    }
-    .btn-checkout { width: 100%; margin-top: 1.5rem; }
-    .btn-checkout-secondary { width: 100%; margin-top: 0.75rem; border-color: var(--clr-neutral-200); color: var(--clr-neutral-600); }
-    
-    .empty-cart { text-align: center; padding: 4rem 2rem; }
-    .empty-cart__icon { font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3; }
-  </style>
 </head>
-<body>
+<body data-page="cart">
+  <div data-site-header></div>
 
-  <!-- NAVBAR -->
-  <nav class="navbar scrolled" id="navbar">
-    <div class="navbar__inner">
-      <a class="navbar__logo" href="index.html">Grand<span>Parfum</span></a>
-      <ul class="navbar__links">
-        <li><a class="navbar__link" href="index.html">Home</a></li>
-        <li><a class="navbar__link" href="produtos.html">Produtos</a></li>
-        <li><a class="navbar__link" href="index.html#categorias">Categorias</a></li>
-      </ul>
-      <div class="navbar__actions">
-        <a href="carrinho.html" class="navbar__icon-btn" id="btn-cart">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          <span class="navbar__cart-badge" id="cart-count">0</span>
-        </a>
+  <main class="page-main">
+    <section class="page-hero">
+      <div class="section__container">
+        <div class="page-hero__copy">
+          <div class="page-kicker">Resumo da compra</div>
+          <h1 class="page-title">Checkout mais claro, sem pagina paralela.</h1>
+          <p class="page-subtitle">Mesma identidade, mesmo header e um resumo de compra mais limpo para fechar o pedido com menos atrito.</p>
+        </div>
       </div>
-    </div>
-  </nav>
+    </section>
 
-  <main class="cart-page">
-    <div class="section__container">
-      <header class="section__header" style="text-align: left; margin-bottom: 2rem;">
-        <h1 class="section__title">Meu Carrinho</h1>
-      </header>
-
-      <div class="cart-grid" id="cart-content">
-        <!-- Renderização via JS -->
+    <section class="section" style="padding-top: 1rem;">
+      <div class="section__container">
+        <div id="cart-content"></div>
       </div>
-    </div>
+    </section>
   </main>
 
-  <footer class="footer" style="margin-top: 5rem;" id="footer">
-    <div class="footer__grid">
-      <div>
-        <div class="footer__brand-name">Grand<span>Parfum</span></div>
-        <p class="footer__desc">Qualidade superior e entrega garantida para todo o Brasil.</p>
-      </div>
-      <div>
-        <h3 class="footer__col-title">Links Úteis</h3>
-        <ul class="footer__links">
-          <li><a href="index.html" class="footer__link">Home</a></li>
-          <li><a href="produtos.html" class="footer__link">Produtos</a></li>
-          <li><a href="carrinho.html" class="footer__link">Carrinho</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="footer__col-title">Suporte</h3>
-        <ul class="footer__links">
-          <li><a href="javascript:Cart.showToast('Redirecionando para Central de Ajuda...')" class="footer__link">Central de Ajuda</a></li>
-          <li><a href="javascript:Cart.showToast('Rastreio em manutenção.')" class="footer__link">Rastrear Pedido</a></li>
-          <li><a href="javascript:Cart.showToast('Nossa política de devolução é de 30 dias.')" class="footer__link">Política de Devolução</a></li>
-        </ul>
-      </div>
-    </div>
-  </footer>
+  <div data-site-footer></div>
 
-  <!-- Firebase SDK -->
+  <script src="products_live.js"></script>
   <script type="importmap">
     {
       "imports": {
@@ -158,201 +43,6 @@
       }
     }
   </script>
-
-
   <script type="module" src="app.js"></script>
-  <script type="module">
-    // Disponibiliza funções do módulo no escopo global para compatibilidade com o HTML legado
-    import { initializeApp } from "firebase/app";
-    import firebaseConfig from "./firebase-config.js";
-    
-    window.addEventListener('load', () => {
-      const cartContainer = document.getElementById('cart-content');
-
-      function renderCart() {
-        const items = Cart.getItems();
-        
-        if (items.length === 0) {
-          cartContainer.innerHTML = `
-            <div class="empty-cart" style="grid-column: 1 / -1;">
-              <div class="empty-cart__icon">🛒</div>
-              <h2 style="margin-bottom: 1rem;">Seu carrinho está vazio</h2>
-              <p style="color: var(--clr-neutral-500); margin-bottom: 2rem;">Que tal dar uma olhada em nossas novidades e encontrar algo especial?</p>
-              <a href="produtos.html" class="btn-primary">Explorar Produtos</a>
-            </div>
-          `;
-          return;
-        }
-
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        const shipping = subtotal > 199 ? 0 : 25;
-        const total = subtotal + shipping;
-
-        let itemsHTML = items.map(item => {
-          // Robustez para itens salvos com nomenclaturas diferentes ou campos faltando
-          const pName = item.name || item.nome || 'Produto';
-          const pPrice = parseFloat(item.price || item.preco || 0);
-          const pEmoji = item.imageEmoji || item.imagemEmoji || '📦';
-          const pCategory = item.category || item.categoria || 'Produto';
-
-          return `
-          <div class="cart-item" data-id="${item.id}">
-            <div class="cart-item__image">${pEmoji}</div>
-            <div class="cart-item__info">
-              <div class="cart-item__name">${pName}</div>
-              <div class="cart-item__category">${pCategory}</div>
-              <div class="cart-item__price">R$ ${pPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            </div>
-            <div class="cart-item__actions">
-              <div class="qty-controls">
-                <button class="qty-btn" onclick="updateQty('${item.id}', -1)" aria-label="Diminuir">-</button>
-                <span class="qty-val">${item.qty}</span>
-                <button class="qty-btn" onclick="updateQty('${item.id}', 1)" aria-label="Aumentar">+</button>
-              </div>
-              <button class="btn-remove" onclick="removeItem('${item.id}')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                Remover
-              </button>
-            </div>
-          </div>
-          `;
-        }).join('');
-
-        cartContainer.innerHTML = `
-          <div class="cart-items">
-            ${itemsHTML}
-          </div>
-          <aside class="summary-card">
-            <h2 class="summary-title">Resumo da Compra</h2>
-            <div class="summary-row">
-              <span>Subtotal</span>
-              <span>R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div class="summary-row">
-              <span>Frete</span>
-              <span>${shipping === 0 ? '<span style="color:var(--clr-success); font-weight:700;">Grátis</span>' : 'R$ ' + shipping.toFixed(2)}</span>
-            </div>
-            <div class="summary-row--total">
-              <span>Total</span>
-              <span>R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-            
-            <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-              <h3 style="font-size: 1rem; margin-bottom: 0.25rem;">Dados de Entrega</h3>
-              <input type="text" id="checkout-name" placeholder="Nome Completo" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
-              <input type="email" id="checkout-email" placeholder="E-mail" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
-              <input type="tel" id="checkout-phone" placeholder="Telefone" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
-              <input type="text" id="checkout-address" placeholder="Endereço de Entrega" required style="padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--clr-neutral-200); width: 100%;">
-            </div>
-
-            <button class="btn-primary btn-checkout" onclick="handleCheckout()">Finalizar Compra</button>
-            <a href="produtos.html" class="btn-outline btn-checkout-secondary">Continuar Comprando</a>
-          </aside>
-        `;
-      }
-
-      window.updateQty = (id, delta) => {
-        const items = Cart.getItems();
-        const item = items.find(i => i.id === id);
-        if (item) {
-          item.qty += delta;
-          if (item.qty <= 0) {
-            removeItem(id);
-          } else {
-            Cart.save(items);
-            renderCart();
-          }
-        }
-      };
-
-      window.removeItem = (id) => {
-        const items = Cart.getItems().filter(i => i.id !== id);
-        Cart.save(items);
-        renderCart();
-      };
-
-      window.handleCheckout = async () => {
-        const items = Cart.getItems();
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        const shipping = subtotal > 199 ? 0 : 25;
-        const total = subtotal + shipping;
-
-        const nameInput = document.getElementById('checkout-name').value;
-        const emailInput = document.getElementById('checkout-email').value;
-        const phoneInput = document.getElementById('checkout-phone').value;
-        const addressInput = document.getElementById('checkout-address').value;
-
-        if (!nameInput || !emailInput || !phoneInput || !addressInput) {
-            Cart.showToast('Por favor, preencha todos os dados de entrega. ⚠️');
-            return;
-        }
-
-        const btn = document.querySelector('.btn-checkout');
-        const originalText = btn.textContent;
-        btn.textContent = 'Enviando Pedido... ⏳';
-        btn.disabled = true;
-        
-        // Dados do pedido 
-        const orderData = {
-          customer: {
-             name: nameInput,
-             email: emailInput,
-             phone: phoneInput,
-             address: addressInput
-          },
-          cliente_nome: nameInput,
-          cliente_email: emailInput,
-          cliente_telefone: phoneInput,
-          cliente_endereco: addressInput,
-          itens: items.map(i => ({
-            produto_id: i.id,
-            nome_prod: i.name,
-            quantidade: i.qty,
-            preco_unit: i.price
-          })),
-          total: total
-        };
-
-        try {
-          // Integração Real com Firebase
-          const orderId = await window.FirebaseDB.createOrder(orderData);
-          console.log('Pedido confirmado via Firebase:', orderId);
-
-          // Sincronização local desativada em produção (evita dependência de localhost para usuários finais)
-          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.info('Modo local detectado: sincronização com backend local pode ser implementada aqui.');
-          }
-
-          Cart.clear();
-          cartContainer.innerHTML = `
-            <div class="empty-cart" style="grid-column: 1 / -1;">
-              <div class="empty-cart__icon" style="color:var(--clr-success); opacity:1;">✅</div>
-              <h2 style="margin-bottom: 1rem;">Pedido Realizado!</h2>
-              <p style="color: var(--clr-neutral-500); margin-bottom: 0.5rem;">Seu pedido <strong>#${orderId}</strong> foi registrado em nosso sistema seguro.</p>
-              <p style="color: var(--clr-neutral-400); margin-bottom: 2rem;">A equipe de logística já foi notificada e está preparando sua entrega.</p>
-              <a href="index.html" class="btn-primary">Voltar para Home</a>
-            </div>
-          `;
-          Cart.showToast('Pedido registrado com sucesso no Firebase! 🚀');
-
-        } catch (error) {
-          console.error('Erro no checkout Firebase:', error);
-          btn.textContent = 'Erro ao processar pedido';
-          btn.style.background = 'var(--clr-danger)';
-          
-          setTimeout(() => {
-            btn.textContent = originalText;
-            btn.style.background = '';
-            btn.disabled = false;
-          }, 4000);
-          
-          Cart.showToast('Erro ao salvar no Firebase. Verifique sua conexão. ❌');
-        }
-      };
-
-
-      renderCart();
-    });
-  </script>
 </body>
 </html>

@@ -1,236 +1,278 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-import database
 import json
 import threading
+import tkinter as tk
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from tkinter import messagebox, ttk
+
+import database
+
+
+PRODUCT_FIELDS = [
+    {"key": "name", "label": "Nome do produto", "widget": "entry", "required": True},
+    {"key": "brand", "label": "Marca", "widget": "entry", "required": False},
+    {
+        "key": "category",
+        "label": "Categoria",
+        "widget": "combo",
+        "required": True,
+        "values": ["Masculino", "Feminino", "Unissex", "Nicho", "Acessorios"],
+    },
+    {"key": "tagline", "label": "Frase curta", "widget": "entry", "required": False},
+    {"key": "description", "label": "Descricao curta", "widget": "text", "height": 3, "required": True},
+    {"key": "longDescription", "label": "Descricao longa", "widget": "text", "height": 5, "required": False},
+    {"key": "price", "label": "Preco atual (R$)", "widget": "entry", "required": True},
+    {"key": "oldPrice", "label": "Preco antigo (R$)", "widget": "entry", "required": False},
+    {"key": "stock", "label": "Estoque fisico", "widget": "entry", "required": True},
+    {"key": "sku", "label": "SKU", "widget": "entry", "required": False},
+    {"key": "volume_ml", "label": "Volume", "widget": "entry", "required": False},
+    {"key": "concentration", "label": "Concentracao", "widget": "entry", "required": False},
+    {"key": "olfactiveFamily", "label": "Familia olfativa", "widget": "entry", "required": False},
+    {"key": "occasion", "label": "Melhor ocasiao de uso", "widget": "entry", "required": False},
+    {"key": "imageEmoji", "label": "Emoji ou icone", "widget": "entry", "required": False},
+    {"key": "image_url", "label": "Imagem principal (URL)", "widget": "entry", "required": False},
+    {"key": "images", "label": "Galeria (uma URL por linha)", "widget": "text", "height": 4, "required": False},
+    {"key": "topNotes", "label": "Notas de saida", "widget": "text", "height": 3, "required": False},
+    {"key": "heartNotes", "label": "Notas de coracao", "widget": "text", "height": 3, "required": False},
+    {"key": "baseNotes", "label": "Notas de fundo", "widget": "text", "height": 3, "required": False},
+    {"key": "highlights", "label": "Destaques da pagina", "widget": "text", "height": 4, "required": False},
+    {"key": "rating", "label": "Nota media", "widget": "entry", "required": False},
+    {"key": "reviews", "label": "Quantidade de avaliacoes", "widget": "entry", "required": False},
+    {"key": "isSale", "label": "Produto em oferta", "widget": "check", "required": False},
+    {"key": "isNew", "label": "Lancamento", "widget": "check", "required": False},
+]
 
 
 class SistemaLogisticaApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Minha Loja - Sistema Local de Vendas e Logística")
-        self.root.geometry("1000x700")
+        self.root.title("Grand Parfum - Sistema Local de Vendas e Logistica")
+        self.root.geometry("1120x760")
 
-        # Tentativa de inicializar um tema melhorzinho do Tkinter
         style = ttk.Style()
         if "clam" in style.theme_names():
             style.theme_use("clam")
 
-        style.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[10, 5])
+        style.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[12, 7])
         style.configure("TLabel", font=("Helvetica", 10))
-        style.configure("Header.TLabel", font=("Helvetica", 14, "bold"))
-        style.configure("Card.TFrame", background="#f0f0f0", relief="raised", borderwidth=1)
+        style.configure("Header.TLabel", font=("Helvetica", 15, "bold"))
+        style.configure("Card.TFrame", background="#f4f1e8", relief="solid", borderwidth=1)
 
-        # Notebook central (Abas)
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Frames (Abas)
         self.tab_dashboard = ttk.Frame(self.notebook)
         self.tab_estoque = ttk.Frame(self.notebook)
         self.tab_pedidos = ttk.Frame(self.notebook)
 
-        self.notebook.add(self.tab_dashboard, text="📊 Dashboard Geral")
-        self.notebook.add(self.tab_estoque, text="📦 Estoque & Produtos")
-        self.notebook.add(self.tab_pedidos, text="🚚 Logística de Pedidos")
+        self.notebook.add(self.tab_dashboard, text="Dashboard")
+        self.notebook.add(self.tab_estoque, text="Estoque & Produtos")
+        self.notebook.add(self.tab_pedidos, text="Pedidos & Logistica")
 
-        # Constrói o layout interno de cada Aba
         self._setup_dashboard()
         self._setup_estoque()
         self._setup_pedidos()
-
-        # Carrega dados do database_mock.py
         self._refresh_all()
-
-        # Inicia servidor de integração em segundo plano
         self._start_api_server()
 
-        # Inicia listener em tempo real do Firebase (se habilitado)
         if database.USE_FIREBASE:
             database.listen_to_orders(lambda: self.root.after(0, self._refresh_realtime))
 
     def _refresh_realtime(self):
-        """Atualização disparada por evento externo (Firebase)"""
         self._refresh_all()
-        # Opcional: Notificar o usuário visualmente sem travar com popup se possível, 
-        # mas como já existe messagebox em outros lugares, vamos manter consistência.
-        # self.root.after(0, lambda: messagebox.showinfo("Atualização", "Novos dados recebidos do site!"))
 
     def _setup_dashboard(self):
-        lbl = ttk.Label(self.tab_dashboard, text="Resumo Dinâmico do E-commerce", style="Header.TLabel")
-        lbl.pack(pady=15)
+        ttk.Label(
+            self.tab_dashboard,
+            text="Resumo operacional do e-commerce",
+            style="Header.TLabel",
+        ).pack(pady=15)
 
-        # Frame envolvente dos cards
         frame_cards = ttk.Frame(self.tab_dashboard)
         frame_cards.pack(fill=tk.X, padx=20, pady=20)
-        frame_cards.columnconfigure(0, weight=1)
-        frame_cards.columnconfigure(1, weight=1)
-        frame_cards.columnconfigure(2, weight=1)
+        for column in range(3):
+            frame_cards.columnconfigure(column, weight=1)
 
-        # Cards (Frames visuais para estatísticas)
         card1 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
         card1.grid(row=0, column=0, padx=10, sticky="ew")
-        ttk.Label(card1, text="Total de Produtos", font=("Helvetica", 10)).pack()
+        ttk.Label(card1, text="Total de produtos").pack()
         self.lbl_total_prod = ttk.Label(card1, text="0", font=("Helvetica", 18, "bold"))
         self.lbl_total_prod.pack(pady=5)
 
         card2 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
         card2.grid(row=0, column=1, padx=10, sticky="ew")
-        ttk.Label(card2, text="Itens com Baixo Estoque (<5)", font=("Helvetica", 10)).pack()
-        self.lbl_baixo_estoque = ttk.Label(card2, text="0", font=("Helvetica", 18, "bold"), foreground="#e63946")
+        ttk.Label(card2, text="Itens com baixo estoque (<5)").pack()
+        self.lbl_baixo_estoque = ttk.Label(
+            card2,
+            text="0",
+            font=("Helvetica", 18, "bold"),
+            foreground="#c94242",
+        )
         self.lbl_baixo_estoque.pack(pady=5)
 
         card3 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
         card3.grid(row=0, column=2, padx=10, sticky="ew")
-        ttk.Label(card3, text="Pedidos Prontos para Envio", font=("Helvetica", 10)).pack()
-        self.lbl_pedidos_pendentes = ttk.Label(card3, text="0", font=("Helvetica", 18, "bold"), foreground="#2a9d8f")
+        ttk.Label(card3, text="Pedidos prontos para envio").pack()
+        self.lbl_pedidos_pendentes = ttk.Label(
+            card3,
+            text="0",
+            font=("Helvetica", 18, "bold"),
+            foreground="#1f9254",
+        )
         self.lbl_pedidos_pendentes.pack(pady=5)
 
-        btn_refresh = ttk.Button(self.tab_dashboard, text="🔄 Atualizar Dashboard", command=self._refresh_all)
-        btn_refresh.pack(pady=30)
+        ttk.Button(
+            self.tab_dashboard,
+            text="Atualizar dashboard",
+            command=self._refresh_all,
+        ).pack(pady=30)
 
     def _setup_estoque(self):
-        # Barra superior com botões de ação
         top_frame = ttk.Frame(self.tab_estoque)
         top_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        ttk.Label(top_frame, text="Gestão de Inventário Centralizada", style="Header.TLabel").pack(side=tk.LEFT)
+        ttk.Label(
+            top_frame,
+            text="Gestao centralizada de inventario e conteudo das paginas de produto",
+            style="Header.TLabel",
+        ).pack(side=tk.LEFT)
 
-        btn_excluir = ttk.Button(top_frame, text="Excluir", command=self._deletar_produto)
-        btn_excluir.pack(side=tk.RIGHT, padx=5)
+        ttk.Button(top_frame, text="Excluir", command=self._deletar_produto).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(top_frame, text="Modificar quantidade", command=self._abrir_modal_att_estoque).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(top_frame, text="Editar detalhes", command=self._editar_produto).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(top_frame, text="Adicionar novo produto", command=lambda: self._abrir_modal_produto()).pack(side=tk.RIGHT, padx=5)
 
-        btn_att_estoque = ttk.Button(top_frame, text="✍️ Modificar Quantidade", command=self._abrir_modal_att_estoque)
-        btn_att_estoque.pack(side=tk.RIGHT, padx=5)
-
-        btn_novo = ttk.Button(top_frame, text="➕ Adicionar Novo Produto", command=self._abrir_modal_produto)
-        btn_novo.pack(side=tk.RIGHT, padx=5)
-
-        # Tabela Treeview (Grid de dados)
         columns = ("id", "nome", "categoria", "preco", "estoque")
         self.tree_estoque = ttk.Treeview(self.tab_estoque, columns=columns, show="headings", height=20)
 
         self.tree_estoque.heading("id", text="ID")
-        self.tree_estoque.heading("nome", text="Nome do Produto")
+        self.tree_estoque.heading("nome", text="Produto")
         self.tree_estoque.heading("categoria", text="Categoria")
-        self.tree_estoque.heading("preco", text="Preço Unit. (R$)")
-        self.tree_estoque.heading("estoque", text="Estoque Físico")
+        self.tree_estoque.heading("preco", text="Preco")
+        self.tree_estoque.heading("estoque", text="Estoque")
 
-        # Controle de largura das colunas
-        self.tree_estoque.column("id", width=120, anchor=tk.CENTER)
-        self.tree_estoque.column("nome", width=350, anchor=tk.W)
-        self.tree_estoque.column("categoria", width=150, anchor=tk.CENTER)
-        self.tree_estoque.column("preco", width=100, anchor=tk.CENTER)
-        self.tree_estoque.column("estoque", width=100, anchor=tk.CENTER)
+        self.tree_estoque.column("id", width=140, anchor=tk.CENTER)
+        self.tree_estoque.column("nome", width=360, anchor=tk.W)
+        self.tree_estoque.column("categoria", width=160, anchor=tk.CENTER)
+        self.tree_estoque.column("preco", width=120, anchor=tk.CENTER)
+        self.tree_estoque.column("estoque", width=110, anchor=tk.CENTER)
 
-        # Scrollbars na TV
         scroll_y = ttk.Scrollbar(self.tab_estoque, orient=tk.VERTICAL, command=self.tree_estoque.yview)
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_estoque.configure(yscrollcommand=scroll_y.set)
-
         self.tree_estoque.pack(fill=tk.BOTH, expand=True, padx=(10, 0), pady=10)
 
+        self.tree_estoque.bind("<Double-1>", lambda _event: self._editar_produto())
+
     def _setup_pedidos(self):
-        # Topo
         top_frame = ttk.Frame(self.tab_pedidos)
         top_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        ttk.Label(top_frame, text="Controle de Envio E-commerce", style="Header.TLabel").pack(side=tk.LEFT)
+        ttk.Label(
+            top_frame,
+            text="Controle de pedidos e expedicao",
+            style="Header.TLabel",
+        ).pack(side=tk.LEFT)
 
-        btn_enviar = ttk.Button(top_frame, text="✅ Marcar Pedido Selecionado como 'Enviado'", command=self._dispatch_order)
-        btn_enviar.pack(side=tk.RIGHT, padx=5)
+        ttk.Button(
+            top_frame,
+            text="Marcar pedido selecionado como enviado",
+            command=self._dispatch_order,
+        ).pack(side=tk.RIGHT, padx=5)
 
-        # Tabela Treeview
         columns = ("id", "cliente", "itens", "total", "status", "data")
         self.tree_pedidos = ttk.Treeview(self.tab_pedidos, columns=columns, show="headings", height=20)
 
-        self.tree_pedidos.heading("id", text="Pedido ID")
+        self.tree_pedidos.heading("id", text="Pedido")
         self.tree_pedidos.heading("cliente", text="Cliente")
-        self.tree_pedidos.heading("itens", text="Detalhes/Itens")
-        self.tree_pedidos.heading("total", text="Total Pago")
-        self.tree_pedidos.heading("status", text="Status Final")
-        self.tree_pedidos.heading("data", text="Data da Compra")
+        self.tree_pedidos.heading("itens", text="Itens")
+        self.tree_pedidos.heading("total", text="Total")
+        self.tree_pedidos.heading("status", text="Status")
+        self.tree_pedidos.heading("data", text="Data")
 
         self.tree_pedidos.column("id", width=100, anchor=tk.CENTER)
-        self.tree_pedidos.column("cliente", width=200, anchor=tk.W)
-        self.tree_pedidos.column("itens", width=300, anchor=tk.W)
-        self.tree_pedidos.column("total", width=100, anchor=tk.CENTER)
+        self.tree_pedidos.column("cliente", width=220, anchor=tk.W)
+        self.tree_pedidos.column("itens", width=320, anchor=tk.W)
+        self.tree_pedidos.column("total", width=110, anchor=tk.CENTER)
         self.tree_pedidos.column("status", width=120, anchor=tk.CENTER)
-        self.tree_pedidos.column("data", width=140, anchor=tk.CENTER)
+        self.tree_pedidos.column("data", width=150, anchor=tk.CENTER)
 
         scroll_y = ttk.Scrollbar(self.tab_pedidos, orient=tk.VERTICAL, command=self.tree_pedidos.yview)
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_pedidos.configure(yscrollcommand=scroll_y.set)
-
         self.tree_pedidos.pack(fill=tk.BOTH, expand=True, padx=(10, 0), pady=10)
 
     def _refresh_all(self):
-        """Função mágica que sincroniza a UI inteira com o DataBase."""
         self._load_products()
         self._load_orders()
         self._update_dashboard()
 
     def _update_dashboard(self):
-        prods = database.get_products()
-        total_prod = len(prods)
-        baixo_estoque = sum(1 for p in prods if int(p.get("estoque", p.get("stock", 0))) < 5)
+        products = database.get_products()
+        total_prod = len(products)
+        baixo_estoque = sum(1 for product in products if int(product.get("stock", 0)) < 5)
 
         orders = database.get_orders()
-        # Pedidos 'pagos' ou 'pendente-pagamento' são os que logística deve tratar
-        # No Firestore novos pedidos entram como 'pendente'
-        pendentes_envio = sum(1 for o in orders if o.get("status", "").lower() in ["pago", "pendente"])
+        pendentes_envio = sum(
+            1 for order in orders if order.get("status", "").lower() in {"pago", "pendente"}
+        )
 
-        self.lbl_total_prod.config(text=f"{total_prod}")
-        self.lbl_baixo_estoque.config(text=f"{baixo_estoque}")
-        self.lbl_pedidos_pendentes.config(text=f"{pendentes_envio}")
+        self.lbl_total_prod.config(text=str(total_prod))
+        self.lbl_baixo_estoque.config(text=str(baixo_estoque))
+        self.lbl_pedidos_pendentes.config(text=str(pendentes_envio))
 
     def _load_products(self):
-        # Limpar tabela local
         for item in self.tree_estoque.get_children():
             self.tree_estoque.delete(item)
 
-        prods = database.get_products()
-        for p in prods:
-            # Suporte a ambos os idiomas para transição suave
-            nome = p.get("nome", p.get("name", "Produto"))
-            cat = p.get("categoria", p.get("category", "Outros"))
-            preco = float(p.get("preco", p.get("price", 0)))
-            estoque = int(p.get("estoque", p.get("stock", 0)))
-
-            valores = (p["id"], nome, cat, f"R$ {preco:.2f}", estoque)
-            row_id = self.tree_estoque.insert("", tk.END, values=valores)
-
-            if estoque == 0:
+        for product in database.get_products():
+            values = (
+                product["id"],
+                product.get("name", "Produto"),
+                product.get("category", "Outros"),
+                f"R$ {float(product.get('price', 0)):.2f}",
+                int(product.get("stock", 0)),
+            )
+            row_id = self.tree_estoque.insert("", tk.END, values=values)
+            stock = int(product.get("stock", 0))
+            if stock == 0:
                 self.tree_estoque.item(row_id, tags=("zerado",))
-            elif estoque < 5:
+            elif stock < 5:
                 self.tree_estoque.item(row_id, tags=("baixo",))
 
-        self.tree_estoque.tag_configure("zerado", background="#ffcccc")
-        self.tree_estoque.tag_configure("baixo", background="#fff0b3")
+        self.tree_estoque.tag_configure("zerado", background="#ffd6d6")
+        self.tree_estoque.tag_configure("baixo", background="#fff3cc")
 
     def _load_orders(self):
         for item in self.tree_pedidos.get_children():
             self.tree_pedidos.delete(item)
 
         orders = database.get_orders()
-        # Ordenando para os recentes primeiro
-        orders.sort(key=lambda x: x["id"], reverse=True)
+        orders.sort(key=lambda order: order["id"], reverse=True)
 
-        for o in orders:
-            # Normalização de Pedidos (Firebase vs Mock)
-            c_nome = o.get("clienteNome", o.get("customer_name", "Cliente"))
-            total = float(o.get("total", 0))
-            status = o.get("status", "pendente").lower()
-            data_cv = o.get("dataCriacao", o.get("created_at", "--/--"))
+        for order in orders:
+            customer_name = order.get("clienteNome", order.get("customer_name", "Cliente"))
+            total = float(order.get("total", 0))
+            status = order.get("status", "pendente").lower()
+            created_at = order.get("dataCriacao", order.get("created_at", "--/--"))
 
-            # Formatando itens para visualização rápida
-            itens_lista = o.get("itens", o.get("items", []))
-            str_items = ", ".join([f"{i.get('quantidade', i.get('quantity', 1))}x {i.get('produtoNome', i.get('product_name', 'Item'))}" for i in itens_lista])
-            if len(str_items) > 35:
-                str_items = str_items[:35] + "..."
+            items = order.get("itens", order.get("items", []))
+            item_text = ", ".join(
+                f"{entry.get('quantidade', entry.get('quantity', 1))}x {entry.get('produtoNome', entry.get('product_name', 'Item'))}"
+                for entry in items
+            )
+            if len(item_text) > 38:
+                item_text = item_text[:38] + "..."
 
-            valores = (o["id"], c_nome, str_items, f"R$ {total:.2f}", status.upper(), data_cv)
-            row_id = self.tree_pedidos.insert("", tk.END, values=valores)
+            values = (
+                order["id"],
+                customer_name,
+                item_text,
+                f"R$ {total:.2f}",
+                status.upper(),
+                created_at,
+            )
+            row_id = self.tree_pedidos.insert("", tk.END, values=values)
 
             if status == "pendente":
                 self.tree_pedidos.item(row_id, tags=("pendente",))
@@ -240,245 +282,343 @@ class SistemaLogisticaApp:
                 self.tree_pedidos.item(row_id, tags=("enviado",))
 
         self.tree_pedidos.tag_configure("pendente", foreground="gray")
-        self.tree_pedidos.tag_configure("pago", foreground="#023e8a", font=("Helvetica", 10, "bold"))
-        self.tree_pedidos.tag_configure("enviado", foreground="#2a9d8f")
+        self.tree_pedidos.tag_configure("pago", foreground="#0f4c81", font=("Helvetica", 10, "bold"))
+        self.tree_pedidos.tag_configure("enviado", foreground="#1f9254")
 
-    # =================
-    # ACTIONS INTERFACE
-    # =================
-    def _abrir_modal_produto(self):
+    def _get_selected_product(self):
+        selected = self.tree_estoque.selection()
+        if not selected:
+            return None
+
+        product_id = self.tree_estoque.item(selected[0], "values")[0]
+        return next((product for product in database.get_products() if product["id"] == product_id), None)
+
+    def _abrir_modal_produto(self, product=None):
+        is_edit = product is not None
         win = tk.Toplevel(self.root)
-        win.title("Adicionar Novo Produto")
-        win.geometry("450x450")
+        win.title("Editar produto" if is_edit else "Adicionar novo produto")
+        win.geometry("700x820")
         win.transient(self.root)
         win.grab_set()
 
-        # Config layout centralizado
-        frame_mid = ttk.Frame(win, padding=20)
-        frame_mid.pack(fill=tk.BOTH, expand=True)
+        outer = ttk.Frame(win, padding=10)
+        outer.pack(fill=tk.BOTH, expand=True)
 
-        ttk.Label(frame_mid, text="Nome da Mercadoria:").pack(anchor=tk.W, pady=(0, 2))
-        ent_nome = ttk.Entry(frame_mid, width=50)
-        ent_nome.pack(fill=tk.X, pady=(0, 10))
+        canvas = tk.Canvas(outer, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(outer, orient=tk.VERTICAL, command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        ttk.Label(frame_mid, text="Categoria do Site:").pack(anchor=tk.W, pady=(0, 2))
-        cb_cat = ttk.Combobox(frame_mid, values=["Masculino", "Feminino", "Unissex", "Acessórios", "Promoções"], state="readonly")
-        cb_cat.current(0)
-        cb_cat.pack(fill=tk.X, pady=(0, 10))
+        form_frame = ttk.Frame(canvas, padding=18)
+        window_id = canvas.create_window((0, 0), window=form_frame, anchor="nw")
 
-        ttk.Label(frame_mid, text="Descrição Breve:").pack(anchor=tk.W, pady=(0, 2))
-        ent_desc = ttk.Entry(frame_mid, width=50)
-        ent_desc.pack(fill=tk.X, pady=(0, 10))
+        form_frame.bind(
+            "<Configure>",
+            lambda event: canvas.configure(scrollregion=canvas.bbox("all")),
+        )
+        canvas.bind(
+            "<Configure>",
+            lambda event: canvas.itemconfigure(window_id, width=event.width),
+        )
 
-        ttk.Label(frame_mid, text="Preço de Venda (R$):").pack(anchor=tk.W, pady=(0, 2))
-        ent_preco = ttk.Entry(frame_mid, width=20)
-        ent_preco.pack(anchor=tk.W, pady=(0, 10))
+        ttk.Label(
+            form_frame,
+            text="Campos da pagina de produto",
+            style="Header.TLabel",
+        ).pack(anchor=tk.W, pady=(0, 15))
 
-        ttk.Label(frame_mid, text="Estoque Físico (Qtd):").pack(anchor=tk.W, pady=(0, 2))
-        ent_estoque = ttk.Entry(frame_mid, width=20)
-        ent_estoque.pack(anchor=tk.W, pady=(0, 20))
+        widgets = {}
+        values = product or {}
 
-        def salvar():
-            try:
-                n = ent_nome.get().strip()
-                c = cb_cat.get()
-                d = ent_desc.get().strip()
-                p = float(ent_preco.get().replace(",", "."))
-                e = int(ent_estoque.get())
+        for field in PRODUCT_FIELDS:
+            if field["widget"] != "check":
+                ttk.Label(form_frame, text=field["label"]).pack(anchor=tk.W, pady=(0, 4))
 
-                if not n or not c:
-                    messagebox.showerror("Erro", "Campos nome e categoria são obrigatórios", parent=win)
+            if field["widget"] == "entry":
+                entry = ttk.Entry(form_frame)
+                entry.pack(fill=tk.X, pady=(0, 10))
+                entry.insert(0, str(values.get(field["key"], "")))
+                widgets[field["key"]] = entry
+
+            elif field["widget"] == "combo":
+                combo = ttk.Combobox(form_frame, values=field["values"], state="readonly")
+                combo.pack(fill=tk.X, pady=(0, 10))
+                selected_value = values.get(field["key"], field["values"][0])
+                combo.set(selected_value or field["values"][0])
+                widgets[field["key"]] = combo
+
+            elif field["widget"] == "check":
+                variable = tk.BooleanVar(value=bool(values.get(field["key"], False)))
+                check = ttk.Checkbutton(form_frame, text=field["label"], variable=variable)
+                check.pack(anchor=tk.W, pady=(0, 10))
+                widgets[field["key"]] = variable
+                continue
+
+            else:
+                text_widget = tk.Text(form_frame, height=field.get("height", 3), wrap="word")
+                text_widget.pack(fill=tk.X, pady=(0, 10))
+                raw_value = values.get(field["key"], "")
+                if isinstance(raw_value, list):
+                    raw_value = "\n".join(raw_value)
+                text_widget.insert("1.0", str(raw_value))
+                widgets[field["key"]] = text_widget
+
+        def read_field(field):
+            widget = widgets[field["key"]]
+            if field["widget"] == "entry":
+                return widget.get().strip()
+            if field["widget"] == "combo":
+                return widget.get().strip()
+            if field["widget"] == "check":
+                return widget.get()
+            return widget.get("1.0", "end").strip()
+
+        def save_product():
+            payload = {}
+            for field in PRODUCT_FIELDS:
+                value = read_field(field)
+                if field["required"] and not value:
+                    messagebox.showerror(
+                        "Campo obrigatorio",
+                        f"O campo '{field['label']}' precisa ser preenchido.",
+                        parent=win,
+                    )
                     return
+                payload[field["key"]] = value
 
-                database.add_product(n, d, p, e, c)
-                messagebox.showinfo("Sucesso", "Produto registrado no inventário e sincronizado virtualmente!", parent=win)
-                self._refresh_all()
-                win.destroy()
+            try:
+                payload["price"] = float(str(payload.get("price", "0")).replace(",", "."))
+                payload["oldPrice"] = float(str(payload.get("oldPrice") or "0").replace(",", "."))
+                payload["stock"] = int(float(payload.get("stock", 0)))
+                payload["rating"] = float(str(payload.get("rating") or "4.8").replace(",", "."))
+                payload["reviews"] = int(float(payload.get("reviews") or 0))
             except ValueError:
-                messagebox.showerror("Erro de Formatação", "Preço (ex: 29.90) e Estoque (ex: 5) devem ser números em formatação limpa.", parent=win)
+                messagebox.showerror(
+                    "Dados invalidos",
+                    "Preco, preco antigo, estoque, rating e reviews devem ser numericos.",
+                    parent=win,
+                )
+                return
 
-        ttk.Button(frame_mid, text="💾 Salvar e Sincronizar Produto", command=salvar).pack(fill=tk.X, pady=10)
+            if is_edit:
+                payload["id"] = product["id"]
+                saved = database.update_product(product["id"], payload)
+                if not saved:
+                    messagebox.showerror("Erro", "Nao foi possivel atualizar o produto.", parent=win)
+                    return
+                messagebox.showinfo("Atualizado", "Produto atualizado e sincronizado.", parent=win)
+            else:
+                new_id = database.add_product(
+                    payload["name"],
+                    payload["description"],
+                    payload["price"],
+                    payload["stock"],
+                    payload["category"],
+                    payload,
+                )
+                if not new_id:
+                    messagebox.showerror("Erro", "Nao foi possivel salvar o produto.", parent=win)
+                    return
+                messagebox.showinfo("Sucesso", f"Produto {new_id} registrado com todos os detalhes.", parent=win)
+
+            self._refresh_all()
+            win.destroy()
+
+        ttk.Button(
+            form_frame,
+            text="Salvar e sincronizar produto",
+            command=save_product,
+        ).pack(fill=tk.X, pady=(10, 0))
+
+    def _editar_produto(self):
+        product = self._get_selected_product()
+        if not product:
+            messagebox.showwarning("Selecao", "Selecione um produto para editar.")
+            return
+        self._abrir_modal_produto(product)
 
     def _deletar_produto(self):
-        selected = self.tree_estoque.selection()
-        if not selected:
-            messagebox.showwarning("Atenção", "Selecione o produto que deseja deletar do BD.")
+        product = self._get_selected_product()
+        if not product:
+            messagebox.showwarning("Atencao", "Selecione o produto que deseja excluir.")
             return
 
-        item_id = self.tree_estoque.item(selected[0], "values")[0]
-        nome = self.tree_estoque.item(selected[0], "values")[1]
-
-        ans = messagebox.askyesno("Confirmar Exclusão", f"Você quer remover permanentemente da loja o produto:\n\n{nome} (ID: {item_id})\n\nIsso removerá do site também!")
-        if ans:
-            database.delete_product(item_id)
+        answer = messagebox.askyesno(
+            "Confirmar exclusao",
+            f"Remover permanentemente {product['name']} ({product['id']}) do sistema e do site?",
+        )
+        if answer:
+            database.delete_product(product["id"])
             self._refresh_all()
-            messagebox.showinfo("Produto Removido", f"Produto {nome} excuído.")
+            messagebox.showinfo("Produto removido", f"{product['name']} foi excluido.")
 
     def _abrir_modal_att_estoque(self):
-        selected = self.tree_estoque.selection()
-        if not selected:
-            messagebox.showwarning("Acesso restrito", "Selecione a linha do produto no inventário antes de clicar em alterar.")
+        product = self._get_selected_product()
+        if not product:
+            messagebox.showwarning("Acesso restrito", "Selecione um produto antes de alterar o estoque.")
             return
 
-        item_id = self.tree_estoque.item(selected[0], "values")[0]
-        nome = self.tree_estoque.item(selected[0], "values")[1]
-        qtd_atual = self.tree_estoque.item(selected[0], "values")[4]
-
         win = tk.Toplevel(self.root)
-        win.title("Modificação Parcial de Estoque")
-        win.geometry("380x250")
+        win.title("Atualizar estoque")
+        win.geometry("380x240")
         win.transient(self.root)
         win.grab_set()
 
         frame = ttk.Frame(win, padding=20)
         frame.pack(fill=tk.BOTH, expand=True)
 
-        ttk.Label(frame, text="Bipagem / Alteração Manual de Lote", style="Header.TLabel").pack(pady=(0, 15))
-        ttk.Label(frame, text=f"Produto Mapeado: {nome}").pack(anchor=tk.W)
-        ttk.Label(frame, text=f"Volume registrado atualmente: {qtd_atual} un.").pack(anchor=tk.W, pady=(0, 15))
+        ttk.Label(frame, text="Atualizacao de estoque", style="Header.TLabel").pack(pady=(0, 15))
+        ttk.Label(frame, text=f"Produto: {product['name']}").pack(anchor=tk.W)
+        ttk.Label(frame, text=f"Estoque atual: {product.get('stock', 0)} unidades").pack(anchor=tk.W, pady=(0, 15))
+        ttk.Label(frame, text="Novo estoque").pack(anchor=tk.W)
 
-        ttk.Label(frame, text="Insira o novo Volume Total no galpão:").pack(anchor=tk.W)
-        ent_est = ttk.Entry(frame, width=15)
-        ent_est.pack(anchor=tk.W, pady=5)
-        ent_est.focus()
+        entry = ttk.Entry(frame, width=18)
+        entry.pack(anchor=tk.W, pady=6)
+        entry.focus()
 
-        def atualizar(*args):
+        def update_stock(*_args):
             try:
-                val = int(ent_est.get())
-                if val < 0:
+                value = int(float(entry.get()))
+                if value < 0:
                     raise ValueError
-                database.update_product_stock(item_id, val)
+                database.update_product_stock(product["id"], value)
                 self._refresh_all()
                 win.destroy()
             except ValueError:
-                messagebox.showerror("Tipagem inválida", "O banco só aceita números inteiros (0 ou mais) para volume físico.", parent=win)
+                messagebox.showerror("Tipagem invalida", "Informe um numero inteiro maior ou igual a zero.", parent=win)
 
-        ent_est.bind('<Return>', atualizar)
-        ttk.Button(frame, text="Atualizar Banco de Dados (↵)", command=atualizar).pack(anchor=tk.W, pady=15)
+        entry.bind("<Return>", update_stock)
+        ttk.Button(frame, text="Atualizar estoque", command=update_stock).pack(anchor=tk.W, pady=15)
 
     def _dispatch_order(self):
         selected = self.tree_pedidos.selection()
         if not selected:
-            messagebox.showwarning("Fila vazia", "Clique sobre uma Ordem de Pedido na lista para processá-la.")
+            messagebox.showwarning("Fila vazia", "Selecione um pedido para processar.")
             return
 
-        val = self.tree_pedidos.item(selected[0], "values")
-        ord_id = val[0]
-        status = val[4]
+        values = self.tree_pedidos.item(selected[0], "values")
+        order_id = values[0]
+        status = values[4].lower()
 
-        if status.lower() == "enviado":
-            messagebox.showinfo("Fechado", "Essa ORDEM já foi expedida pela transportadora.")
+        if status == "enviado":
+            messagebox.showinfo("Pedido finalizado", "Esse pedido ja foi enviado.")
             return
 
-        if status.lower() == "pendente":
-            ans = messagebox.askyesno("Verificação Crucial", "Atenção Total Logística:\n\nEste pedido aparece como PENDENTE (pagamento ainda sob verificação ou boleto não compensado).\nLiberar mercadoria sem comprovado bancário é risco. \n\nVocê tem certeza Cega que quer despachar esta mercadoria agora?")
-            if not ans:
+        if status == "pendente":
+            confirmed = messagebox.askyesno(
+                "Pagamento pendente",
+                "Este pedido ainda consta como pendente. Deseja realmente libera-lo para envio?",
+            )
+            if not confirmed:
                 return
 
-        ans = messagebox.askyesno("Processo de Expedição", f"Deseja bipar o código e transferir a ORDEM de Pedido [{ord_id}] para 'ENVIADO' / Na Entrega do Cliente?")
-        if ans:
-            database.update_order_status(ord_id, "enviado")
+        confirmed = messagebox.askyesno(
+            "Confirmar envio",
+            f"Deseja marcar o pedido {order_id} como enviado?",
+        )
+        if confirmed:
+            database.update_order_status(order_id, "enviado")
             self._refresh_all()
-            messagebox.showinfo("Sistema do Site Atualizado", "Tudo certo! Logística confirmada. O Site vai atualizar para o cliente ver e a caixa foi liberada.")
+            messagebox.showinfo("Atualizado", "Pedido marcado como enviado.")
 
-    # Modificado para suportar chaves em inglês nas ordens recebidas via POST
     def _start_api_server(self):
         def run_server():
             class OrderHandler(BaseHTTPRequestHandler):
                 def do_OPTIONS(self):
                     self.send_response(200)
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-                    self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                    self.send_header("Access-Control-Allow-Headers", "Content-Type")
                     self.end_headers()
 
                 def do_POST(self):
-                    if self.path == '/order':
-                        content_length = int(self.headers['Content-Length'])
-                        post_data = self.rfile.read(content_length)
-                        order = json.loads(post_data)
-
-                        # Processar o pedido no banco de dados local
-                        data = database._read_db()
-
-                        # 1. Validar Estoque antes de processar
-                        insufficient_stock = []
-                        # Adaptando chaves para o que o front envia (items, product_id, quantity)
-                        items_key = 'items' if 'items' in order else 'itens'
-                        for item in order.get(items_key, []):
-                            prod_id = item.get('product_id') or item.get('produto_id')
-                            qty_requested = item.get('quantity') or item.get('quantidade', 0)
-                            prod_name = item.get('product_name') or item.get('nome_prod', prod_id)
-
-                            # Encontra produto no "banco"
-                            product = next((p for p in data['produtos'] if p['id'] == prod_id), None)
-                            if not product or int(product.get('stock', product.get('estoque', 0))) < qty_requested:
-                                insufficient_stock.append(prod_name)
-
-                        if insufficient_stock:
-                            self.send_response(400)
-                            self.send_header('Access-Control-Allow-Origin', '*')
-                            self.send_header('Content-Type', 'application/json')
-                            self.end_headers()
-                            self.wfile.write(json.dumps({
-                                "status": "error",
-                                "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}"
-                            }).encode())
-                            return
-
-                        # 2. Se estoque OK, decrementa e salva o pedido
-                        for item in order.get(items_key, []):
-                            prod_id = item.get('product_id') or item.get('produto_id')
-                            qty_requested = item.get('quantity') or item.get('quantidade', 0)
-                            for p in data['produtos']:
-                                if p['id'] == prod_id:
-                                    stock_key = 'stock' if 'stock' in p else 'estoque'
-                                    p[stock_key] = int(p[stock_key]) - qty_requested
-                                    break
-
-                        # Ajusta chaves para padronização interna (se necessário)
-                        if 'cliente_nome' in order:
-                            order['customer_name'] = order.pop('cliente_nome')
-                        if 'cliente_email' in order:
-                            order['customer_email'] = order.pop('cliente_email')
-                        if 'itens' in order:
-                            order['items'] = order.pop('itens')
-                        for i in order.get('items', []):
-                            if 'produto_id' in i:
-                                i['product_id'] = i.pop('produto_id')
-                            if 'nome_prod' in i:
-                                i['product_name'] = i.pop('nome_prod')
-                            if 'quantidade' in i:
-                                i['quantity'] = i.pop('quantidade')
-                            if 'preco_unit' in i:
-                                i['unit_price'] = i.pop('preco_unit')
-
-                        order['id'] = f"ord-{len(data['pedidos']) + 1:03d}"
-                        order['status'] = 'pago'
-                        from datetime import datetime
-                        order['created_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-                        data['pedidos'].append(order)
-                        database._write_db(data)
-
-                        # Notificar o app Tkinter (usa after para ser thread-safe)
-                        customer_name = order.get('customer_name', 'Cliente')
-                        self.server.app_instance.root.after(0, self.server.app_instance._refresh_all)
-                        self.server.app_instance.root.after(0, lambda: messagebox.showinfo("Novo Pedido!", f"Um novo pedido de {customer_name} foi recebido e o estoque foi atualizado!"))
-
-                        self.send_response(200)
-                        self.send_header('Access-Control-Allow-Origin', '*')
-                        self.send_header('Content-Type', 'application/json')
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"status": "success", "order_id": order['id']}).encode())
-                    else:
+                    if self.path != "/order":
                         self.send_response(404)
                         self.end_headers()
+                        return
 
-            server_address = ('', 5000)
+                    content_length = int(self.headers["Content-Length"])
+                    order = json.loads(self.rfile.read(content_length))
+                    data = database._read_db()
+
+                    insufficient_stock = []
+                    items_key = "items" if "items" in order else "itens"
+                    for item in order.get(items_key, []):
+                        product_id = item.get("product_id") or item.get("produto_id")
+                        quantity = item.get("quantity") or item.get("quantidade", 0)
+                        product_name = item.get("product_name") or item.get("nome_prod", product_id)
+                        product = next((entry for entry in data["produtos"] if entry["id"] == product_id), None)
+                        if not product or int(product.get("stock", 0)) < quantity:
+                            insufficient_stock.append(product_name)
+
+                    if insufficient_stock:
+                        self.send_response(400)
+                        self.send_header("Access-Control-Allow-Origin", "*")
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(
+                            json.dumps(
+                                {
+                                    "status": "error",
+                                    "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
+                                }
+                            ).encode()
+                        )
+                        return
+
+                    for item in order.get(items_key, []):
+                        product_id = item.get("product_id") or item.get("produto_id")
+                        quantity = item.get("quantity") or item.get("quantidade", 0)
+                        for product in data["produtos"]:
+                            if product["id"] == product_id:
+                                product["stock"] = int(product.get("stock", 0)) - quantity
+                                break
+
+                    if "cliente_nome" in order:
+                        order["customer_name"] = order.pop("cliente_nome")
+                    if "cliente_email" in order:
+                        order["customer_email"] = order.pop("cliente_email")
+                    if "itens" in order:
+                        order["items"] = order.pop("itens")
+
+                    for item in order.get("items", []):
+                        if "produto_id" in item:
+                            item["product_id"] = item.pop("produto_id")
+                        if "nome_prod" in item:
+                            item["product_name"] = item.pop("nome_prod")
+                        if "quantidade" in item:
+                            item["quantity"] = item.pop("quantidade")
+                        if "preco_unit" in item:
+                            item["unit_price"] = item.pop("preco_unit")
+
+                    order["id"] = f"ord-{len(data['pedidos']) + 1:03d}"
+                    order["status"] = "pago"
+                    order["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+                    data["pedidos"].append(order)
+                    database._write_db(data)
+
+                    customer_name = order.get("customer_name", "Cliente")
+                    self.server.app_instance.root.after(0, self.server.app_instance._refresh_all)
+                    self.server.app_instance.root.after(
+                        0,
+                        lambda: messagebox.showinfo(
+                            "Novo pedido",
+                            f"Um novo pedido de {customer_name} foi recebido.",
+                        ),
+                    )
+
+                    self.send_response(200)
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "success", "order_id": order["id"]}).encode())
+
+            server_address = ("", 5000)
             httpd = HTTPServer(server_address, OrderHandler)
             httpd.app_instance = self
-            print("Servidor de Integração rodando na porta 5000...")
+            print("Servidor de integracao rodando na porta 5000...")
             httpd.serve_forever()
 
         threading.Thread(target=run_server, daemon=True).start()

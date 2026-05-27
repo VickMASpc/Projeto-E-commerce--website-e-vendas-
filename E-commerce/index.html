@@ -3,439 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Grand Parfum — A melhor experiência de compra online. Produtos de qualidade com entrega rápida e os melhores preços.">
-  <meta name="theme-color" content="#8533ff">
-  <title>Grand Parfum — Compre com Qualidade</title>
+  <meta name="description" content="Grand Parfum - perfumaria premium com curadoria de fragrancias originais e experiencia de compra refinada.">
+  <title>Grand Parfum - Curadoria Premium</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-
-  <!-- ============================
-       NAVBAR
-       ============================ -->
-  <nav class="navbar" id="navbar" role="navigation" aria-label="Menu principal">
-    <div class="navbar__inner">
-      <a class="navbar__logo" href="index.html" aria-label="Grand Parfum — Home">
-        Grand<span>Parfum</span>
-      </a>
-
-      <ul class="navbar__links" role="list">
-        <li><a class="navbar__link" href="index.html">Home</a></li>
-        <li><a class="navbar__link" href="produtos.html">Produtos</a></li>
-        <li><a class="navbar__link" href="#categorias">Categorias</a></li>
-        <li><a class="navbar__link" href="#sobre">Sobre</a></li>
-        <li><a class="navbar__link" href="#contato">Contato</a></li>
-      </ul>
-
-      <div class="navbar__actions">
-        <!-- Busca -->
-        <button class="navbar__icon-btn" id="btn-search" aria-label="Pesquisar">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-        </button>
-
-        <!-- Favoritos -->
-        <a href="favoritos.html" class="navbar__icon-btn" aria-label="Lista de desejos">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        </a>
-
-        <!-- Carrinho -->
-        <a href="carrinho.html" class="navbar__icon-btn" aria-label="Carrinho de compras (0 itens)" id="btn-cart">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
-          <span class="navbar__cart-badge" id="cart-count" aria-live="polite">0</span>
-        </a>
-
-        <a href="auth.html" class="navbar__btn-primary" id="btn-login">Entrar</a>
-      </div>
-
-      <!-- Hamburger mobile -->
-      <button class="navbar__hamburger" id="btn-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- Menu mobile (oculto por padrão) -->
-  <div id="mobile-menu" style="display:none; position:fixed; top:70px; left:0; right:0; bottom:0; background:rgba(10,2,25,0.98); z-index:999; padding:2rem; flex-direction:column; gap:1.5rem;" aria-hidden="true">
-    <a href="index.html"    style="color:#fff; font-size:1.25rem; font-weight:600;">Home</a>
-    <a href="produtos.html" style="color:#fff; font-size:1.25rem; font-weight:600;">Produtos</a>
-    <a href="#categorias"   style="color:#fff; font-size:1.25rem; font-weight:600;">Categorias</a>
-    <a href="#sobre"        style="color:#fff; font-size:1.25rem; font-weight:600;">Sobre</a>
-    <a href="#contato"      style="color:#fff; font-size:1.25rem; font-weight:600;">Contato</a>
-    <a href="auth.html" class="btn-primary" style="text-align:center; margin-top:1rem;">Entrar / Cadastrar</a>
-  </div>
-
+<body data-page="home">
+  <div data-site-header></div>
 
   <main>
-    <!-- ============================
-         HERO
-         ============================ -->
     <section class="hero" id="hero" aria-label="Destaque principal">
       <div class="hero__grid">
         <div class="hero__content">
           <div class="hero__badge">
             <span class="hero__badge-dot" aria-hidden="true"></span>
-            Novidades da semana
+            curadoria da semana
           </div>
 
           <h1 class="hero__title">
-            Essências que<br>
-            <span class="hero__title-highlight">contam histórias.</span>
+            Essencias que<br>
+            <span class="hero__title-highlight">entram antes de voce.</span>
           </h1>
 
           <p class="hero__desc">
-            Explore nossa coleção exclusiva de fragrâncias de luxo, nacionais e importadas. Entrega premium para quem aprecia o extraordinário.
+            Descubra perfumes de assinatura, nicho e classicos atemporais com navegação melhor resolvida, busca real e paginas de produto completas.
           </p>
 
           <div class="hero__cta">
-            <a href="produtos.html" class="btn-primary" id="cta-ver-produtos">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-              Ver Produtos
-            </a>
-            <a href="#categorias" class="btn-outline" id="cta-categorias">Explorar Categorias</a>
+            <a href="produtos.html" class="btn-primary">Ver colecao</a>
+            <a href="#categorias" class="btn-outline">Explorar categorias</a>
           </div>
 
-          <div class="hero__stats" aria-label="Números da loja">
+          <div class="hero__stats" aria-label="Numeros da loja">
             <div>
-              <div class="hero__stat-value" id="stat-produtos">200+</div>
-              <div class="hero__stat-label">Fragrâncias</div>
+              <div class="hero__stat-value">200+</div>
+              <div class="hero__stat-label">Fragrancias selecionadas</div>
             </div>
             <div>
-              <div class="hero__stat-value" id="stat-clientes">5k+</div>
-              <div class="hero__stat-label">Clientes premium</div>
+              <div class="hero__stat-value">5k+</div>
+              <div class="hero__stat-label">Clientes recorrentes</div>
             </div>
             <div>
-              <div class="hero__stat-value" id="stat-entregas">100%</div>
-              <div class="hero__stat-label">Originais</div>
+              <div class="hero__stat-value">100%</div>
+              <div class="hero__stat-label">Produtos originais</div>
             </div>
           </div>
         </div>
 
-        <!-- Visual hero (coluna direita) -->
         <div class="hero__image-wrapper" aria-hidden="true">
           <div class="hero__image-card">
-            <!-- Placeholder visual enquanto sem imagem real -->
-            <svg width="180" height="180" viewBox="0 0 180 180" fill="none" style="opacity:0.3">
-              <rect width="180" height="180" rx="32" fill="white" fill-opacity="0.05"/>
-              <path d="M90 30 L150 65 L150 115 L90 150 L30 115 L30 65 Z" stroke="white" stroke-width="2" fill="none"/>
-              <circle cx="90" cy="90" r="30" stroke="white" stroke-width="2" fill="none"/>
-            </svg>
+            <div class="product-visual product-visual--detail" style="--visual-start:#20150c; --visual-end:#050505; --visual-accent:#d4af37;">
+              <span class="product-visual__label">Grand Parfum</span>
+              <div class="product-visual__emoji">✨</div>
+              <strong class="product-visual__title">Selecao premium em evidencia</strong>
+              <span class="product-visual__meta">Busca inteligente, vitrine refinada e detalhe completo.</span>
+            </div>
           </div>
-
-          <div class="hero__floating-badge hero__floating-badge--top">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Compra 100% segura
-          </div>
-
-          <div class="hero__floating-badge hero__floating-badge--bottom">
-            <svg width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
-            Frete grátis acima de R$199
-          </div>
+          <div class="hero__floating-badge hero__floating-badge--top">Compra segura e assistida</div>
+          <div class="hero__floating-badge hero__floating-badge--bottom">Frete gratis acima de R$ 199</div>
         </div>
       </div>
     </section>
 
-    <!-- ============================
-         BARRA DE CONFIANÇA
-         ============================ -->
     <div class="trust-bar" aria-label="Diferenciais da loja">
       <div class="trust-bar__inner">
-        <div class="trust-bar__item">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          Frete grátis acima de R$199
-        </div>
-        <div class="trust-bar__item">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 3h15l-1 9H6L4 3H1zm5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0zm10 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0z"/></svg>
-          Devoluções em 30 dias
-        </div>
-        <div class="trust-bar__item">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Pagamento seguro
-        </div>
-        <div class="trust-bar__item">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 5.52 5.52l.9-.9a2 2 0 0 1 2.1-.45c.907.339 1.85.373 2.81.7a2 2 0 0 1 1.72 2z"/></svg>
-          Suporte 24/7
-        </div>
-        <div class="trust-bar__item">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Parcele em até 12x
-        </div>
+        <div class="trust-bar__item">Frete premium para todo o Brasil</div>
+        <div class="trust-bar__item">Pagamento seguro e parcelamento em 12x</div>
+        <div class="trust-bar__item">Produtos originais com procedencia</div>
+        <div class="trust-bar__item">Suporte humano para indicacao e pos-venda</div>
       </div>
     </div>
 
-
-    <!-- ============================
-         CATEGORIAS
-         ============================ -->
     <section class="section" id="categorias" aria-labelledby="categorias-title">
       <div class="section__container">
         <header class="section__header animate-on-scroll">
           <span class="section__eyebrow">Navegue por</span>
-          <h2 class="section__title" id="categorias-title">Categorias em Destaque</h2>
-          <p class="section__subtitle">Encontre exatamente o que procura em nossa seleção curada.</p>
+          <h2 class="section__title" id="categorias-title">Categorias em destaque</h2>
+          <p class="section__subtitle">Escolha um caminho rapido para descobrir marcas, familias e perfis que combinam com o momento.</p>
         </header>
 
-        <div class="categories__grid" id="categories-grid">
-          <!-- Populado via JS ou estático -->
-          <a href="produtos.html?cat=Masculino" class="category-card animate-on-scroll" id="cat-masculino">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #1a1a1a, #424242);">🕶️</div>
+        <div class="categories__grid">
+          <a href="produtos.html?cat=Masculino" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#161616,#3d3d3d);">🖤</div>
             <div class="category-card__name">Masculino</div>
-            <div class="category-card__count">Fragrâncias intensas</div>
+            <div class="category-card__count">Assinaturas secas e elegantes</div>
           </a>
-          <a href="produtos.html?cat=Feminino" class="category-card animate-on-scroll" id="cat-feminino">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #fff5f5, #ffd1d1);">🌸</div>
+          <a href="produtos.html?cat=Feminino" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff1f5,#ffd1e6);">🌸</div>
             <div class="category-card__name">Feminino</div>
-            <div class="category-card__count">Essências delicadas</div>
+            <div class="category-card__count">Florais, gourmands e classicos</div>
           </a>
-          <a href="produtos.html?cat=Unissex" class="category-card animate-on-scroll" id="cat-unissex">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #f5f5f5, #e0e0e0);">🌓</div>
+          <a href="produtos.html?cat=Unissex" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#f1f5f9,#dbeafe);">🌙</div>
             <div class="category-card__name">Unissex</div>
-            <div class="category-card__count">Para todos os gostos</div>
+            <div class="category-card__count">Perfis leves e compartilhaveis</div>
           </a>
-          <a href="produtos.html?cat=Nicho" class="category-card animate-on-scroll" id="cat-nicho">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #d4af37, #9c7c22);">💎</div>
-            <div class="category-card__name">Nicho & Luxo</div>
-            <div class="category-card__count">Perfumes exclusivos</div>
+          <a href="produtos.html?cat=Nicho" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#27113d,#4f1f6f);">💎</div>
+            <div class="category-card__name">Nicho</div>
+            <div class="category-card__count">Alta assinatura e exclusividade</div>
           </a>
-          <a href="produtos.html?cat=Acessórios" class="category-card animate-on-scroll" id="cat-acessorios">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">👜</div>
-            <div class="category-card__name">Acessórios</div>
-            <div class="category-card__count">Complemente seu estilo</div>
+          <a href="produtos.html?cat=Acessorios" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);">🧳</div>
+            <div class="category-card__name">Acessorios</div>
+            <div class="category-card__count">Itens para compor o ritual</div>
           </a>
-          <a href="produtos.html?cat=Promoções" class="category-card animate-on-scroll" id="cat-promocoes">
-            <div class="category-card__icon" style="background: linear-gradient(135deg, #ffebee, #ffcdd2);">🏷️</div>
-            <div class="category-card__name">Promoções</div>
-            <div class="category-card__count">Ofertas imperdíveis</div>
+          <a href="produtos.html?filter=sale" class="category-card animate-on-scroll">
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);">🏷️</div>
+            <div class="category-card__name">Ofertas</div>
+            <div class="category-card__count">Descontos ativos na vitrine</div>
           </a>
         </div>
       </div>
     </section>
 
-
-    <!-- ============================
-         PRODUTOS EM DESTAQUE
-         ============================ -->
     <section class="section section--light" id="produtos" aria-labelledby="produtos-title">
       <div class="section__container">
-        <header class="section__header animate-on-scroll" style="display:flex; justify-content:space-between; align-items:flex-end; text-align:left; flex-wrap:wrap; gap:1rem;">
-          <div>
-            <span class="section__eyebrow">Mais Vendidos</span>
-            <h2 class="section__title" id="produtos-title" style="margin-bottom:0">Produtos em Destaque</h2>
-          </div>
-          <a href="produtos.html" class="btn-outline" style="color:var(--clr-primary-700); border-color:var(--clr-primary-300); white-space:nowrap; padding: 0.75rem 1.5rem;">
-            Ver todos →
-          </a>
+        <header class="section__header animate-on-scroll">
+          <span class="section__eyebrow">Mais procurados</span>
+          <h2 class="section__title" id="produtos-title">Produtos em destaque</h2>
+          <p class="section__subtitle">A grade abaixo e alimentada pela mesma base usada na busca e nas paginas de produto.</p>
         </header>
-
-        <div class="products__grid" id="featured-products">
-          <!-- Populados dinamicamente via app.js -->
-        </div>
-        </div>
+        <div class="products__grid" id="featured-products"></div>
       </div>
     </section>
 
-
-    <!-- ============================
-         BANNER PROMO
-         ============================ -->
     <section class="section" aria-labelledby="promo-title">
       <div class="section__container">
         <div class="promo-banner animate-on-scroll">
           <div>
-            <p class="promo-banner__eyebrow">⚡ Oferta especial</p>
-            <h2 class="promo-banner__title" id="promo-title">
-              Até 40% off em<br>produtos selecionados
-            </h2>
-            <p class="promo-banner__desc">
-              Aproveite nossa liquidação de fim de temporada. Ofertas válidas por tempo limitado enquanto durarem os estoques.
-            </p>
+            <p class="promo-banner__eyebrow">Oferta especial</p>
+            <h2 class="promo-banner__title" id="promo-title">Ate 40% off em selecao rotativa</h2>
+            <p class="promo-banner__desc">Acompanhe a vitrine com busca ao vivo e use os filtros para encontrar rapidamente produtos novos, em oferta ou salvos nos favoritos.</p>
           </div>
-          <div style="display:flex; flex-direction:column; gap:1rem; align-items:flex-start; flex-shrink:0;">
-            <a href="produtos.html?filter=sale" class="btn-primary" id="cta-promo" style="background: var(--gradient-accent); box-shadow: 0 8px 24px rgba(255,107,53,0.4);">
-              Ver Ofertas
-            </a>
-            <div style="color:rgba(255,255,255,0.5); font-size:0.8rem; display:flex; align-items:center; gap:0.5rem;">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              Oferta termina em breve
-            </div>
-          </div>
+          <a href="produtos.html?filter=sale" class="btn-primary">Ver ofertas</a>
         </div>
       </div>
     </section>
 
-
-    <!-- ============================
-         DEPOIMENTOS
-         ============================ -->
     <section class="section section--light" id="sobre" aria-labelledby="reviews-title">
       <div class="section__container">
         <header class="section__header animate-on-scroll">
-          <span class="section__eyebrow">O que falam de nós</span>
-          <h2 class="section__title" id="reviews-title">Avaliações dos Clientes</h2>
-          <p class="section__subtitle">Mais de 10.000 clientes satisfeitos. Veja o que eles dizem.</p>
+          <span class="section__eyebrow">O que falam de nos</span>
+          <h2 class="section__title" id="reviews-title">Avaliacoes dos clientes</h2>
+          <p class="section__subtitle">Experiencia consistente do catalogo ao checkout, com paginas de produto mais completas e comparacao mais simples.</p>
         </header>
 
         <div class="reviews__grid">
-          <article class="review-card animate-on-scroll" id="review-1">
+          <article class="review-card animate-on-scroll">
             <div class="review-card__header">
-              <div class="review-card__avatar" aria-hidden="true">MF</div>
+              <div class="review-card__avatar">MF</div>
               <div>
                 <div class="review-card__name">Maria Fernanda</div>
-                <div class="review-card__date">Março 2026</div>
+                <div class="review-card__date">Mar 2026</div>
               </div>
             </div>
-            <div class="review-card__stars" aria-label="5 estrelas">★★★★★</div>
-            <p class="review-card__text">
-              "O Bleu de Chanel que comprei é 100% original. A fixação é absurda e o atendimento premium da Grand Parfum é sem igual."
-            </p>
+            <div class="review-card__stars">★★★★★</div>
+            <p class="review-card__text">A busca finalmente ajuda de verdade. Digitei a marca e cheguei no produto certo em segundos.</p>
           </article>
 
-          <article class="review-card animate-on-scroll" id="review-2">
+          <article class="review-card animate-on-scroll">
             <div class="review-card__header">
-              <div class="review-card__avatar" aria-hidden="true" style="background:var(--gradient-accent);">CR</div>
+              <div class="review-card__avatar">CR</div>
               <div>
                 <div class="review-card__name">Carlos Rodrigues</div>
-                <div class="review-card__date">Fevereiro 2026</div>
+                <div class="review-card__date">Fev 2026</div>
               </div>
             </div>
-            <div class="review-card__stars" aria-label="5 estrelas">★★★★★</div>
-            <p class="review-card__text">
-              "Tinha dúvidas sobre qual perfume de nicho escolher e o suporte me ajudou com amostras. O Creed Aventus é simplesmente divino."
-            </p>
+            <div class="review-card__stars">★★★★★</div>
+            <p class="review-card__text">As paginas individuais agora mostram notas, detalhes e produtos relacionados. Ficou muito mais facil comparar.</p>
           </article>
 
-          <article class="review-card animate-on-scroll" id="review-3">
+          <article class="review-card animate-on-scroll">
             <div class="review-card__header">
-              <div class="review-card__avatar" aria-hidden="true" style="background:linear-gradient(135deg,#22c55e,#16a34a);">JS</div>
+              <div class="review-card__avatar">JS</div>
               <div>
                 <div class="review-card__name">Juliana Souza</div>
-                <div class="review-card__date">Janeiro 2026</div>
+                <div class="review-card__date">Jan 2026</div>
               </div>
             </div>
-            <div class="review-card__stars" aria-label="5 estrelas">★★★★★</div>
-            <p class="review-card__text">
-              "A entrega foi muito discreta e elegante. O Tom Ford veio muito bem embalado. Grand Parfum agora é a minha única loja de perfumes."
-            </p>
+            <div class="review-card__stars">★★★★★</div>
+            <p class="review-card__text">Header e footer iguais em tudo. Nao parece mais um monte de paginas soltas.</p>
           </article>
         </div>
       </div>
     </section>
 
-
-    <!-- ============================
-         NEWSLETTER
-         ============================ -->
     <section class="newsletter" id="contato" aria-labelledby="newsletter-title">
       <div class="section__container newsletter__inner">
-        <h2 class="newsletter__title" id="newsletter-title">
-          Fique por dentro das ofertas 🎁
-        </h2>
-        <p class="newsletter__subtitle">
-          Cadastre seu e-mail e receba promoções exclusivas, novidades e cupons especiais.
-        </p>
-        <form class="newsletter__form" id="newsletter-form" novalidate aria-label="Formulário de cadastro na newsletter">
-          <input
-            class="newsletter__input"
-            type="email"
-            id="newsletter-email"
-            name="email"
-            placeholder="seu@email.com"
-            autocomplete="email"
-            required
-            aria-label="Seu e-mail"
-          >
-          <button type="submit" class="newsletter__submit" id="btn-newsletter-submit">
-            Quero Ofertas
-          </button>
+        <h2 class="newsletter__title" id="newsletter-title">Receba ofertas e lancamentos</h2>
+        <p class="newsletter__subtitle">Cadastre seu e-mail para acompanhar novidades, reposicoes e oportunidades da curadoria.</p>
+        <form class="newsletter__form" id="newsletter-form" novalidate>
+          <input class="newsletter__input" type="email" id="newsletter-email" name="email" placeholder="seu@email.com" autocomplete="email" required>
+          <button type="submit" class="newsletter__submit" id="btn-newsletter-submit">Quero receber</button>
         </form>
-        <p style="color:rgba(255,255,255,0.4); font-size:0.78rem; margin-top:1rem;">
-          Sem spam. Cancele quando quiser.
-        </p>
       </div>
     </section>
   </main>
 
+  <div data-site-footer></div>
 
-  <!-- ============================
-       FOOTER
-       ============================ -->
-  <footer class="footer" id="footer" aria-label="Rodapé">
-    <div class="footer__grid">
-      <div>
-        <div class="footer__brand-name">Grand<span>Parfum</span></div>
-        <p class="footer__desc">
-          Sua curadoria exclusiva de fragrâncias de luxo. Somente produtos originais com garantia de procedência.
-        </p>
-        <div class="footer__social" aria-label="Redes sociais">
-          <a href="#" class="footer__social-link" aria-label="Instagram">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </a>
-          <a href="#" class="footer__social-link" aria-label="WhatsApp">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-          </a>
-          <a href="#" class="footer__social-link" aria-label="Facebook">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="footer__col-title">Loja</h3>
-        <ul class="footer__links" role="list">
-          <li><a href="produtos.html" class="footer__link">Todos os Produtos</a></li>
-          <li><a href="produtos.html?filter=sale" class="footer__link">Ofertas</a></li>
-          <li><a href="produtos.html?filter=new" class="footer__link">Lançamentos</a></li>
-          <li><a href="produtos.html?filter=bestsellers" class="footer__link">Mais Vendidos</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="footer__col-title">Suporte</h3>
-        <ul class="footer__links" role="list">
-          <li><a href="javascript:Cart.showToast('Redirecionando para Central de Ajuda...')" class="footer__link">Central de Ajuda</a></li>
-          <li><a href="javascript:Cart.showToast('Rastreio em manutenção.')" class="footer__link">Rastrear Pedido</a></li>
-          <li><a href="javascript:Cart.showToast('Nossa política de devolução é de 30 dias.')" class="footer__link">Política de Devolução</a></li>
-          <li><a href="#contato" class="footer__link">Fale Conosco</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="footer__col-title">Empresa</h3>
-        <ul class="footer__links" role="list">
-          <li><a href="#sobre" class="footer__link">Sobre Nós</a></li>
-          <li><a href="javascript:Cart.showToast('Nosso blog será lançado em breve!')" class="footer__link">Blog</a></li>
-          <li><a href="javascript:Cart.showToast('Envie seu currículo para rh@grandparfum.com')" class="footer__link">Trabalhe Conosco</a></li>
-          <li><a href="javascript:Cart.showToast('Programa de afiliados temporariamente fechado.')" class="footer__link">Afiliados</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer__bottom">
-      <p class="footer__copy">© 2026 Grand Parfum. Todos os direitos reservados. CNPJ: XX.XXX.XXX/0001-XX</p>
-      <nav class="footer__bottom-links" aria-label="Links legais">
-        <a href="javascript:Cart.showToast('Nossa Política de Privacidade será atualizada.')" class="footer__bottom-link">Privacidade</a>
-        <a href="javascript:Cart.showToast('Você concordou com os Termos de Uso.')" class="footer__bottom-link">Termos de Uso</a>
-        <a href="javascript:Cart.showToast('Utilizamos cookies apenas essenciais.')" class="footer__bottom-link">Cookies</a>
-      </nav>
-    </div>
-  </footer>
-
-
-  <!-- ============================
-       SCRIPTS
-       ============================ -->
-  <!-- Firebase SDK -->
+  <script src="products_live.js"></script>
   <script type="importmap">
     {
       "imports": {
@@ -445,20 +215,6 @@
       }
     }
   </script>
-
-
   <script type="module" src="app.js"></script>
-  <script type="module">
-    import './app.js';
-    window.addEventListener('load', () => {
-      if (window.FirebaseDB) {
-        window.FirebaseDB.initProducts('featured-products', 4);
-      } else if (typeof window.renderProducts === 'function') {
-        const hasLive = (typeof PRODUCTS_LIVE !== 'undefined' && PRODUCTS_LIVE.length > 0);
-        const source = hasLive ? PRODUCTS_LIVE : (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []);
-        window.renderProducts('featured-products', source.slice(0, 4));
-      }
-    });
-  </script>
 </body>
 </html>
