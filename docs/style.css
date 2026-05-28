@@ -1571,6 +1571,11 @@ ul {
   border-radius: 1.6rem;
 }
 
+.cart-summary {
+  position: sticky;
+  top: calc(var(--navbar-height) + 1.5rem);
+}
+
 .cart-item {
   display: grid;
   grid-template-columns: 84px 1fr auto auto;
@@ -1913,9 +1918,27 @@ ul {
     --navbar-height: 72px;
   }
 
+  .page-main,
+  .page-shell {
+    padding-top: calc(var(--navbar-height) + 1.8rem);
+  }
+
+  .page-hero {
+    padding: 1rem 0 0.5rem;
+  }
+
+  .page-title {
+    font-size: clamp(2rem, 11vw, 3rem);
+    line-height: 0.96;
+  }
+
+  .page-subtitle {
+    font-size: 0.96rem;
+  }
+
   .section,
   .newsletter {
-    padding: var(--space-16) 0;
+    padding: var(--space-12) 0;
   }
 
   .section__container,
@@ -1947,17 +1970,71 @@ ul {
     grid-template-columns: 1fr;
   }
 
+  .toolbar {
+    padding: 1rem;
+    border-radius: 1.3rem;
+  }
+
   .detail-spec-grid {
     grid-template-columns: 1fr;
   }
 
+  .cart-layout {
+    gap: 1rem;
+  }
+
+  .cart-items,
+  .cart-summary {
+    padding: 1rem;
+    border-radius: 1.3rem;
+  }
+
   .cart-item {
     display: grid;
+    gap: 0.85rem;
     justify-items: start;
+    padding: 1.1rem 0;
+  }
+
+  .cart-item__visual {
+    width: 72px;
+    height: 72px;
+    border-radius: 1rem;
+  }
+
+  .cart-item__controls {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cart-remove {
+    width: 100%;
+    min-height: 44px;
+    border-radius: var(--radius-full);
+    background: rgba(201, 66, 66, 0.08);
+    text-align: center;
+  }
+
+  .cart-summary {
+    position: static;
+  }
+
+  .checkout-fields input {
+    min-height: 52px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 540px) {
+  .section__container,
+  .navbar__inner,
+  .hero__grid,
+  .trust-bar__inner,
+  .footer__grid,
+  .footer__bottom {
+    width: min(100%, calc(100% - 1rem));
+  }
+
   .navbar__actions {
     gap: 0.45rem;
   }
@@ -1986,5 +2063,35 @@ ul {
 
   .hero__stats {
     gap: 1rem 1.8rem;
+  }
+
+  .page-kicker {
+    font-size: 0.74rem;
+    letter-spacing: 0.13em;
+  }
+
+  .page-title {
+    font-size: clamp(1.85rem, 10.5vw, 2.55rem);
+  }
+
+  .page-subtitle {
+    margin-top: 0.7rem;
+    font-size: 0.92rem;
+  }
+
+  .cart-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cart-item__body h3 {
+    font-size: 0.96rem;
+  }
+
+  .cart-summary h2 {
+    font-size: 1.35rem;
+  }
+
+  .cart-summary__row {
+    font-size: 0.95rem;
   }
 }

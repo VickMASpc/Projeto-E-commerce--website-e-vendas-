@@ -464,6 +464,19 @@ function formatPrice(value) {
   })}`;
 }
 
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, (char) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[char] || char;
+  });
+}
+
 function getProductGallery(product) {
   if (product.images.length > 0) {
     return product.images.map((url, index) => ({
@@ -1509,7 +1522,16 @@ function createCartMedia(item) {
   `;
 }
 
-function renderCartPage() {
+function readCheckoutDraft() {
+  return {
+    name: document.getElementById("checkout-name")?.value.trim() || "",
+    email: document.getElementById("checkout-email")?.value.trim() || "",
+    phone: document.getElementById("checkout-phone")?.value.trim() || "",
+    address: document.getElementById("checkout-address")?.value.trim() || "",
+  };
+}
+
+function renderCartPage(checkoutDraft = readCheckoutDraft()) {
   const cartRoot = document.getElementById("cart-content");
   if (!cartRoot) {
     return;
@@ -1574,10 +1596,10 @@ function renderCartPage() {
         </div>
 
         <div class="checkout-fields">
-          <input id="checkout-name" type="text" placeholder="Nome completo">
-          <input id="checkout-email" type="email" placeholder="E-mail">
-          <input id="checkout-phone" type="tel" placeholder="Telefone">
-          <input id="checkout-address" type="text" placeholder="Endereco de entrega">
+          <input id="checkout-name" type="text" placeholder="Nome completo" value="${escapeHtml(checkoutDraft.name || "")}">
+          <input id="checkout-email" type="email" placeholder="E-mail" value="${escapeHtml(checkoutDraft.email || "")}">
+          <input id="checkout-phone" type="tel" placeholder="Telefone" value="${escapeHtml(checkoutDraft.phone || "")}">
+          <input id="checkout-address" type="text" placeholder="Endereco de entrega" value="${escapeHtml(checkoutDraft.address || "")}">
         </div>
 
         <button class="btn-primary btn-block" id="checkout-submit">Finalizar compra</button>
@@ -1593,6 +1615,7 @@ function updateCartQuantity(productId, delta) {
   if (!item) {
     return;
   }
+  const checkoutDraft = readCheckoutDraft();
 
   const stockLimit = Math.min(MAX_CART_QUANTITY, item.stock || Cart.getStockLimit(productId));
   const nextQty = item.qty + delta;
@@ -1607,7 +1630,7 @@ function updateCartQuantity(productId, delta) {
   } else {
     Cart.save(items);
   }
-  renderCartPage();
+  renderCartPage(checkoutDraft);
 }
 
 async function handleCheckout() {
@@ -1672,11 +1695,12 @@ function setupCartPageActions() {
 
     const actionButton = event.target.closest("[data-cart-action]");
     if (actionButton) {
+      const checkoutDraft = readCheckoutDraft();
       const action = actionButton.dataset.cartAction;
       const productId = actionButton.dataset.cartId;
       if (action === "remove") {
         Cart.removeItem(productId);
-        renderCartPage();
+        renderCartPage(checkoutDraft);
       }
       if (action === "increase") {
         updateCartQuantity(productId, 1);
