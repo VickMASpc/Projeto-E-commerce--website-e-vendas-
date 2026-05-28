@@ -1,0 +1,49 @@
+{
+  "projectRoot": "C:\\Users\\VictorMonteiroDeArau\\Downloads\\DUmp\\Todos\\Projeto-E-commerce--website-e-vendas-",
+  "batchFiles": [
+    {
+      "path": "E-commerce/carrinho.html",
+      "language": "html",
+      "sizeLines": 48,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "E-commerce/favoritos.html",
+      "language": "html",
+      "sizeLines": 48,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "E-commerce/index.html",
+      "language": "html",
+      "sizeLines": 220,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "E-commerce/produto.html",
+      "language": "html",
+      "sizeLines": 49,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "E-commerce/produtos.html",
+      "language": "html",
+      "sizeLines": 81,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "E-commerce/style.css",
+      "language": "css",
+      "sizeLines": 1990,
+      "fileCategory": "markup"
+    }
+  ],
+  "batchImportData": {
+    "E-commerce/carrinho.html": [],
+    "E-commerce/favoritos.html": [],
+    "E-commerce/index.html": [],
+    "E-commerce/produto.html": [],
+    "E-commerce/produtos.html": [],
+    "E-commerce/style.css": []
+  }
+}

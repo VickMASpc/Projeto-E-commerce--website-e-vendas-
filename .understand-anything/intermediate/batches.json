@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 30,
+  "totalBatches": 4,
+  "exportsByPath": {
+    ".understand-anything/.understandignore": [],
+    "E-commerce/app.js": [],
+    "E-commerce/firebase-config.js": [],
+    "E-commerce/products_live.js": [],
+    "Sistema de análise de vendas/React app/eslint.config.js": [],
+    "Sistema de análise de vendas/React app/src/App.tsx": [],
+    "Sistema de análise de vendas/React app/src/main.tsx": [],
+    "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx": [
+      "SalesDashboard"
+    ],
+    "Sistema de análise de vendas/React app/vite.config.ts": [],
+    "Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx": [],
+    "Sistema de vendas/database.py": [
+      "_to_float",
+      "_to_int",
+      "_to_bool",
+      "_parse_list",
+      "normalize_product",
+      "_next_order_id",
+      "_normalize_order_item",
+      "normalize_order",
+      "_initial_data",
+      "_init_db",
+      "_read_db",
+      "_write_db",
+      "_export_to_frontend",
+      "get_products",
+      "add_product",
+      "update_product",
+      "update_product_stock",
+      "delete_product",
+      "listen_to_orders",
+      "get_orders",
+      "create_local_order",
+      "update_order_status",
+      "_parse_date",
+      "get_stats"
+    ],
+    "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py": [
+      "SistemaLogisticaApp"
+    ]
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "Sistema de análise de vendas/React app/src/App.tsx",
+          "language": "typescript",
+          "sizeLines": 7,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/src/main.tsx",
+          "language": "typescript",
+          "sizeLines": 10,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx",
+          "language": "typescript",
+          "sizeLines": 365,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "Sistema de análise de vendas/React app/src/App.tsx": [
+          "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx"
+        ],
+        "Sistema de análise de vendas/React app/src/main.tsx": [
+          "Sistema de análise de vendas/React app/src/App.tsx",
+          "Sistema de análise de vendas/React app/src/index.css"
+        ],
+        "Sistema de análise de vendas/React app/src/sistema_de_analise_de_vendas.tsx": []
+      },
+      "neighborMap": {
+        "Sistema de análise de vendas/React app/src/main.tsx": [
+          {
+            "path": "Sistema de análise de vendas/React app/src/index.css",
+            "batchIndex": 4,
+            "symbols": []
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "E-commerce/carrinho.html",
+          "language": "html",
+          "sizeLines": 48,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "E-commerce/favoritos.html",
+          "language": "html",
+          "sizeLines": 48,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "E-commerce/index.html",
+          "language": "html",
+          "sizeLines": 220,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "E-commerce/produto.html",
+          "language": "html",
+          "sizeLines": 49,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "E-commerce/produtos.html",
+          "language": "html",
+          "sizeLines": 81,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "E-commerce/style.css",
+          "language": "css",
+          "sizeLines": 1990,
+          "fileCategory": "markup"
+        }
+      ],
+      "batchImportData": {
+        "E-commerce/carrinho.html": [],
+        "E-commerce/favoritos.html": [],
+        "E-commerce/index.html": [],
+        "E-commerce/produto.html": [],
+        "E-commerce/produtos.html": [],
+        "E-commerce/style.css": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "Sistema de análise de vendas/React app/.env.example",
+          "language": "config",
+          "sizeLines": 1,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/README.md",
+          "language": "markdown",
+          "sizeLines": 73,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/index.html",
+          "language": "html",
+          "sizeLines": 13,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/package.json",
+          "language": "json",
+          "sizeLines": 33,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/tsconfig.app.json",
+          "language": "json",
+          "sizeLines": 25,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/tsconfig.json",
+          "language": "json",
+          "sizeLines": 7,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/tsconfig.node.json",
+          "language": "json",
+          "sizeLines": 24,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        "Sistema de análise de vendas/React app/.env.example": [],
+        "Sistema de análise de vendas/React app/README.md": [],
+        "Sistema de análise de vendas/React app/index.html": [],
+        "Sistema de análise de vendas/React app/package.json": [],
+        "Sistema de análise de vendas/React app/tsconfig.app.json": [],
+        "Sistema de análise de vendas/React app/tsconfig.json": [],
+        "Sistema de análise de vendas/React app/tsconfig.node.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": ".understand-anything/.understandignore",
+          "language": "unknown",
+          "sizeLines": 17,
+          "fileCategory": "code"
+        },
+        {
+          "path": "E-commerce/app.js",
+          "language": "javascript",
+          "sizeLines": 1757,
+          "fileCategory": "code"
+        },
+        {
+          "path": "E-commerce/firebase-config.js",
+          "language": "javascript",
+          "sizeLines": 11,
+          "fileCategory": "code"
+        },
+        {
+          "path": "E-commerce/products_live.js",
+          "language": "javascript",
+          "sizeLines": 324,
+          "fileCategory": "code"
+        },
+        {
+          "path": "readme.md",
+          "language": "markdown",
+          "sizeLines": 62,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/eslint.config.js",
+          "language": "javascript",
+          "sizeLines": 22,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/src/App.css",
+          "language": "css",
+          "sizeLines": 184,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/src/index.css",
+          "language": "css",
+          "sizeLines": 31,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "Sistema de análise de vendas/React app/vite.config.ts",
+          "language": "typescript",
+          "sizeLines": 12,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx",
+          "language": "typescript",
+          "sizeLines": 176,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de vendas/database.py",
+          "language": "python",
+          "sizeLines": 683,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Sistema de vendas/db_mock.json",
+          "language": "json",
+          "sizeLines": 323,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de vendas/serviceAccountKey.json",
+          "language": "json",
+          "sizeLines": 13,
+          "fileCategory": "config"
+        },
+        {
+          "path": "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py",
+          "language": "python",
+          "sizeLines": 589,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".understand-anything/.understandignore": [],
+        "E-commerce/app.js": [
+          "E-commerce/firebase-config.js"
+        ],
+        "E-commerce/firebase-config.js": [],
+        "E-commerce/products_live.js": [],
+        "readme.md": [],
+        "Sistema de análise de vendas/React app/eslint.config.js": [],
+        "Sistema de análise de vendas/React app/src/App.css": [],
+        "Sistema de análise de vendas/React app/src/index.css": [],
+        "Sistema de análise de vendas/React app/vite.config.ts": [],
+        "Sistema de análise de vendas/sistema_de_analise_de_vendas.tsx": [],
+        "Sistema de vendas/database.py": [],
+        "Sistema de vendas/db_mock.json": [],
+        "Sistema de vendas/serviceAccountKey.json": [],
+        "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py": [
+          "Sistema de vendas/database.py"
+        ]
+      },
+      "neighborMap": {
+        "Sistema de análise de vendas/React app/src/index.css": [
+          {
+            "path": "Sistema de análise de vendas/React app/src/main.tsx",
+            "batchIndex": 1,
+            "symbols": []
+          }
+        ]
+      }
+    }
+  ]
+}
