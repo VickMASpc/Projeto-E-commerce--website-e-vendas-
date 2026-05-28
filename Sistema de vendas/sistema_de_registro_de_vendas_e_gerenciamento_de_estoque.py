@@ -539,11 +539,25 @@ class SistemaLogisticaApp:
                     self.wfile.write(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
 
                 def do_GET(self):
+                    if self.path == "/stats":
+                        self._send_json(200, database.get_stats())
+                        return
+
+                    if self.path == "/orders":
+                        self._send_json(200, {"orders": database.get_orders()})
+                        return
+
+                    if self.path == "/products":
+                        self._send_json(200, {"products": database.get_products()})
+                        return
+
+                    if self.path == "/health":
+                        self._send_json(200, {"status": "ok"})
+                        return
+
                     if self.path != "/stats":
                         self._send_json(404, {"status": "error", "message": "Rota nao encontrada."})
                         return
-
-                    self._send_json(200, database.get_stats())
 
                 def do_POST(self):
                     if self.path != "/order":

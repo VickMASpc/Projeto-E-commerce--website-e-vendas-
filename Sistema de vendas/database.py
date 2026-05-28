@@ -250,6 +250,14 @@ DEFAULT_PRODUCT = {
 }
 
 
+SEED_PRODUCTS_BY_ID = {product["id"]: deepcopy(product) for product in SEED_PRODUCTS}
+SEED_PRODUCTS_BY_NAME = {
+    str(product.get("name", "")).strip().lower(): deepcopy(product)
+    for product in SEED_PRODUCTS
+    if product.get("name")
+}
+
+
 def _to_float(value, fallback=0.0):
     try:
         return float(str(value).replace(",", "."))
@@ -285,8 +293,24 @@ def _parse_list(value):
 
 
 def normalize_product(product):
+    product = product or {}
+    seed_match = {}
+
+    raw_id = product.get("id", "")
+    raw_name = str(product.get("name") or product.get("nome") or "").strip().lower()
+    if raw_id and raw_id in SEED_PRODUCTS_BY_ID:
+        seed_match = deepcopy(SEED_PRODUCTS_BY_ID[raw_id])
+    elif raw_name and raw_name in SEED_PRODUCTS_BY_NAME:
+        seed_match = deepcopy(SEED_PRODUCTS_BY_NAME[raw_name])
+
     merged = deepcopy(DEFAULT_PRODUCT)
+    merged.update(seed_match)
     merged.update(product or {})
+
+    raw_brand = product.get("brand") or product.get("marca") or ""
+    raw_tagline = product.get("tagline") or product.get("subtitulo") or ""
+    raw_top_notes = _parse_list(product.get("topNotes") or product.get("notasTopo"))
+    legacy_sparse_product = bool(seed_match) and not raw_brand and not raw_tagline and not raw_top_notes
 
     normalized = {
         "id": merged.get("id", ""),
@@ -316,6 +340,32 @@ def normalize_product(product):
         "isNew": _to_bool(merged.get("isNew") or merged.get("eNovo")),
         "images": _parse_list(merged.get("images") or merged.get("image_urls") or merged.get("imageUrls")),
     }
+
+    if legacy_sparse_product:
+        normalized["brand"] = seed_match.get("brand", normalized["brand"])
+        normalized["tagline"] = seed_match.get("tagline", normalized["tagline"])
+        normalized["description"] = seed_match.get("description", normalized["description"])
+        normalized["longDescription"] = seed_match.get(
+            "longDescription", normalized["longDescription"]
+        )
+        normalized["category"] = seed_match.get("category", normalized["category"])
+        normalized["imageEmoji"] = seed_match.get("imageEmoji", normalized["imageEmoji"])
+        normalized["volume_ml"] = seed_match.get("volume_ml", normalized["volume_ml"])
+        normalized["concentration"] = seed_match.get(
+            "concentration", normalized["concentration"]
+        )
+        normalized["olfactiveFamily"] = seed_match.get(
+            "olfactiveFamily", normalized["olfactiveFamily"]
+        )
+        normalized["occasion"] = seed_match.get("occasion", normalized["occasion"])
+        normalized["topNotes"] = seed_match.get("topNotes", normalized["topNotes"])
+        normalized["heartNotes"] = seed_match.get("heartNotes", normalized["heartNotes"])
+        normalized["baseNotes"] = seed_match.get("baseNotes", normalized["baseNotes"])
+        normalized["highlights"] = seed_match.get("highlights", normalized["highlights"])
+        normalized["rating"] = seed_match.get("rating", normalized["rating"])
+        normalized["reviews"] = seed_match.get("reviews", normalized["reviews"])
+        normalized["isSale"] = seed_match.get("isSale", normalized["isSale"])
+        normalized["isNew"] = seed_match.get("isNew", normalized["isNew"])
 
     if normalized["image_url"] and normalized["image_url"] not in normalized["images"]:
         normalized["images"].insert(0, normalized["image_url"])
@@ -566,6 +616,73 @@ def get_orders():
 
 
 def create_local_order(order):
+    if USE_FIREBASE and db is not None:
+        normalized = normalize_order(order, f"ord-{int(datetime.now().timestamp() * 1000)}")
+        if not normalized["items"]:
+            return {
+                "ok": False,
+                "message": "Pedido sem itens.",
+                "order_id": None,
+            }
+
+        transaction = db.transaction()
+
+        @firestore.transactional
+        def process_order(txn):
+            product_refs = {
+                item["product_id"]: db.collection("produtos").document(item["product_id"])
+                for item in normalized["items"]
+                if item.get("product_id")
+            }
+
+            snapshots = {
+                product_id: product_ref.get(transaction=txn)
+                for product_id, product_ref in product_refs.items()
+            }
+
+            insufficient_stock = []
+            products_by_id = {}
+            for item in normalized["items"]:
+                product_id = item.get("product_id")
+                snapshot = snapshots.get(product_id)
+                if snapshot is None or not snapshot.exists:
+                    insufficient_stock.append(item["product_name"])
+                    continue
+
+                product = normalize_product(snapshot.to_dict() | {"id": snapshot.id})
+                products_by_id[product_id] = product
+                if int(product.get("stock", 0)) < item["quantity"]:
+                    insufficient_stock.append(item["product_name"])
+
+            if insufficient_stock:
+                return {
+                    "ok": False,
+                    "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
+                    "order_id": None,
+                }
+
+            for item in normalized["items"]:
+                product_id = item["product_id"]
+                product_ref = product_refs[product_id]
+                current_stock = int(products_by_id[product_id].get("stock", 0))
+                txn.update(product_ref, {"stock": current_stock - item["quantity"]})
+
+            normalized["status"] = "pago"
+            normalized["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+            order_ref = db.collection("pedidos").document(normalized["id"])
+            txn.set(order_ref, normalized)
+            return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
+
+        try:
+            return process_order(transaction)
+        except Exception as error:
+            print(f"Erro ao registrar pedido no Firebase: {error}")
+            return {
+                "ok": False,
+                "message": "Nao foi possivel registrar o pedido no Firebase.",
+                "order_id": None,
+            }
+
     data = _read_db()
     normalized = normalize_order(order, _next_order_id(data["pedidos"]))
     if not normalized["items"]:
@@ -618,12 +735,100 @@ def update_order_status(pedido_id, novo_status):
 
 
 def _parse_date(value):
-    for pattern in ("%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S"):
+    if hasattr(value, "strftime"):
         try:
-            return datetime.strptime(str(value).replace("+00:00", "").replace("Z", ""), pattern)
+            return value
+        except Exception:
+            pass
+
+    if hasattr(value, "to_datetime"):
+        try:
+            return value.to_datetime()
+        except Exception:
+            pass
+
+    raw_value = str(value).strip()
+
+    for pattern in (
+        "%d/%m/%Y %H:%M",
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%S",
+    ):
+        try:
+            return datetime.strptime(raw_value, pattern)
         except ValueError:
             continue
+
+    if raw_value.endswith("+00:00"):
+        trimmed = raw_value[:-6]
+        for pattern in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+            try:
+                return datetime.strptime(trimmed, pattern)
+            except ValueError:
+                continue
     return datetime.now()
+
+
+def _build_time_series(orders, min_days=30):
+    orders_by_day = defaultdict(lambda: {"sales": 0.0, "orders": 0})
+
+    if orders:
+        parsed_dates = [_parse_date(order.get("created_at")) for order in orders]
+        end_date = max(parsed_dates).date()
+        start_date = min(parsed_dates).date()
+    else:
+        end_date = datetime.now().date()
+        start_date = end_date
+
+    span_days = max((end_date - start_date).days + 1, 1)
+    days = max(min_days, span_days)
+    start_date = end_date.fromordinal(end_date.toordinal() - max(days - 1, 0))
+
+    for order in orders:
+        order_date = _parse_date(order.get("created_at")).date()
+        if order_date < start_date or order_date > end_date:
+            continue
+
+        bucket = orders_by_day[order_date]
+        bucket["sales"] += _to_float(order.get("total"))
+        bucket["orders"] += 1
+
+    points = []
+    for offset in range(days):
+        current_date = start_date.fromordinal(start_date.toordinal() + offset)
+        bucket = orders_by_day[current_date]
+        points.append(
+            {
+                "date": current_date.strftime("%d/%m"),
+                "isoDate": current_date.isoformat(),
+                "sales": round(bucket["sales"], 2),
+                "orders": bucket["orders"],
+            }
+        )
+
+    return points
+
+
+def _period_totals(orders, start_date, end_date):
+    selected = []
+    for order in orders:
+        order_date = _parse_date(order.get("created_at")).date()
+        if start_date <= order_date <= end_date:
+            selected.append(order)
+
+    total_revenue = sum(_to_float(order.get("total")) for order in selected)
+    return {
+        "orders": len(selected),
+        "revenue": round(total_revenue, 2),
+    }
+
+
+def _growth_pct(current, previous):
+    if previous == 0:
+        return 100.0 if current > 0 else 0.0
+    return round(((current - previous) / previous) * 100, 1)
 
 
 def get_stats():
@@ -636,27 +841,46 @@ def get_stats():
     average_ticket = total_revenue / total_orders if total_orders else 0
 
     inventory_by_category = defaultdict(int)
+    products_by_id = {product["id"]: product for product in products}
     product_names = {product["id"]: product["name"] for product in products}
     for product in products:
         inventory_by_category[product.get("category", "Outros")] += int(product.get("stock", 0))
 
     sales_by_product = defaultdict(int)
-    sales_by_date = defaultdict(float)
+    category_sales = defaultdict(lambda: {"value": 0.0, "orders": 0, "units": 0})
+    customer_sales = defaultdict(lambda: {"revenue": 0.0, "orders": 0})
     recent_activity = []
     for order in paid_orders:
-        created_at = _parse_date(order.get("created_at"))
-        sales_by_date[created_at.strftime("%d/%m")] += _to_float(order.get("total"))
+        order_total = _to_float(order.get("total"))
         recent_activity.append(
             {
                 "id": order.get("id", ""),
                 "label": f"Pedido {order.get('id', '')} - {order.get('status', 'pendente')}",
                 "customer": order.get("customer_name", "Cliente"),
                 "created_at": order.get("created_at", ""),
+                "total": round(order_total, 2),
+                "status": order.get("status", "pendente"),
             }
         )
+
+        customer_name = order.get("customer_name", "Cliente")
+        customer_sales[customer_name]["revenue"] += order_total
+        customer_sales[customer_name]["orders"] += 1
+
+        seen_categories = set()
         for item in order.get("items", []):
             name = item.get("product_name") or product_names.get(item.get("product_id"), "Item")
-            sales_by_product[name] += _to_int(item.get("quantity"), 1)
+            quantity = _to_int(item.get("quantity"), 1)
+            unit_price = _to_float(item.get("unit_price"))
+            product = products_by_id.get(item.get("product_id"))
+            category_name = (product or {}).get("category", "Outros")
+
+            sales_by_product[name] += quantity
+            category_sales[category_name]["value"] += quantity * unit_price
+            category_sales[category_name]["units"] += quantity
+            if category_name not in seen_categories:
+                category_sales[category_name]["orders"] += 1
+                seen_categories.add(category_name)
 
     top_products = sorted(
         ({"name": name, "sales": quantity} for name, quantity in sales_by_product.items()),
@@ -664,15 +888,102 @@ def get_stats():
         reverse=True,
     )[:5]
 
+    timeline = _build_time_series(paid_orders, 30)
     sales_over_time = [
-        {"date": date, "sales": total}
-        for date, total in sorted(sales_by_date.items())
+        {
+            "date": point["date"],
+            "isoDate": point["isoDate"],
+            "sales": point["sales"],
+            "orders": point["orders"],
+        }
+        for point in timeline
     ]
+
+    last_day = datetime.now().date()
+    last_7_start = last_day.fromordinal(last_day.toordinal() - 6)
+    prev_7_end = last_day.fromordinal(last_day.toordinal() - 7)
+    prev_7_start = prev_7_end.fromordinal(prev_7_end.toordinal() - 6)
+
+    current_period = _period_totals(paid_orders, last_7_start, last_day)
+    previous_period = _period_totals(paid_orders, prev_7_start, prev_7_end)
+
+    low_stock_items = sorted(
+        [
+            {
+                "id": product["id"],
+                "name": product.get("name", "Produto"),
+                "category": product.get("category", "Outros"),
+                "stock": int(product.get("stock", 0)),
+            }
+            for product in products
+            if int(product.get("stock", 0)) <= 12
+        ],
+        key=lambda item: item["stock"],
+    )[:6]
+
+    order_status = defaultdict(int)
+    for order in orders:
+        order_status[str(order.get("status", "pendente")).lower()] += 1
+
+    category_performance = sorted(
+        (
+            {
+                "name": category,
+                "value": round(metrics["value"], 2),
+                "orders": metrics["orders"],
+                "units": metrics["units"],
+            }
+            for category, metrics in category_sales.items()
+        ),
+        key=lambda item: item["value"],
+        reverse=True,
+    )
+
+    top_customers = sorted(
+        (
+            {
+                "name": customer,
+                "revenue": round(metrics["revenue"], 2),
+                "orders": metrics["orders"],
+            }
+            for customer, metrics in customer_sales.items()
+        ),
+        key=lambda item: item["revenue"],
+        reverse=True,
+    )[:5]
+
+    orders_today = sum(
+        1 for order in orders if _parse_date(order.get("created_at")).date() == last_day
+    )
+    realtime_revenue = sum(
+        _to_float(order.get("total"))
+        for order in orders
+        if _parse_date(order.get("created_at")).date() == last_day
+    )
 
     return {
         "totalRevenue": round(total_revenue, 2),
         "totalOrders": total_orders,
         "averageTicket": round(average_ticket, 2),
+        "inventoryUnits": sum(int(product.get("stock", 0)) for product in products),
+        "activeCategories": len(inventory_by_category),
+        "ordersToday": orders_today,
+        "paidOrders": order_status["pago"],
+        "pendingOrders": order_status["pendente"],
+        "shippedOrders": order_status["enviado"],
+        "lowStockCount": len(low_stock_items),
+        "revenueDeltaPct": _growth_pct(
+            current_period["revenue"], previous_period["revenue"]
+        ),
+        "ordersDeltaPct": _growth_pct(
+            current_period["orders"], previous_period["orders"]
+        ),
+        "realtimeRevenue": round(realtime_revenue, 2),
+        "lastUpdated": datetime.now().isoformat(timespec="seconds"),
+        "periodSummary": {
+            "current": current_period,
+            "previous": previous_period,
+        },
         "inventoryStatus": [
             {"name": category, "value": quantity}
             for category, quantity in sorted(inventory_by_category.items())
@@ -680,4 +991,11 @@ def get_stats():
         "salesOverTime": sales_over_time,
         "topProducts": top_products,
         "recentActivity": recent_activity[-5:][::-1],
+        "categoryPerformance": category_performance,
+        "orderStatus": [
+            {"name": status.title(), "value": total}
+            for status, total in sorted(order_status.items())
+        ],
+        "lowStockItems": low_stock_items,
+        "topCustomers": top_customers,
     }
