@@ -4,8 +4,12 @@ import tkinter as tk
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from tkinter import messagebox, ttk
 
+import customtkinter as ctk
+
 import database
 
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme("blue")
 
 PRODUCT_FIELDS = [
     {"key": "name", "label": "Nome do produto", "widget": "entry", "required": True},
@@ -48,25 +52,47 @@ class SistemaLogisticaApp:
         self.root.title("Grand Parfum - Sistema Local de Vendas e Logistica")
         self.root.geometry("1120x760")
 
+        # Configurar estilos de widgets TTK (usados nos Treeviews e afins)
         style = ttk.Style()
         if "clam" in style.theme_names():
             style.theme_use("clam")
 
-        style.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[12, 7])
-        style.configure("TLabel", font=("Helvetica", 10))
-        style.configure("Header.TLabel", font=("Helvetica", 15, "bold"))
-        style.configure("Card.TFrame", background="#f4f1e8", relief="solid", borderwidth=1)
+        is_dark_mode = ctk.get_appearance_mode() == "Dark"
+        bg_color = "#2b2b2b" if is_dark_mode else "#ebebeb"
+        fg_color = "#ffffff" if is_dark_mode else "#000000"
+        header_bg = "#333333" if is_dark_mode else "#d9d9d9"
+        header_fg = "#ffffff" if is_dark_mode else "#000000"
+        selected_bg = "#1f538d"
 
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        style.configure(
+            "Treeview", 
+            background=bg_color, 
+            foreground=fg_color, 
+            fieldbackground=bg_color, 
+            rowheight=25, 
+            borderwidth=0, 
+            font=("Helvetica", 11)
+        )
+        style.configure(
+            "Treeview.Heading", 
+            background=header_bg, 
+            foreground=header_fg, 
+            relief="flat", 
+            font=("Helvetica", 12, "bold")
+        )
+        style.map("Treeview", background=[("selected", selected_bg)])
 
-        self.tab_dashboard = ttk.Frame(self.notebook)
-        self.tab_estoque = ttk.Frame(self.notebook)
-        self.tab_pedidos = ttk.Frame(self.notebook)
+        # Configurar componentes CustomTkinter
+        self.notebook = ctk.CTkTabview(self.root)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        self.notebook.add(self.tab_dashboard, text="Dashboard")
-        self.notebook.add(self.tab_estoque, text="Estoque & Produtos")
-        self.notebook.add(self.tab_pedidos, text="Pedidos & Logistica")
+        self.notebook.add("Dashboard")
+        self.notebook.add("Estoque & Produtos")
+        self.notebook.add("Pedidos & Logistica")
+
+        self.tab_dashboard = self.notebook.tab("Dashboard")
+        self.tab_estoque = self.notebook.tab("Estoque & Produtos")
+        self.tab_pedidos = self.notebook.tab("Pedidos & Logistica")
 
         self._setup_dashboard()
         self._setup_estoque()
@@ -81,68 +107,71 @@ class SistemaLogisticaApp:
         self._refresh_all()
 
     def _setup_dashboard(self):
-        ttk.Label(
+        ctk.CTkLabel(
             self.tab_dashboard,
             text="Resumo operacional do e-commerce",
-            style="Header.TLabel",
-        ).pack(pady=15)
+            font=ctk.CTkFont(size=20, weight="bold")
+        ).pack(pady=20)
 
-        frame_cards = ttk.Frame(self.tab_dashboard)
+        frame_cards = ctk.CTkFrame(self.tab_dashboard, fg_color="transparent")
         frame_cards.pack(fill=tk.X, padx=20, pady=20)
+        
         for column in range(3):
             frame_cards.columnconfigure(column, weight=1)
 
-        card1 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
-        card1.grid(row=0, column=0, padx=10, sticky="ew")
-        ttk.Label(card1, text="Total de produtos").pack()
-        self.lbl_total_prod = ttk.Label(card1, text="0", font=("Helvetica", 18, "bold"))
-        self.lbl_total_prod.pack(pady=5)
+        # Card 1
+        card1 = ctk.CTkFrame(frame_cards, corner_radius=15)
+        card1.grid(row=0, column=0, padx=15, sticky="ew")
+        ctk.CTkLabel(card1, text="Total de produtos", font=ctk.CTkFont(size=14)).pack(pady=(20, 5))
+        self.lbl_total_prod = ctk.CTkLabel(card1, text="0", font=ctk.CTkFont(size=32, weight="bold"))
+        self.lbl_total_prod.pack(pady=(0, 20))
 
-        card2 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
-        card2.grid(row=0, column=1, padx=10, sticky="ew")
-        ttk.Label(card2, text="Itens com baixo estoque (<5)").pack()
-        self.lbl_baixo_estoque = ttk.Label(
-            card2,
-            text="0",
-            font=("Helvetica", 18, "bold"),
-            foreground="#c94242",
+        # Card 2
+        card2 = ctk.CTkFrame(frame_cards, corner_radius=15)
+        card2.grid(row=0, column=1, padx=15, sticky="ew")
+        ctk.CTkLabel(card2, text="Itens com baixo estoque (<5)", font=ctk.CTkFont(size=14)).pack(pady=(20, 5))
+        self.lbl_baixo_estoque = ctk.CTkLabel(
+            card2, text="0", font=ctk.CTkFont(size=32, weight="bold"), text_color="#ff5e5e"
         )
-        self.lbl_baixo_estoque.pack(pady=5)
+        self.lbl_baixo_estoque.pack(pady=(0, 20))
 
-        card3 = ttk.Frame(frame_cards, style="Card.TFrame", padding=20)
-        card3.grid(row=0, column=2, padx=10, sticky="ew")
-        ttk.Label(card3, text="Pedidos prontos para envio").pack()
-        self.lbl_pedidos_pendentes = ttk.Label(
-            card3,
-            text="0",
-            font=("Helvetica", 18, "bold"),
-            foreground="#1f9254",
+        # Card 3
+        card3 = ctk.CTkFrame(frame_cards, corner_radius=15)
+        card3.grid(row=0, column=2, padx=15, sticky="ew")
+        ctk.CTkLabel(card3, text="Pedidos prontos para envio", font=ctk.CTkFont(size=14)).pack(pady=(20, 5))
+        self.lbl_pedidos_pendentes = ctk.CTkLabel(
+            card3, text="0", font=ctk.CTkFont(size=32, weight="bold"), text_color="#2ecc71"
         )
-        self.lbl_pedidos_pendentes.pack(pady=5)
+        self.lbl_pedidos_pendentes.pack(pady=(0, 20))
 
-        ttk.Button(
+        ctk.CTkButton(
             self.tab_dashboard,
             text="Atualizar dashboard",
+            font=ctk.CTkFont(size=14, weight="bold"),
             command=self._refresh_all,
-        ).pack(pady=30)
+            height=40
+        ).pack(pady=40)
 
     def _setup_estoque(self):
-        top_frame = ttk.Frame(self.tab_estoque)
-        top_frame.pack(fill=tk.X, padx=10, pady=10)
+        top_frame = ctk.CTkFrame(self.tab_estoque, fg_color="transparent")
+        top_frame.pack(fill=tk.X, padx=10, pady=(10, 20))
 
-        ttk.Label(
+        ctk.CTkLabel(
             top_frame,
-            text="Gestao centralizada de inventario e conteudo das paginas de produto",
-            style="Header.TLabel",
+            text="Gestao centralizada de inventario e conteudo",
+            font=ctk.CTkFont(size=18, weight="bold")
         ).pack(side=tk.LEFT)
 
-        ttk.Button(top_frame, text="Excluir", command=self._deletar_produto).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(top_frame, text="Modificar quantidade", command=self._abrir_modal_att_estoque).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(top_frame, text="Editar detalhes", command=self._editar_produto).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(top_frame, text="Adicionar novo produto", command=lambda: self._abrir_modal_produto()).pack(side=tk.RIGHT, padx=5)
+        ctk.CTkButton(top_frame, text="Excluir", fg_color="#d63031", hover_color="#ff7675", command=self._deletar_produto).pack(side=tk.RIGHT, padx=5)
+        ctk.CTkButton(top_frame, text="Modificar quantidade", command=self._abrir_modal_att_estoque).pack(side=tk.RIGHT, padx=5)
+        ctk.CTkButton(top_frame, text="Editar detalhes", command=self._editar_produto).pack(side=tk.RIGHT, padx=5)
+        ctk.CTkButton(top_frame, text="Adicionar novo produto", command=lambda: self._abrir_modal_produto()).pack(side=tk.RIGHT, padx=5)
+
+        table_frame = ctk.CTkFrame(self.tab_estoque)
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
         columns = ("id", "nome", "categoria", "preco", "estoque")
-        self.tree_estoque = ttk.Treeview(self.tab_estoque, columns=columns, show="headings", height=20)
+        self.tree_estoque = ttk.Treeview(table_frame, columns=columns, show="headings")
 
         self.tree_estoque.heading("id", text="ID")
         self.tree_estoque.heading("nome", text="Produto")
@@ -156,31 +185,36 @@ class SistemaLogisticaApp:
         self.tree_estoque.column("preco", width=120, anchor=tk.CENTER)
         self.tree_estoque.column("estoque", width=110, anchor=tk.CENTER)
 
-        scroll_y = ttk.Scrollbar(self.tab_estoque, orient=tk.VERTICAL, command=self.tree_estoque.yview)
+        scroll_y = ctk.CTkScrollbar(table_frame, orientation="vertical", command=self.tree_estoque.yview)
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_estoque.configure(yscrollcommand=scroll_y.set)
-        self.tree_estoque.pack(fill=tk.BOTH, expand=True, padx=(10, 0), pady=10)
+        self.tree_estoque.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         self.tree_estoque.bind("<Double-1>", lambda _event: self._editar_produto())
 
     def _setup_pedidos(self):
-        top_frame = ttk.Frame(self.tab_pedidos)
-        top_frame.pack(fill=tk.X, padx=10, pady=10)
+        top_frame = ctk.CTkFrame(self.tab_pedidos, fg_color="transparent")
+        top_frame.pack(fill=tk.X, padx=10, pady=(10, 20))
 
-        ttk.Label(
+        ctk.CTkLabel(
             top_frame,
             text="Controle de pedidos e expedicao",
-            style="Header.TLabel",
+            font=ctk.CTkFont(size=18, weight="bold")
         ).pack(side=tk.LEFT)
 
-        ttk.Button(
+        ctk.CTkButton(
             top_frame,
             text="Marcar pedido selecionado como enviado",
             command=self._dispatch_order,
+            fg_color="#00b894",
+            hover_color="#55efc4"
         ).pack(side=tk.RIGHT, padx=5)
 
+        table_frame = ctk.CTkFrame(self.tab_pedidos)
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+
         columns = ("id", "cliente", "itens", "total", "status", "data")
-        self.tree_pedidos = ttk.Treeview(self.tab_pedidos, columns=columns, show="headings", height=20)
+        self.tree_pedidos = ttk.Treeview(table_frame, columns=columns, show="headings")
 
         self.tree_pedidos.heading("id", text="Pedido")
         self.tree_pedidos.heading("cliente", text="Cliente")
@@ -196,10 +230,10 @@ class SistemaLogisticaApp:
         self.tree_pedidos.column("status", width=120, anchor=tk.CENTER)
         self.tree_pedidos.column("data", width=150, anchor=tk.CENTER)
 
-        scroll_y = ttk.Scrollbar(self.tab_pedidos, orient=tk.VERTICAL, command=self.tree_pedidos.yview)
+        scroll_y = ctk.CTkScrollbar(table_frame, orientation="vertical", command=self.tree_pedidos.yview)
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_pedidos.configure(yscrollcommand=scroll_y.set)
-        self.tree_pedidos.pack(fill=tk.BOTH, expand=True, padx=(10, 0), pady=10)
+        self.tree_pedidos.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def _refresh_all(self):
         self._load_products()
@@ -216,9 +250,9 @@ class SistemaLogisticaApp:
             1 for order in orders if order.get("status", "").lower() in {"pago", "pendente"}
         )
 
-        self.lbl_total_prod.config(text=str(total_prod))
-        self.lbl_baixo_estoque.config(text=str(baixo_estoque))
-        self.lbl_pedidos_pendentes.config(text=str(pendentes_envio))
+        self.lbl_total_prod.configure(text=str(total_prod))
+        self.lbl_baixo_estoque.configure(text=str(baixo_estoque))
+        self.lbl_pedidos_pendentes.configure(text=str(pendentes_envio))
 
     def _load_products(self):
         for item in self.tree_estoque.get_children():
@@ -239,8 +273,9 @@ class SistemaLogisticaApp:
             elif stock < 5:
                 self.tree_estoque.item(row_id, tags=("baixo",))
 
-        self.tree_estoque.tag_configure("zerado", background="#ffd6d6")
-        self.tree_estoque.tag_configure("baixo", background="#fff3cc")
+        # Adjust colors for tags based on theme (optional enhancement, here we use strong backgrounds)
+        self.tree_estoque.tag_configure("zerado", background="#ff7979", foreground="black")
+        self.tree_estoque.tag_configure("baixo", background="#f6e58d", foreground="black")
 
     def _load_orders(self):
         for item in self.tree_pedidos.get_children():
@@ -281,8 +316,8 @@ class SistemaLogisticaApp:
                 self.tree_pedidos.item(row_id, tags=("enviado",))
 
         self.tree_pedidos.tag_configure("pendente", foreground="gray")
-        self.tree_pedidos.tag_configure("pago", foreground="#0f4c81", font=("Helvetica", 10, "bold"))
-        self.tree_pedidos.tag_configure("enviado", foreground="#1f9254")
+        self.tree_pedidos.tag_configure("pago", foreground="#3498db", font=("Helvetica", 11, "bold"))
+        self.tree_pedidos.tag_configure("enviado", foreground="#2ecc71")
 
     def _get_selected_product(self):
         selected = self.tree_estoque.selection()
@@ -294,68 +329,51 @@ class SistemaLogisticaApp:
 
     def _abrir_modal_produto(self, product=None):
         is_edit = product is not None
-        win = tk.Toplevel(self.root)
+        win = ctk.CTkToplevel(self.root)
         win.title("Editar produto" if is_edit else "Adicionar novo produto")
         win.geometry("700x820")
         win.transient(self.root)
         win.grab_set()
 
-        outer = ttk.Frame(win, padding=10)
-        outer.pack(fill=tk.BOTH, expand=True)
+        form_frame = ctk.CTkScrollableFrame(win)
+        form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        canvas = tk.Canvas(outer, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(outer, orient=tk.VERTICAL, command=canvas.yview)
-        canvas.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        form_frame = ttk.Frame(canvas, padding=18)
-        window_id = canvas.create_window((0, 0), window=form_frame, anchor="nw")
-
-        form_frame.bind(
-            "<Configure>",
-            lambda event: canvas.configure(scrollregion=canvas.bbox("all")),
-        )
-        canvas.bind(
-            "<Configure>",
-            lambda event: canvas.itemconfigure(window_id, width=event.width),
-        )
-
-        ttk.Label(
+        ctk.CTkLabel(
             form_frame,
-            text="Campos da pagina de produto",
-            style="Header.TLabel",
-        ).pack(anchor=tk.W, pady=(0, 15))
+            text="Detalhes do Produto",
+            font=ctk.CTkFont(size=20, weight="bold")
+        ).pack(anchor=tk.W, pady=(0, 20))
 
         widgets = {}
         values = product or {}
 
         for field in PRODUCT_FIELDS:
             if field["widget"] != "check":
-                ttk.Label(form_frame, text=field["label"]).pack(anchor=tk.W, pady=(0, 4))
+                ctk.CTkLabel(form_frame, text=field["label"]).pack(anchor=tk.W, pady=(5, 0))
 
             if field["widget"] == "entry":
-                entry = ttk.Entry(form_frame)
+                entry = ctk.CTkEntry(form_frame)
                 entry.pack(fill=tk.X, pady=(0, 10))
                 entry.insert(0, str(values.get(field["key"], "")))
                 widgets[field["key"]] = entry
 
             elif field["widget"] == "combo":
-                combo = ttk.Combobox(form_frame, values=field["values"], state="readonly")
+                combo = ctk.CTkOptionMenu(form_frame, values=field["values"])
                 combo.pack(fill=tk.X, pady=(0, 10))
                 selected_value = values.get(field["key"], field["values"][0])
                 combo.set(selected_value or field["values"][0])
                 widgets[field["key"]] = combo
 
             elif field["widget"] == "check":
-                variable = tk.BooleanVar(value=bool(values.get(field["key"], False)))
-                check = ttk.Checkbutton(form_frame, text=field["label"], variable=variable)
-                check.pack(anchor=tk.W, pady=(0, 10))
+                variable = ctk.BooleanVar(value=bool(values.get(field["key"], False)))
+                check = ctk.CTkCheckBox(form_frame, text=field["label"], variable=variable)
+                check.pack(anchor=tk.W, pady=(10, 10))
                 widgets[field["key"]] = variable
                 continue
 
             else:
-                text_widget = tk.Text(form_frame, height=field.get("height", 3), wrap="word")
+                height = field.get("height", 3) * 20  # Ajuste aproximado para pixels
+                text_widget = ctk.CTkTextbox(form_frame, height=height, wrap="word")
                 text_widget.pack(fill=tk.X, pady=(0, 10))
                 raw_value = values.get(field["key"], "")
                 if isinstance(raw_value, list):
@@ -365,13 +383,11 @@ class SistemaLogisticaApp:
 
         def read_field(field):
             widget = widgets[field["key"]]
-            if field["widget"] == "entry":
-                return widget.get().strip()
-            if field["widget"] == "combo":
+            if field["widget"] in ("entry", "combo"):
                 return widget.get().strip()
             if field["widget"] == "check":
                 return widget.get()
-            return widget.get("1.0", "end").strip()
+            return widget.get("1.0", "end-1c").strip()
 
         def save_product():
             payload = {}
@@ -424,11 +440,13 @@ class SistemaLogisticaApp:
             self._refresh_all()
             win.destroy()
 
-        ttk.Button(
+        ctk.CTkButton(
             form_frame,
             text="Salvar e sincronizar produto",
+            font=ctk.CTkFont(weight="bold"),
             command=save_product,
-        ).pack(fill=tk.X, pady=(10, 0))
+            height=40
+        ).pack(fill=tk.X, pady=(20, 10))
 
     def _editar_produto(self):
         product = self._get_selected_product()
@@ -458,21 +476,21 @@ class SistemaLogisticaApp:
             messagebox.showwarning("Acesso restrito", "Selecione um produto antes de alterar o estoque.")
             return
 
-        win = tk.Toplevel(self.root)
+        win = ctk.CTkToplevel(self.root)
         win.title("Atualizar estoque")
-        win.geometry("380x240")
+        win.geometry("400x260")
         win.transient(self.root)
         win.grab_set()
 
-        frame = ttk.Frame(win, padding=20)
-        frame.pack(fill=tk.BOTH, expand=True)
+        frame = ctk.CTkFrame(win)
+        frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        ttk.Label(frame, text="Atualizacao de estoque", style="Header.TLabel").pack(pady=(0, 15))
-        ttk.Label(frame, text=f"Produto: {product['name']}").pack(anchor=tk.W)
-        ttk.Label(frame, text=f"Estoque atual: {product.get('stock', 0)} unidades").pack(anchor=tk.W, pady=(0, 15))
-        ttk.Label(frame, text="Novo estoque").pack(anchor=tk.W)
+        ctk.CTkLabel(frame, text="Atualizacao de estoque", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=(0, 15))
+        ctk.CTkLabel(frame, text=f"Produto: {product['name']}").pack(anchor=tk.W)
+        ctk.CTkLabel(frame, text=f"Estoque atual: {product.get('stock', 0)} unidades").pack(anchor=tk.W, pady=(0, 15))
+        ctk.CTkLabel(frame, text="Novo estoque").pack(anchor=tk.W)
 
-        entry = ttk.Entry(frame, width=18)
+        entry = ctk.CTkEntry(frame, width=200)
         entry.pack(anchor=tk.W, pady=6)
         entry.focus()
 
@@ -488,7 +506,7 @@ class SistemaLogisticaApp:
                 messagebox.showerror("Tipagem invalida", "Informe um numero inteiro maior ou igual a zero.", parent=win)
 
         entry.bind("<Return>", update_stock)
-        ttk.Button(frame, text="Atualizar estoque", command=update_stock).pack(anchor=tk.W, pady=15)
+        ctk.CTkButton(frame, text="Atualizar estoque", font=ctk.CTkFont(weight="bold"), command=update_stock).pack(anchor=tk.W, pady=15)
 
     def _dispatch_order(self):
         selected = self.tree_pedidos.selection()
@@ -598,6 +616,6 @@ class SistemaLogisticaApp:
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ctk.CTk()
     app = SistemaLogisticaApp(root)
     root.mainloop()
