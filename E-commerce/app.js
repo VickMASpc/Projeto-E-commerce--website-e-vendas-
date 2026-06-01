@@ -3,10 +3,12 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   getFirestore,
   limit,
   query,
   setDoc,
+  where,
 } from "firebase/firestore";
 import { 
   onAuthStateChanged,
@@ -16,9 +18,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
-import firebaseConfig, { auth } from "./firebase-config.js";
+import firebaseConfig, { app, auth } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const PAGE = document.body.dataset.page || "home";
@@ -180,11 +181,43 @@ let observer = null;
 
 const AuthManager = {
   user: null,
+  profile: null,
   
   init() {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       this.user = user;
+
+      if (user) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const snap = await getDoc(userRef);
+          if (!snap.exists()) {
+            const newProfile = {
+              email: user.email,
+              name: user.displayName || "Usuario",
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(userRef, newProfile);
+            AuthManager.profile = newProfile;
+          } else {
+            AuthManager.profile = snap.data();
+          }
+        } catch(e) {
+          console.error("Erro ao gerenciar usuario no firestore:", e);
+        }
+
+        if (typeof Cart !== 'undefined') await Cart.loadFromCloud(user.uid);
+        if (typeof Wishlist !== 'undefined') await Wishlist.loadFromCloud(user.uid);
+      } else {
+        if (typeof Cart !== 'undefined') Cart.clearCloudRef();
+        if (typeof Wishlist !== 'undefined') Wishlist.clearCloudRef();
+      }
+
       renderSiteChrome();
+      setupNavbarBehavior();
+      if (typeof Cart !== 'undefined') Cart.updateBadge();
+      if (typeof Wishlist !== 'undefined') Wishlist.updateBadge();
+      
       // Se estiver na pagina de conta e deslogar, redireciona
       if (!user && PAGE === "account") {
         window.location.href = "auth.html";
@@ -677,6 +710,45 @@ function renderProducts(containerId, productList = []) {
 }
 
 const Cart = {
+  userId: null,
+
+  async loadFromCloud(uid) {
+    this.userId = uid;
+    const items = this.getItems();
+    try {
+      const docRef = doc(db, "carts", uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+         const cloudItems = snap.data().items || [];
+         const merged = [...cloudItems];
+         for (const item of items) {
+           const existing = merged.find(i => i.id === item.id);
+           if (existing) {
+             existing.qty = Math.max(existing.qty, item.qty);
+           } else {
+             merged.push(item);
+           }
+         }
+         localStorage.setItem(CART_KEY, JSON.stringify(merged));
+         if (merged.length !== cloudItems.length) {
+           await setDoc(docRef, { items: merged });
+         }
+      } else if (items.length > 0) {
+         await setDoc(docRef, { items });
+      }
+    } catch(err) {
+      console.error("Erro sincronizando cart:", err);
+    }
+    this.updateBadge();
+    if (PAGE === "cart") {
+      if (typeof renderCartPage === 'function') renderCartPage();
+    }
+  },
+
+  clearCloudRef() {
+    this.userId = null;
+  },
+
   getProduct(productId) {
     return productCache?.find((entry) => entry.id === productId) || null;
   },
@@ -722,6 +794,10 @@ const Cart = {
 
     localStorage.setItem(CART_KEY, JSON.stringify(normalizedItems));
     this.updateBadge();
+
+    if (this.userId) {
+      setDoc(doc(db, "carts", this.userId), { items: normalizedItems }).catch(console.error);
+    }
   },
 
   addItem(productOrId, name, price, imageEmoji = "📦", quantity = 1) {
@@ -822,6 +898,37 @@ const Cart = {
 };
 
 const Wishlist = {
+  userId: null,
+
+  async loadFromCloud(uid) {
+    this.userId = uid;
+    const items = this.getItems();
+    try {
+      const docRef = doc(db, "wishlists", uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudItems = snap.data().items || [];
+        const merged = Array.from(new Set([...cloudItems, ...items]));
+        localStorage.setItem(WISHLIST_KEY, JSON.stringify(merged));
+        if (merged.length !== cloudItems.length) {
+          await setDoc(docRef, { items: merged });
+        }
+      } else if (items.length > 0) {
+        await setDoc(docRef, { items });
+      }
+    } catch(err) {
+       console.error("Erro sincronizando wishlist:", err);
+    }
+    this.updateBadge();
+    if (PAGE === "favorites") {
+      if (typeof initFavoritesPage === 'function') initFavoritesPage();
+    }
+  },
+  
+  clearCloudRef() {
+    this.userId = null;
+  },
+
   getItems() {
     try {
       return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
@@ -833,6 +940,10 @@ const Wishlist = {
   save(items) {
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
     this.updateBadge();
+
+    if (this.userId) {
+      setDoc(doc(db, "wishlists", this.userId), { items }).catch(console.error);
+    }
   },
 
   hasItem(productId) {
@@ -1611,11 +1722,12 @@ function createCartMedia(item) {
 }
 
 function readCheckoutDraft() {
+  const p = AuthManager.profile || {};
   return {
-    name: document.getElementById("checkout-name")?.value.trim() || "",
-    email: document.getElementById("checkout-email")?.value.trim() || "",
-    phone: document.getElementById("checkout-phone")?.value.trim() || "",
-    address: document.getElementById("checkout-address")?.value.trim() || "",
+    name: document.getElementById("checkout-name")?.value.trim() || p.name || AuthManager.user?.displayName || "",
+    email: document.getElementById("checkout-email")?.value.trim() || p.email || AuthManager.user?.email || "",
+    phone: document.getElementById("checkout-phone")?.value.trim() || p.phone || "",
+    address: document.getElementById("checkout-address")?.value.trim() || p.address || "",
   };
 }
 
@@ -1762,8 +1874,15 @@ async function handleCheckout() {
       userId: AuthManager.user?.uid || null
     });
 
-    Cart.clear();
-    renderCartPage();
+    if (AuthManager.user) {
+      Cart.clear();
+      // Em produção, se o pedido deu certo, limpamos a nuvem também
+      setDoc(doc(db, "carts", AuthManager.user.uid), { items: [] }).catch(console.error);
+    } else {
+      Cart.clear();
+    }
+    
+    if (typeof renderCartPage === 'function') renderCartPage();
     Cart.showToast(`Pedido ${orderId} confirmado.`);
   } catch (error) {
     console.error(error);
@@ -1924,9 +2043,53 @@ async function initAccountPage() {
   const emailEl = document.getElementById("user-email");
   const avatarEl = document.getElementById("user-avatar");
 
-  if (nameEl) nameEl.textContent = user.displayName || "Usuario";
-  if (emailEl) emailEl.textContent = user.email;
-  if (avatarEl && user.displayName) avatarEl.textContent = user.displayName[0].toUpperCase();
+  const profileForm = document.getElementById("profile-form");
+  const profileEmail = document.getElementById("profile-email");
+  const profileName = document.getElementById("profile-name");
+  const profilePhone = document.getElementById("profile-phone");
+  const profileAddress = document.getElementById("profile-address");
+
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      const displayName = data.name || user.displayName || "Usuario";
+      if (nameEl) nameEl.textContent = displayName;
+      if (emailEl) emailEl.textContent = data.email || user.email;
+      if (avatarEl) avatarEl.textContent = displayName[0].toUpperCase();
+
+      if (profileEmail) profileEmail.value = data.email || user.email;
+      if (profileName) profileName.value = displayName;
+      if (profilePhone) profilePhone.value = data.phone || "";
+      if (profileAddress) profileAddress.value = data.address || "";
+    }
+  } catch (err) {
+    console.error("Erro ao carregar perfil:", err);
+  }
+
+  if (profileForm) {
+    profileForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = profileForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Salvando...";
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          name: profileName?.value.trim() || "",
+          email: profileEmail?.value || "",
+          phone: profilePhone?.value.trim() || "",
+          address: profileAddress?.value.trim() || ""
+        }, { merge: true });
+        Cart.showToast("Perfil atualizado!");
+        if (nameEl) nameEl.textContent = profileName.value.trim();
+        if (avatarEl) avatarEl.textContent = profileName.value.trim()[0].toUpperCase();
+      } catch(err) {
+        Cart.showToast("Erro ao salvar.");
+      }
+      btn.disabled = false;
+      btn.textContent = "Salvar alteracoes";
+    });
+  }
 
   const logoutBtn = document.getElementById("btn-logout");
   if (logoutBtn) {
@@ -1954,12 +2117,10 @@ async function loadUserOrders(userId) {
   if (!list) return;
 
   try {
-    const q = query(collection(db, "pedidos"), limit(20)); // Aqui deveriamos filtrar por clienteId
-    // Nota: Atualmente os pedidos nao salvam o userId, vamos filtrar localmente enquanto nao alteramos o createOrder
+    const q = query(collection(db, "pedidos"), where("clienteId", "==", userId), limit(20));
     const snapshot = await getDocs(q);
     const orders = snapshot.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(o => o.clienteEmail === auth.currentUser.email); // Provisorio
+      .map(d => ({ id: d.id, ...d.data() }));
 
     if (orders.length === 0) {
       list.innerHTML = `<div class="empty-state"><p>Voce ainda nao realizou nenhum pedido.</p></div>`;
