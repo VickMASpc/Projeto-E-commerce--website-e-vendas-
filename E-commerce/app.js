@@ -1,4 +1,3 @@
-import { initializeApp } from "firebase/app";
 import {
   addDoc,
   collection,
@@ -9,7 +8,15 @@ import {
   query,
   setDoc,
 } from "firebase/firestore";
-import firebaseConfig from "./firebase-config.js";
+import { 
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "firebase/auth";
+import firebaseConfig, { auth } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -171,6 +178,74 @@ let productCachePromise = null;
 let searchState = { open: false };
 let observer = null;
 
+const AuthManager = {
+  user: null,
+  
+  init() {
+    onAuthStateChanged(auth, (user) => {
+      this.user = user;
+      renderSiteChrome();
+      // Se estiver na pagina de conta e deslogar, redireciona
+      if (!user && PAGE === "account") {
+        window.location.href = "auth.html";
+      }
+    });
+  },
+
+  async login(email, password) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no login:", error);
+      return { success: false, message: this.getFriendlyError(error.code) };
+    }
+  },
+
+  async register(email, password) {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no cadastro:", error);
+      return { success: false, message: this.getFriendlyError(error.code) };
+    }
+  },
+
+  async loginWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no Google Login:", error);
+      return { success: false, message: "Falha ao entrar com Google." };
+    }
+  },
+
+  async logout() {
+    try {
+      await signOut(auth);
+      Cart.showToast("Sessao encerrada.");
+      return true;
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      return false;
+    }
+  },
+
+  getFriendlyError(code) {
+    switch (code) {
+      case "auth/user-not-found": return "Usuario nao encontrado.";
+      case "auth/wrong-password": return "Senha incorreta.";
+      case "auth/email-already-in-use": return "E-mail ja cadastrado.";
+      case "auth/weak-password": return "Senha muito fraca.";
+      case "auth/invalid-email": return "E-mail invalido.";
+      default: return "Ocorreu um erro. Tente novamente.";
+    }
+  }
+};
+
 const FirebaseDB = {
   async getProducts(count = DEFAULT_PRODUCT_LIMIT) {
     try {
@@ -230,6 +305,7 @@ const FirebaseDB = {
 
       const orderId = `ord-${Date.now().toString().slice(-6)}`;
       const payload = {
+        clienteId: AuthManager.user?.uid || null,
         clienteNome: orderData.customer?.name || "Cliente",
         clienteEmail: orderData.customer?.email || "",
         clienteTelefone: orderData.customer?.phone || "",
@@ -852,9 +928,18 @@ function buildHeader() {
               </svg>
               <span class="navbar__cart-badge" id="cart-count">0</span>
             </a>
-            <a href="#" class="navbar__btn-primary" data-toast="Area de clientes em breve.">
-              Minha conta
-            </a>
+            ${AuthManager.user 
+              ? `
+                <a href="account.html" class="navbar__btn-primary">
+                  Minha conta
+                </a>
+              `
+              : `
+                <a href="auth.html" class="navbar__btn-primary">
+                  Entrar
+                </a>
+              `
+            }
           </div>
         </div>
 
@@ -869,7 +954,10 @@ function buildHeader() {
           .join("")}
         <a href="favoritos.html" class="mobile-menu__link">Favoritos</a>
         <a href="carrinho.html" class="mobile-menu__link">Carrinho</a>
-        <a href="#" class="mobile-menu__cta" data-toast="Area de clientes em breve.">Minha conta</a>
+        ${AuthManager.user 
+          ? `<a href="account.html" class="mobile-menu__cta">Minha conta</a>`
+          : `<a href="auth.html" class="mobile-menu__cta">Entrar</a>`
+        }
       </div>
     </nav>
   `;
@@ -1671,6 +1759,7 @@ async function handleCheckout() {
         unit_price: item.price,
         quantity: item.qty,
       })),
+      userId: AuthManager.user?.uid || null
     });
 
     Cart.clear();
@@ -1745,7 +1834,158 @@ function initNewsletter() {
   });
 }
 
+function initAuthPage() {
+  const loginCard = document.getElementById("login-card");
+  const registerCard = document.getElementById("register-card");
+  const showRegister = document.getElementById("show-register");
+  const showLogin = document.getElementById("show-login");
+
+  if (showRegister && showLogin && loginCard && registerCard) {
+    showRegister.addEventListener("click", (e) => {
+      e.preventDefault();
+      loginCard.hidden = true;
+      registerCard.hidden = false;
+    });
+    showLogin.addEventListener("click", (e) => {
+      e.preventDefault();
+      registerCard.hidden = true;
+      loginCard.hidden = false;
+    });
+  }
+
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value;
+      const pass = document.getElementById("login-password").value;
+      const btn = loginForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Entrando...";
+      
+      const res = await AuthManager.login(email, pass);
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+        btn.disabled = false;
+        btn.textContent = "Entrar";
+      }
+    });
+  }
+
+  const registerForm = document.getElementById("register-form");
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("register-email").value;
+      const pass = document.getElementById("register-password").value;
+      const btn = registerForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Criando...";
+
+      const res = await AuthManager.register(email, pass);
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+        btn.disabled = false;
+        btn.textContent = "Criar conta";
+      }
+    });
+  }
+
+  const btnGoogle = document.getElementById("btn-google-login");
+  if (btnGoogle) {
+    btnGoogle.addEventListener("click", async () => {
+      const res = await AuthManager.loginWithGoogle();
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+      }
+    });
+  }
+}
+
+async function initAccountPage() {
+  // Redireciona se nao logado (init ja trata, mas garantimos aqui)
+  if (!AuthManager.user && !auth.currentUser) {
+    // Aguarda um pouco o estado do firebase
+    await new Promise(r => setTimeout(r, 1000));
+    if (!auth.currentUser) {
+      window.location.href = "auth.html";
+      return;
+    }
+  }
+
+  const user = auth.currentUser;
+  const nameEl = document.getElementById("user-display-name");
+  const emailEl = document.getElementById("user-email");
+  const avatarEl = document.getElementById("user-avatar");
+
+  if (nameEl) nameEl.textContent = user.displayName || "Usuario";
+  if (emailEl) emailEl.textContent = user.email;
+  if (avatarEl && user.displayName) avatarEl.textContent = user.displayName[0].toUpperCase();
+
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => AuthManager.logout());
+  }
+
+  // Abas
+  const navItems = document.querySelectorAll(".account-nav-item[data-tab]");
+  navItems.forEach(item => {
+    item.addEventListener("click", () => {
+      const tab = item.dataset.tab;
+      document.querySelectorAll("[id^='tab-']").forEach(t => t.hidden = true);
+      document.getElementById(`tab-${tab}`).hidden = false;
+      navItems.forEach(n => n.classList.remove("is-active"));
+      item.classList.add("is-active");
+    });
+  });
+
+  // Carregar pedidos
+  loadUserOrders(user.uid);
+}
+
+async function loadUserOrders(userId) {
+  const list = document.getElementById("orders-list");
+  if (!list) return;
+
+  try {
+    const q = query(collection(db, "pedidos"), limit(20)); // Aqui deveriamos filtrar por clienteId
+    // Nota: Atualmente os pedidos nao salvam o userId, vamos filtrar localmente enquanto nao alteramos o createOrder
+    const snapshot = await getDocs(q);
+    const orders = snapshot.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(o => o.clienteEmail === auth.currentUser.email); // Provisorio
+
+    if (orders.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Voce ainda nao realizou nenhum pedido.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = orders.map(order => `
+      <div class="order-item">
+        <div class="order-header">
+          <strong>Pedido #${order.id.slice(-6)}</strong>
+          <span class="order-status is-${order.status}">${order.status}</span>
+        </div>
+        <div class="order-body">
+          <p>${order.itens.length} ${order.itens.length === 1 ? "item" : "itens"} · ${formatPrice(order.total)}</p>
+          <span class="order-date">${new Date(order.dataCriacao).toLocaleDateString("pt-BR")}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `<p>Erro ao carregar pedidos.</p>`;
+  }
+}
+
 async function initPage() {
+  AuthManager.init();
   renderSiteChrome();
   setupNavbarBehavior();
   Cart.updateBadge();
@@ -1771,11 +2011,18 @@ async function initPage() {
   if (PAGE === "cart") {
     renderCartPage();
   }
+  if (PAGE === "auth") {
+    initAuthPage();
+  }
+  if (PAGE === "account") {
+    initAccountPage();
+  }
 }
 
 window.FirebaseDB = FirebaseDB;
 window.renderProducts = renderProducts;
 window.Cart = Cart;
 window.Wishlist = Wishlist;
+window.AuthManager = AuthManager;
 
 initPage();

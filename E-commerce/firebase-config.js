@@ -1,4 +1,6 @@
-// Configuração do Firebase — Cole suas credenciais aqui
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDM1aX1N4UQVhhl1RGn_tAXrAxh9mtjZY4",
   authDomain: "ecommerce-74d5c.firebaseapp.com",
@@ -9,4 +11,8 @@ const firebaseConfig = {
   measurementId: "G-QQENVYKVZH"
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+export { auth };
 export default firebaseConfig;
