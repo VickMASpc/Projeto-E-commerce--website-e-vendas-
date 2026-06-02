@@ -15,6 +15,7 @@ import {
   signOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
@@ -182,6 +183,33 @@ let observer = null;
 const AuthManager = {
   user: null,
   profile: null,
+
+  async ensureUserDocuments(user, overrides = {}) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    const baseProfile = {
+      email: user.email || "",
+      name: overrides.name || user.displayName || "Usuario"
+    };
+
+    if (!snap.exists()) {
+      const newProfile = {
+        ...baseProfile,
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(userRef, newProfile);
+      this.profile = newProfile;
+    } else {
+      const existing = snap.data();
+      this.profile = { ...baseProfile, ...existing };
+      await setDoc(userRef, baseProfile, { merge: true });
+    }
+
+    await Promise.all([
+      setDoc(doc(db, "carts", user.uid), { items: [] }, { merge: true }),
+      setDoc(doc(db, "wishlists", user.uid), { items: [] }, { merge: true })
+    ]);
+  },
   
   init() {
     onAuthStateChanged(auth, async (user) => {
@@ -189,19 +217,7 @@ const AuthManager = {
 
       if (user) {
         try {
-          const userRef = doc(db, "users", user.uid);
-          const snap = await getDoc(userRef);
-          if (!snap.exists()) {
-            const newProfile = {
-              email: user.email,
-              name: user.displayName || "Usuario",
-              createdAt: new Date().toISOString()
-            };
-            await setDoc(userRef, newProfile);
-            AuthManager.profile = newProfile;
-          } else {
-            AuthManager.profile = snap.data();
-          }
+          await this.ensureUserDocuments(user);
         } catch(e) {
           console.error("Erro ao gerenciar usuario no firestore:", e);
         }
@@ -235,9 +251,13 @@ const AuthManager = {
     }
   },
 
-  async register(email, password) {
+  async register(name, email, password) {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      if (name?.trim()) {
+        await updateProfile(credential.user, { displayName: name.trim() });
+      }
+      await this.ensureUserDocuments(credential.user, { name: name?.trim() || "Usuario" });
       return { success: true };
     } catch (error) {
       console.error("Erro no cadastro:", error);
@@ -1997,13 +2017,14 @@ function initAuthPage() {
   if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const name = document.getElementById("register-name").value;
       const email = document.getElementById("register-email").value;
       const pass = document.getElementById("register-password").value;
       const btn = registerForm.querySelector("button");
       btn.disabled = true;
       btn.textContent = "Criando...";
 
-      const res = await AuthManager.register(email, pass);
+      const res = await AuthManager.register(name, email, pass);
       if (res.success) {
         window.location.href = "account.html";
       } else {
