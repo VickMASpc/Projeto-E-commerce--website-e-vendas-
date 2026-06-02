@@ -29,6 +29,10 @@ if USE_FIREBASE:
 DB_FILE = os.path.join(os.path.dirname(__file__), "db_mock.json")
 
 
+def _now_iso():
+    return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+
 SEED_PRODUCTS = [
     {
         "id": "perf-1",
@@ -422,6 +426,7 @@ def normalize_order(order, fallback_id=None):
 
     return {
         "id": order.get("id") or fallback_id or "",
+        "customer_id": order.get("customer_id") or order.get("clienteId") or order.get("userId") or customer.get("id") or None,
         "customer_name": order.get("customer_name") or order.get("clienteNome") or customer.get("name") or "Cliente",
         "customer_email": order.get("customer_email") or order.get("clienteEmail") or customer.get("email") or "",
         "customer_phone": order.get("customer_phone") or order.get("clienteTelefone") or customer.get("phone") or "",
@@ -429,7 +434,9 @@ def normalize_order(order, fallback_id=None):
         "items": normalized_items,
         "total": total,
         "status": str(order.get("status") or "pendente").lower(),
-        "created_at": order.get("created_at") or order.get("dataCriacao") or datetime.now().strftime("%d/%m/%Y %H:%M"),
+        "created_at": order.get("created_at") or order.get("dataCriacao") or _now_iso(),
+        "updated_at": order.get("updated_at") or order.get("atualizadoEm") or _now_iso(),
+        "schema_version": int(order.get("schema_version") or order.get("schemaVersion") or 2),
     }
 
 
@@ -668,7 +675,8 @@ def create_local_order(order):
                 txn.update(product_ref, {"stock": current_stock - item["quantity"]})
 
             normalized["status"] = "pago"
-            normalized["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+            normalized["created_at"] = _now_iso()
+            normalized["updated_at"] = normalized["created_at"]
             order_ref = db.collection("pedidos").document(normalized["id"])
             txn.set(order_ref, normalized)
             return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
@@ -712,7 +720,8 @@ def create_local_order(order):
             product["stock"] = int(product.get("stock", 0)) - item["quantity"]
 
     normalized["status"] = "pago"
-    normalized["created_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    normalized["created_at"] = _now_iso()
+    normalized["updated_at"] = normalized["created_at"]
     data["pedidos"].append(normalized)
     _write_db(data)
     return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
@@ -721,7 +730,10 @@ def create_local_order(order):
 def update_order_status(pedido_id, novo_status):
     if USE_FIREBASE and db is not None:
         try:
-            db.collection("pedidos").document(pedido_id).update({"status": novo_status})
+            db.collection("pedidos").document(pedido_id).update({
+                "status": novo_status,
+                "updated_at": _now_iso(),
+            })
             return
         except Exception as error:
             print(f"Erro ao atualizar status no Firebase: {error}")
@@ -730,6 +742,7 @@ def update_order_status(pedido_id, novo_status):
     for order in data["pedidos"]:
         if order["id"] == pedido_id:
             order["status"] = novo_status
+            order["updated_at"] = _now_iso()
             break
     _write_db(data)
 

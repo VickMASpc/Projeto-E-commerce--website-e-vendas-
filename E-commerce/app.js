@@ -29,6 +29,61 @@ const WISHLIST_KEY = "minhaloja_wishlist";
 const DEFAULT_PRODUCT_LIMIT = 60;
 const MAX_CART_QUANTITY = 99;
 
+function nowIsoString() {
+  return new Date().toISOString();
+}
+
+function parseDateValue(value) {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value?.toDate === "function") {
+    return value.toDate().getTime();
+  }
+
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  if (typeof value === "string") {
+    const direct = Date.parse(value);
+    if (Number.isFinite(direct)) {
+      return direct;
+    }
+
+    const parts = value.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+    if (parts) {
+      const [, day, month, year, hour = "00", minute = "00"] = parts;
+      return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime();
+    }
+  }
+
+  return 0;
+}
+
+function getOrderItems(order) {
+  if (Array.isArray(order?.items)) {
+    return order.items;
+  }
+  if (Array.isArray(order?.itens)) {
+    return order.itens;
+  }
+  return [];
+}
+
+function getOrderCreatedAt(order) {
+  return order?.created_at || order?.dataCriacao || "";
+}
+
+function formatOrderDate(value) {
+  const timestamp = parseDateValue(value);
+  if (!timestamp) {
+    return "Data indisponivel";
+  }
+  return new Date(timestamp).toLocaleDateString("pt-BR");
+}
+
 const CATEGORY_THEMES = {
   Masculino: { start: "#0f172a", end: "#1e293b", accent: "#d4af37", emoji: "🖤" },
   Feminino: { start: "#7f1d1d", end: "#be185d", accent: "#f9a8d4", emoji: "🌸" },
@@ -187,27 +242,37 @@ const AuthManager = {
   async ensureUserDocuments(user, overrides = {}) {
     const userRef = doc(db, "users", user.uid);
     const snap = await getDoc(userRef);
-    const baseProfile = {
-      email: user.email || "",
-      name: overrides.name || user.displayName || "Usuario"
+    const existing = snap.exists() ? snap.data() : {};
+    const nextProfile = {
+      email: user.email || existing.email || "",
+      name: overrides.name || existing.name || user.displayName || "Usuario",
+      phone: existing.phone || "",
+      address: existing.address || "",
+      updatedAt: nowIsoString(),
     };
 
     if (!snap.exists()) {
-      const newProfile = {
-        ...baseProfile,
-        createdAt: new Date().toISOString()
-      };
-      await setDoc(userRef, newProfile);
-      this.profile = newProfile;
-    } else {
-      const existing = snap.data();
-      this.profile = { ...baseProfile, ...existing };
-      await setDoc(userRef, baseProfile, { merge: true });
+      nextProfile.createdAt = nowIsoString();
+    } else if (existing.createdAt) {
+      nextProfile.createdAt = existing.createdAt;
     }
 
+    await setDoc(userRef, nextProfile, { merge: true });
+    this.profile = { ...existing, ...nextProfile };
+
     await Promise.all([
-      setDoc(doc(db, "carts", user.uid), { items: [] }, { merge: true }),
-      setDoc(doc(db, "wishlists", user.uid), { items: [] }, { merge: true })
+      setDoc(doc(db, "carts", user.uid), {
+        ownerId: user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true }),
+      setDoc(doc(db, "wishlists", user.uid), {
+        ownerId: user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true })
     ]);
   },
   
@@ -315,7 +380,7 @@ const FirebaseDB = {
     try {
       await addDoc(collection(db, "newsletter"), {
         email,
-        createdAt: new Date(),
+        createdAt: nowIsoString(),
       });
       return true;
     } catch (error) {
@@ -327,7 +392,11 @@ const FirebaseDB = {
   async createOrder(orderData) {
     try {
       const localOrderPayload = {
-        customer: orderData.customer || {},
+        customer: {
+          ...(orderData.customer || {}),
+          id: orderData.userId || orderData.customer?.id || null,
+        },
+        customer_id: orderData.userId || orderData.customer?.id || null,
         total: orderData.total || 0,
         items: (orderData.items || []).map((item) => ({
           product_id: item.product_id || item.id || "",
@@ -358,20 +427,22 @@ const FirebaseDB = {
 
       const orderId = `ord-${Date.now().toString().slice(-6)}`;
       const payload = {
-        clienteId: AuthManager.user?.uid || null,
-        clienteNome: orderData.customer?.name || "Cliente",
-        clienteEmail: orderData.customer?.email || "",
-        clienteTelefone: orderData.customer?.phone || "",
-        clienteEndereco: orderData.customer?.address || "",
-        itens: (orderData.items || []).map((item) => ({
-          produtoId: item.product_id || item.id || "",
-          produtoNome: item.name || item.product_name || "Produto",
-          preco: item.price || item.unit_price || 0,
-          quantidade: item.quantity || 1,
+        customer_id: orderData.userId || AuthManager.user?.uid || null,
+        customer_name: orderData.customer?.name || "Cliente",
+        customer_email: orderData.customer?.email || "",
+        customer_phone: orderData.customer?.phone || "",
+        customer_address: orderData.customer?.address || "",
+        items: (orderData.items || []).map((item) => ({
+          product_id: item.product_id || item.id || "",
+          product_name: item.name || item.product_name || "Produto",
+          unit_price: item.price || item.unit_price || 0,
+          quantity: item.quantity || 1,
         })),
         total: orderData.total || 0,
         status: "pendente",
-        dataCriacao: new Date().toISOString(),
+        created_at: nowIsoString(),
+        updated_at: nowIsoString(),
+        schemaVersion: 2,
       };
 
       await setDoc(doc(db, "pedidos", orderId), payload);
@@ -749,12 +820,22 @@ const Cart = {
              merged.push(item);
            }
          }
-         localStorage.setItem(CART_KEY, JSON.stringify(merged));
-         if (merged.length !== cloudItems.length) {
-           await setDoc(docRef, { items: merged });
+        localStorage.setItem(CART_KEY, JSON.stringify(merged));
+        if (merged.length !== cloudItems.length) {
+           await setDoc(docRef, {
+             ownerId: uid,
+             schemaVersion: 2,
+             updatedAt: nowIsoString(),
+             items: merged,
+           }, { merge: true });
          }
       } else if (items.length > 0) {
-         await setDoc(docRef, { items });
+         await setDoc(docRef, {
+           ownerId: uid,
+           schemaVersion: 2,
+           updatedAt: nowIsoString(),
+           items,
+         }, { merge: true });
       }
     } catch(err) {
       console.error("Erro sincronizando cart:", err);
@@ -816,7 +897,12 @@ const Cart = {
     this.updateBadge();
 
     if (this.userId) {
-      setDoc(doc(db, "carts", this.userId), { items: normalizedItems }).catch(console.error);
+      setDoc(doc(db, "carts", this.userId), {
+        ownerId: this.userId,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: normalizedItems,
+      }, { merge: true }).catch(console.error);
     }
   },
 
@@ -931,10 +1017,20 @@ const Wishlist = {
         const merged = Array.from(new Set([...cloudItems, ...items]));
         localStorage.setItem(WISHLIST_KEY, JSON.stringify(merged));
         if (merged.length !== cloudItems.length) {
-          await setDoc(docRef, { items: merged });
+          await setDoc(docRef, {
+            ownerId: uid,
+            schemaVersion: 2,
+            updatedAt: nowIsoString(),
+            items: merged,
+          }, { merge: true });
         }
       } else if (items.length > 0) {
-        await setDoc(docRef, { items });
+        await setDoc(docRef, {
+          ownerId: uid,
+          schemaVersion: 2,
+          updatedAt: nowIsoString(),
+          items,
+        }, { merge: true });
       }
     } catch(err) {
        console.error("Erro sincronizando wishlist:", err);
@@ -962,7 +1058,12 @@ const Wishlist = {
     this.updateBadge();
 
     if (this.userId) {
-      setDoc(doc(db, "wishlists", this.userId), { items }).catch(console.error);
+      setDoc(doc(db, "wishlists", this.userId), {
+        ownerId: this.userId,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items,
+      }, { merge: true }).catch(console.error);
     }
   },
 
@@ -1897,7 +1998,12 @@ async function handleCheckout() {
     if (AuthManager.user) {
       Cart.clear();
       // Em produção, se o pedido deu certo, limpamos a nuvem também
-      setDoc(doc(db, "carts", AuthManager.user.uid), { items: [] }).catch(console.error);
+      setDoc(doc(db, "carts", AuthManager.user.uid), {
+        ownerId: AuthManager.user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true }).catch(console.error);
     } else {
       Cart.clear();
     }
@@ -2095,15 +2201,32 @@ async function initAccountPage() {
       btn.disabled = true;
       btn.textContent = "Salvando...";
       try {
+        const nextName = profileName?.value.trim() || AuthManager.profile?.name || user.displayName || "Usuario";
+        const nextPhone = profilePhone?.value.trim() || "";
+        const nextAddress = profileAddress?.value.trim() || "";
+        const updatedAt = nowIsoString();
+        if (nextName && nextName !== user.displayName) {
+          await updateProfile(user, { displayName: nextName });
+        }
         await setDoc(doc(db, "users", user.uid), {
-          name: profileName?.value.trim() || "",
-          email: profileEmail?.value || "",
-          phone: profilePhone?.value.trim() || "",
-          address: profileAddress?.value.trim() || ""
+          name: nextName,
+          email: user.email || AuthManager.profile?.email || "",
+          phone: nextPhone,
+          address: nextAddress,
+          updatedAt,
         }, { merge: true });
+        AuthManager.profile = {
+          ...(AuthManager.profile || {}),
+          name: nextName,
+          email: user.email || AuthManager.profile?.email || "",
+          phone: nextPhone,
+          address: nextAddress,
+          updatedAt,
+        };
         Cart.showToast("Perfil atualizado!");
-        if (nameEl) nameEl.textContent = profileName.value.trim();
-        if (avatarEl) avatarEl.textContent = profileName.value.trim()[0].toUpperCase();
+        if (nameEl) nameEl.textContent = AuthManager.profile.name;
+        if (emailEl) emailEl.textContent = AuthManager.profile.email;
+        if (avatarEl) avatarEl.textContent = AuthManager.profile.name[0].toUpperCase();
       } catch(err) {
         Cart.showToast("Erro ao salvar.");
       }
@@ -2130,7 +2253,7 @@ async function initAccountPage() {
   });
 
   // Carregar pedidos
-  loadUserOrders(user.uid);
+  loadUserOrdersV2(user.uid);
 }
 
 async function loadUserOrders(userId) {
@@ -2160,6 +2283,48 @@ async function loadUserOrders(userId) {
         </div>
       </div>
     `).join("");
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `<p>Erro ao carregar pedidos.</p>`;
+  }
+}
+
+async function loadUserOrdersV2(userId) {
+  const list = document.getElementById("orders-list");
+  if (!list) return;
+
+  try {
+    const [primarySnapshot, legacySnapshot] = await Promise.all([
+      getDocs(query(collection(db, "pedidos"), where("customer_id", "==", userId), limit(20))),
+      getDocs(query(collection(db, "pedidos"), where("clienteId", "==", userId), limit(20))),
+    ]);
+    const orderMap = new Map();
+    [...primarySnapshot.docs, ...legacySnapshot.docs].forEach((entry) => {
+      orderMap.set(entry.id, { id: entry.id, ...entry.data() });
+    });
+    const orders = Array.from(orderMap.values())
+      .sort((a, b) => parseDateValue(getOrderCreatedAt(b)) - parseDateValue(getOrderCreatedAt(a)));
+
+    if (orders.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Voce ainda nao realizou nenhum pedido.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = orders.map((order) => {
+      const items = getOrderItems(order);
+      return `
+      <div class="order-item">
+        <div class="order-header">
+          <strong>Pedido #${order.id.slice(-6)}</strong>
+          <span class="order-status is-${order.status}">${order.status}</span>
+        </div>
+        <div class="order-body">
+          <p>${items.length} ${items.length === 1 ? "item" : "itens"} · ${formatPrice(order.total)}</p>
+          <span class="order-date">${formatOrderDate(getOrderCreatedAt(order))}</span>
+        </div>
+      </div>
+    `;
+    }).join("");
   } catch (err) {
     console.error(err);
     list.innerHTML = `<p>Erro ao carregar pedidos.</p>`;
