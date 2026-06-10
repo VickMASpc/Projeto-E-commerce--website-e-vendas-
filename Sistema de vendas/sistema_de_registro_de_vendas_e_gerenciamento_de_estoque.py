@@ -65,19 +65,19 @@ class SistemaLogisticaApp:
         selected_bg = "#1f538d"
 
         style.configure(
-            "Treeview", 
-            background=bg_color, 
-            foreground=fg_color, 
-            fieldbackground=bg_color, 
-            rowheight=25, 
-            borderwidth=0, 
+            "Treeview",
+            background=bg_color,
+            foreground=fg_color,
+            fieldbackground=bg_color,
+            rowheight=25,
+            borderwidth=0,
             font=("Helvetica", 11)
         )
         style.configure(
-            "Treeview.Heading", 
-            background=header_bg, 
-            foreground=header_fg, 
-            relief="flat", 
+            "Treeview.Heading",
+            background=header_bg,
+            foreground=header_fg,
+            relief="flat",
             font=("Helvetica", 12, "bold")
         )
         style.map("Treeview", background=[("selected", selected_bg)])
