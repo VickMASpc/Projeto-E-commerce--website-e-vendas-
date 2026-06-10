@@ -578,16 +578,26 @@ class SistemaLogisticaApp:
                         return
 
                 def do_POST(self):
+                    try:
+                        content_length = int(self.headers.get("Content-Length", 0))
+                        payload = json.loads(self.rfile.read(content_length) or b"{}")
+                    except (ValueError, json.JSONDecodeError):
+                        self._send_json(400, {"status": "error", "message": "Payload invalido."})
+                        return
+
+                    if self.path == "/coupon/validate":
+                        result = database.validate_coupon(
+                            payload.get("code"),
+                            payload.get("subtotal"),
+                        )
+                        self._send_json(200, result)
+                        return
+
                     if self.path != "/order":
                         self._send_json(404, {"status": "error", "message": "Rota nao encontrada."})
                         return
 
-                    try:
-                        content_length = int(self.headers.get("Content-Length", 0))
-                        order = json.loads(self.rfile.read(content_length) or b"{}")
-                    except (ValueError, json.JSONDecodeError):
-                        self._send_json(400, {"status": "error", "message": "Pedido invalido."})
-                        return
+                    order = payload
 
                     result = database.create_local_order(order)
                     if not result["ok"]:

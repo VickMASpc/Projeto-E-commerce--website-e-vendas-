@@ -253,6 +253,43 @@ DEFAULT_PRODUCT = {
     "images": [],
 }
 
+DEFAULT_COUPON = {
+    "code": "",
+    "type": "percent",
+    "value": 0.0,
+    "active": False,
+    "min_subtotal": 0.0,
+    "max_discount": None,
+    "expires_at": None,
+    "usage_limit": None,
+}
+
+SEED_COUPONS = [
+    {
+        "code": "BEMVINDO10",
+        "type": "percent",
+        "value": 10,
+        "active": True,
+        "min_subtotal": 250,
+        "max_discount": 180,
+    },
+    {
+        "code": "VIP150",
+        "type": "fixed",
+        "value": 150,
+        "active": True,
+        "min_subtotal": 1200,
+        "usage_limit": 25,
+    },
+    {
+        "code": "INATIVO5",
+        "type": "percent",
+        "value": 5,
+        "active": False,
+        "min_subtotal": 0,
+    },
+]
+
 
 SEED_PRODUCTS_BY_ID = {product["id"]: deepcopy(product) for product in SEED_PRODUCTS}
 SEED_PRODUCTS_BY_NAME = {
@@ -294,6 +331,39 @@ def _parse_list(value):
     for separator in separators[1:]:
         text = text.replace(separator, separators[0])
     return [item.strip() for item in text.split(separators[0]) if item.strip()]
+
+
+def _parse_optional_date(value):
+    if not value:
+        return None
+    parsed = _parse_date(value)
+    return parsed if parsed.year > 1970 else None
+
+
+def _normalize_coupon_type(value):
+    coupon_type = str(value or "percent").strip().lower()
+    return coupon_type if coupon_type in {"percent", "fixed"} else "percent"
+
+
+def normalize_coupon(coupon):
+    coupon = coupon or {}
+    normalized = deepcopy(DEFAULT_COUPON)
+    normalized.update(coupon)
+
+    code = str(normalized.get("code", "")).strip().upper()
+    max_discount = normalized.get("max_discount")
+    usage_limit = normalized.get("usage_limit")
+
+    return {
+        "code": code,
+        "type": _normalize_coupon_type(normalized.get("type")),
+        "value": max(_to_float(normalized.get("value"), 0.0), 0.0),
+        "active": _to_bool(normalized.get("active")),
+        "min_subtotal": max(_to_float(normalized.get("min_subtotal"), 0.0), 0.0),
+        "max_discount": max(_to_float(max_discount, 0.0), 0.0) if max_discount not in (None, "") else None,
+        "expires_at": normalized.get("expires_at") or None,
+        "usage_limit": max(_to_int(usage_limit, 0), 0) if usage_limit not in (None, "") else None,
+    }
 
 
 def normalize_product(product):
@@ -419,10 +489,14 @@ def normalize_order(order, fallback_id=None):
     customer = order.get("customer") or {}
     items = order.get("items") or order.get("itens") or []
     normalized_items = [_normalize_order_item(item) for item in items]
-    total = _to_float(
-        order.get("total"),
+    subtotal = _to_float(
+        order.get("subtotal"),
         sum(item["quantity"] * item["unit_price"] for item in normalized_items),
     )
+    shipping = _to_float(order.get("shipping"), 0.0)
+    discount_total = _to_float(order.get("discount_total", order.get("discount")), 0.0)
+    total = _to_float(order.get("total"), subtotal - discount_total + shipping)
+    coupon_code = str(order.get("coupon_code") or order.get("couponCode") or "").strip().upper() or None
 
     return {
         "id": order.get("id") or fallback_id or "",
@@ -432,6 +506,10 @@ def normalize_order(order, fallback_id=None):
         "customer_phone": order.get("customer_phone") or order.get("clienteTelefone") or customer.get("phone") or "",
         "customer_address": order.get("customer_address") or order.get("clienteEndereco") or customer.get("address") or "",
         "items": normalized_items,
+        "subtotal": subtotal,
+        "shipping": shipping,
+        "discount_total": max(discount_total, 0.0),
+        "coupon_code": coupon_code,
         "total": total,
         "status": str(order.get("status") or "pendente").lower(),
         "created_at": order.get("created_at") or order.get("dataCriacao") or _now_iso(),
@@ -443,6 +521,7 @@ def normalize_order(order, fallback_id=None):
 def _initial_data():
     return {
         "produtos": [normalize_product(product) for product in SEED_PRODUCTS],
+        "cupons": [normalize_coupon(coupon) for coupon in SEED_COUPONS],
         "pedidos": [
             {
                 "id": "ord-001",
@@ -456,6 +535,10 @@ def _initial_data():
                         "unit_price": 920.00,
                     }
                 ],
+                "subtotal": 920.00,
+                "shipping": 0.0,
+                "discount_total": 0.0,
+                "coupon_code": None,
                 "total": 920.00,
                 "status": "enviado",
                 "created_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
@@ -477,6 +560,7 @@ def _read_db():
         data = json.load(file)
 
     data["produtos"] = [normalize_product(product) for product in data.get("produtos", [])]
+    data["cupons"] = [normalize_coupon(coupon) for coupon in data.get("cupons", SEED_COUPONS)]
     data["pedidos"] = [normalize_order(order) for order in data.get("pedidos", [])]
     data.setdefault("vendas", [])
     return data
@@ -485,6 +569,7 @@ def _read_db():
 def _write_db(data):
     clean_data = {
         "produtos": [normalize_product(product) for product in data.get("produtos", [])],
+        "cupons": [normalize_coupon(coupon) for coupon in data.get("cupons", [])],
         "pedidos": [normalize_order(order) for order in data.get("pedidos", [])],
         "vendas": data.get("vendas", []),
     }
@@ -622,6 +707,102 @@ def get_orders():
     return _read_db()["pedidos"]
 
 
+def get_coupons():
+    return _read_db()["cupons"]
+
+
+def _count_coupon_usage(coupon_code, orders):
+    code = str(coupon_code or "").strip().upper()
+    if not code:
+        return 0
+    return sum(1 for order in orders if str(order.get("coupon_code") or "").strip().upper() == code)
+
+
+def validate_coupon(code, subtotal, orders=None):
+    normalized_code = str(code or "").strip().upper()
+    subtotal_value = max(_to_float(subtotal, 0.0), 0.0)
+
+    if not normalized_code:
+        return {
+            "valid": False,
+            "code": None,
+            "discount": 0.0,
+            "message": "Informe um cupom.",
+            "adjusted_total": subtotal_value,
+        }
+
+    coupons = get_coupons()
+    coupon = next((entry for entry in coupons if entry["code"] == normalized_code), None)
+    if not coupon:
+        return {
+            "valid": False,
+            "code": normalized_code,
+            "discount": 0.0,
+            "message": "Cupom nao encontrado.",
+            "adjusted_total": subtotal_value,
+        }
+
+    if not coupon.get("active"):
+        return {
+            "valid": False,
+            "code": normalized_code,
+            "discount": 0.0,
+            "message": "Cupom inativo.",
+            "adjusted_total": subtotal_value,
+        }
+
+    expires_at = _parse_optional_date(coupon.get("expires_at"))
+    if expires_at and expires_at < datetime.utcnow():
+        return {
+            "valid": False,
+            "code": normalized_code,
+            "discount": 0.0,
+            "message": "Cupom expirado.",
+            "adjusted_total": subtotal_value,
+        }
+
+    if subtotal_value < coupon.get("min_subtotal", 0.0):
+        return {
+            "valid": False,
+            "code": normalized_code,
+            "discount": 0.0,
+            "message": f"Cupom disponivel apenas para pedidos acima de R$ {coupon['min_subtotal']:.2f}.",
+            "adjusted_total": subtotal_value,
+        }
+
+    if orders is None:
+        orders = get_orders()
+    usage_limit = coupon.get("usage_limit")
+    if usage_limit is not None and _count_coupon_usage(normalized_code, orders) >= usage_limit:
+        return {
+            "valid": False,
+            "code": normalized_code,
+            "discount": 0.0,
+            "message": "Cupom esgotado.",
+            "adjusted_total": subtotal_value,
+        }
+
+    if coupon.get("type") == "fixed":
+        discount = coupon.get("value", 0.0)
+    else:
+        discount = subtotal_value * (coupon.get("value", 0.0) / 100.0)
+
+    max_discount = coupon.get("max_discount")
+    if max_discount is not None:
+        discount = min(discount, max_discount)
+
+    discount = max(0.0, min(discount, subtotal_value))
+    adjusted_total = max(subtotal_value - discount, 0.0)
+
+    return {
+        "valid": True,
+        "code": normalized_code,
+        "discount": round(discount, 2),
+        "message": "Cupom aplicado com sucesso.",
+        "adjusted_total": round(adjusted_total, 2),
+    }
+
+
 def create_local_order(order):
     if USE_FIREBASE and db is not None:
         normalized = normalize_order(order, f"ord-{int(datetime.now().timestamp() * 1000)}")
@@ -631,6 +812,20 @@ def create_local_order(order):
                 "message": "Pedido sem itens.",
                 "order_id": None,
             }
+
+        coupon_result = validate_coupon(normalized.get("coupon_code"), normalized["subtotal"]) if normalized.get("coupon_code") else None
+        if normalized.get("coupon_code") and not coupon_result["valid"]:
+            return {
+                "ok": False,
+                "message": coupon_result["message"],
+                "order_id": None,
+            }
+
+        discount_total = coupon_result["discount"] if coupon_result else 0.0
+        expected_total = round(normalized["subtotal"] - discount_total + normalized["shipping"], 2)
+        if abs(normalized["total"] - expected_total) > 0.01:
+            normalized["total"] = expected_total
+        normalized["discount_total"] = discount_total
 
         transaction = db.transaction()
 
@@ -699,6 +894,16 @@ def create_local_order(order):
             "message": "Pedido sem itens.",
             "order_id": None,
         }
+
+    coupon_result = validate_coupon(normalized.get("coupon_code"), normalized["subtotal"], data["pedidos"]) if normalized.get("coupon_code") else None
+    if normalized.get("coupon_code") and not coupon_result["valid"]:
+        return {
+            "ok": False,
+            "message": coupon_result["message"],
+            "order_id": None,
+        }
+    normalized["discount_total"] = coupon_result["discount"] if coupon_result else 0.0
+    normalized["total"] = round(normalized["subtotal"] - normalized["discount_total"] + normalized["shipping"], 2)
 
     products_by_id = {product["id"]: product for product in data["produtos"]}
     insufficient_stock = []

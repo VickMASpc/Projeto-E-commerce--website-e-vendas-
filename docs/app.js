@@ -234,6 +234,7 @@ let productCache = null;
 let productCachePromise = null;
 let searchState = { open: false };
 let observer = null;
+let currentProductId = null;
 
 const AuthManager = {
   user: null,
@@ -397,6 +398,10 @@ const FirebaseDB = {
           id: orderData.userId || orderData.customer?.id || null,
         },
         customer_id: orderData.userId || orderData.customer?.id || null,
+        subtotal: orderData.subtotal || 0,
+        shipping: orderData.shipping || 0,
+        discount_total: orderData.discount_total || 0,
+        coupon_code: orderData.coupon_code || null,
         total: orderData.total || 0,
         items: (orderData.items || []).map((item) => ({
           product_id: item.product_id || item.id || "",
@@ -425,6 +430,10 @@ const FirebaseDB = {
         return result.order_id;
       }
 
+      if (orderData.coupon_code) {
+        throw new Error("Cupons exigem o sistema local de vendas online.");
+      }
+
       const orderId = `ord-${Date.now().toString().slice(-6)}`;
       const payload = {
         customer_id: orderData.userId || AuthManager.user?.uid || null,
@@ -436,8 +445,12 @@ const FirebaseDB = {
           product_id: item.product_id || item.id || "",
           product_name: item.name || item.product_name || "Produto",
           unit_price: item.price || item.unit_price || 0,
-          quantity: item.quantity || 1,
+            quantity: item.quantity || 1,
         })),
+        subtotal: orderData.subtotal || 0,
+        shipping: orderData.shipping || 0,
+        discount_total: orderData.discount_total || 0,
+        coupon_code: orderData.coupon_code || null,
         total: orderData.total || 0,
         status: "pendente",
         created_at: nowIsoString(),
@@ -461,6 +474,134 @@ const FirebaseDB = {
     if (containerId) {
       renderProducts(containerId, scopedProducts);
     }
+  },
+
+  async validateCoupon(code, items, subtotal) {
+    try {
+      const response = await fetch("http://localhost:5000/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          subtotal,
+          items: (items || []).map((item) => ({
+            product_id: item.id || item.product_id || "",
+            quantity: item.qty || item.quantity || 1,
+            unit_price: item.price || item.unit_price || 0,
+          })),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.message || "Nao foi possivel validar o cupom.");
+      }
+      return result;
+    } catch (error) {
+      console.error("Erro ao validar cupom:", error);
+      throw error;
+    }
+  },
+};
+
+const Reviews = {
+  buildId(productId, userId) {
+    return `${userId}__${productId}`;
+  },
+
+  async loadProductReviews(productId) {
+    try {
+      const snapshot = await getDocs(
+        query(collection(db, "reviews"), where("product_id", "==", productId), limit(50)),
+      );
+      const entries = snapshot.docs
+        .map((entry) => ({ id: entry.id, ...entry.data() }))
+        .sort((left, right) => {
+          const leftValue = parseDateValue(left.updated_at || left.created_at);
+          const rightValue = parseDateValue(right.updated_at || right.created_at);
+          return rightValue - leftValue;
+        });
+
+      const count = entries.length;
+      const average = count
+        ? entries.reduce((sum, entry) => sum + toNumber(entry.score, 0), 0) / count
+        : 0;
+      const currentUserReview = AuthManager.user
+        ? entries.find((entry) => entry.user_id === AuthManager.user.uid) || null
+        : null;
+
+      return {
+        entries,
+        count,
+        average,
+        currentUserReview,
+      };
+    } catch (error) {
+      console.error("Erro ao carregar avaliacoes:", error);
+      return {
+        entries: [],
+        count: 0,
+        average: 0,
+        currentUserReview: null,
+      };
+    }
+  },
+
+  async syncAggregate(productId, entries) {
+    const count = entries.length;
+    const average = count
+      ? entries.reduce((sum, entry) => sum + toNumber(entry.score, 0), 0) / count
+      : 0;
+    await setDoc(doc(db, "produtos", productId), {
+      rating: count ? Number(average.toFixed(1)) : 0,
+      reviews: count,
+      updatedAt: nowIsoString(),
+    }, { merge: true });
+
+    if (Array.isArray(productCache)) {
+      const current = productCache.find((entry) => entry.id === productId);
+      if (current) {
+        current.rating = count ? Number(average.toFixed(1)) : 0;
+        current.reviews = count;
+      }
+    }
+
+    return {
+      count,
+      average,
+    };
+  },
+
+  async saveProductReview(productId, payload) {
+    if (!AuthManager.user) {
+      throw new Error("Entre na sua conta para avaliar.");
+    }
+
+    const reviewRef = doc(db, "reviews", this.buildId(productId, AuthManager.user.uid));
+    const nextReview = {
+      product_id: productId,
+      user_id: AuthManager.user.uid,
+      user_name:
+        AuthManager.profile?.name ||
+        AuthManager.user.displayName ||
+        AuthManager.user.email ||
+        "Cliente",
+      score: Math.max(1, Math.min(5, Number.parseInt(payload.score, 10) || 5)),
+      title: String(payload.title || "").trim(),
+      comment: String(payload.comment || "").trim(),
+      updated_at: nowIsoString(),
+    };
+
+    const existing = await getDoc(reviewRef);
+    if (!existing.exists()) {
+      nextReview.created_at = nowIsoString();
+    } else {
+      nextReview.created_at = existing.data().created_at || nowIsoString();
+    }
+
+    await setDoc(reviewRef, nextReview, { merge: true });
+    const nextState = await this.loadProductReviews(productId);
+    await this.syncAggregate(productId, nextState.entries);
+    return this.loadProductReviews(productId);
   },
 };
 
@@ -803,9 +944,29 @@ function renderProducts(containerId, productList = []) {
 const Cart = {
   userId: null,
 
+  readStorage() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(CART_KEY));
+      if (Array.isArray(raw)) {
+        return { items: raw, coupon: null };
+      }
+      return {
+        items: Array.isArray(raw?.items) ? raw.items : [],
+        coupon: raw?.coupon || null,
+      };
+    } catch {
+      return { items: [], coupon: null };
+    }
+  },
+
+  writeStorage(payload) {
+    localStorage.setItem(CART_KEY, JSON.stringify(payload));
+  },
+
   async loadFromCloud(uid) {
     this.userId = uid;
     const items = this.getItems();
+    const coupon = this.getCoupon();
     try {
       const docRef = doc(db, "carts", uid);
       const snap = await getDoc(docRef);
@@ -820,7 +981,7 @@ const Cart = {
              merged.push(item);
            }
          }
-        localStorage.setItem(CART_KEY, JSON.stringify(merged));
+        this.writeStorage({ items: merged, coupon });
         if (merged.length !== cloudItems.length) {
            await setDoc(docRef, {
              ownerId: uid,
