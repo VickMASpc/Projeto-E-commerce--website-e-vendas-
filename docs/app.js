@@ -861,9 +861,17 @@ function createProductVisual(product, variant = "card", asset = null) {
   `;
 }
 
+function getDiscountPercentage(product) {
+  if (!product.oldPrice || product.oldPrice <= product.price) {
+    return 0;
+  }
+  return Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
+}
+
 function createProductCard(product) {
+  const discountPercentage = getDiscountPercentage(product);
   const badge = product.isSale
-    ? `<span class="product-card__badge product-card__badge--sale">Oferta</span>`
+    ? `<span class="product-card__badge product-card__badge--sale">${discountPercentage ? `${discountPercentage}% off` : "Oferta"}</span>`
     : product.isNew
       ? `<span class="product-card__badge product-card__badge--new">Novo</span>`
       : "";
@@ -899,22 +907,26 @@ function createProductCard(product) {
       <div class="product-card__body">
         <div class="product-card__category-row">
           <span class="product-card__category">${product.category}</span>
-          <span class="product-card__stock ${product.stock > 0 ? "" : "is-empty"}">
-            ${product.stock > 0 ? `${product.stock} em estoque` : "Sem estoque"}
-          </span>
+          <span class="product-card__brand">${product.brand}</span>
         </div>
         <h3 class="product-card__name">${product.name}</h3>
         <p class="product-card__copy">${product.tagline || product.description}</p>
         <div class="product-card__rating">
           <span class="product-card__stars" aria-label="${product.rating} estrelas">★★★★★</span>
-          <span class="product-card__rating-count">(${product.reviews})</span>
+          <span class="product-card__rating-count">${product.rating.toFixed(1)} (${product.reviews})</span>
         </div>
-        <div class="product-card__footer">
+        <div class="product-card__price-block">
           <div>
             <div class="product-card__price-current">${formatPrice(product.price)}</div>
             ${oldPrice}
           </div>
+          <span class="product-card__stock ${product.stock > 0 ? "" : "is-empty"}">
+            ${product.stock > 0 ? `${product.stock} em estoque` : "Sem estoque"}
+          </span>
+        </div>
+        <div class="product-card__footer">
           <div class="product-card__installments">12x sem juros</div>
+          <div class="product-card__shipping">${product.price >= 199 ? "Frete gratis" : "Frete a partir de R$ 25"}</div>
         </div>
       </div>
     </article>
@@ -1260,53 +1272,75 @@ function navHref(anchor) {
 }
 
 function buildHeader() {
-  const links = [
-    { label: "Home", href: "index.html", page: "home" },
-    { label: "Produtos", href: "produtos.html", page: "products" },
-    { label: "Categorias", href: navHref("#categorias"), page: "" },
-    { label: "Sobre", href: navHref("#sobre"), page: "" },
-    { label: "Contato", href: navHref("#contato"), page: "" },
+  const utilityLinks = [
+    { label: "Atendimento", href: "#", toast: "Atendimento por WhatsApp em breve." },
+    { label: "Envio e entrega", href: "#", toast: "Consulte prazos e opcoes no checkout." },
+    { label: "Trocas e devolucoes", href: "#", toast: "Trocas em ate 30 dias para produtos lacrados." },
+  ];
+  const categoryLinks = [
+    { label: "Todos", href: "produtos.html" },
+    { label: "Masculino", href: "produtos.html?cat=Masculino" },
+    { label: "Feminino", href: "produtos.html?cat=Feminino" },
+    { label: "Unissex", href: "produtos.html?cat=Unissex" },
+    { label: "Nicho", href: "produtos.html?cat=Nicho" },
+    { label: "Acessorios", href: "produtos.html?cat=Acessorios" },
+    { label: "Ofertas", href: "produtos.html?filter=sale" },
+    { label: "Lancamentos", href: "produtos.html?filter=new" },
   ];
 
   return `
     <nav class="navbar ${PAGE === "home" ? "" : "scrolled"}" id="navbar" aria-label="Menu principal">
-      <div class="navbar__inner">
-        <a class="navbar__logo" href="index.html" aria-label="Grand Parfum - Home">
-          Grand<span>Parfum</span>
-        </a>
+      <div class="navbar__promo">
+        <div class="navbar__promo-inner">
+          <span>Frete gratis acima de R$ 199</span>
+          <strong>10% off na primeira compra com o cupom PRIMEIRACOMPRA</strong>
+        </div>
+      </div>
 
-        <form class="navbar__search" id="site-search-form" role="search" novalidate>
-          <label class="sr-only" for="site-search-input">Buscar produtos</label>
-          <svg class="navbar__search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
-          <input
-            class="navbar__search-input"
-            id="site-search-input"
-            type="search"
-            placeholder="Buscar fragrancias, marcas ou notas..."
-            autocomplete="off"
-          >
-          <div class="navbar__search-results" id="site-search-results" hidden></div>
-        </form>
-
-        <div class="navbar__right">
-          <ul class="navbar__links" role="list">
-            ${links
+      <div class="navbar__utility">
+        <div class="navbar__utility-inner">
+          <div class="navbar__utility-links">
+            ${utilityLinks
               .map(
                 (link) => `
-                  <li>
-                    <a class="navbar__link ${PAGE === link.page ? "is-active" : ""}" href="${link.href}">
+                    <a class="navbar__utility-link" href="${link.href}" ${link.toast ? `data-toast="${link.toast}"` : ""}>
                       ${link.label}
                     </a>
-                  </li>
                 `,
               )
               .join("")}
-          </ul>
+          </div>
+          <a class="navbar__utility-link" href="produtos.html?filter=sale">Promocoes da semana</a>
+        </div>
+      </div>
+
+      <div class="navbar__main">
+        <div class="navbar__inner">
+          <a class="navbar__logo" href="index.html" aria-label="Grand Parfum - Home">
+            Grand<span>Parfum</span>
+          </a>
+
+          <form class="navbar__search" id="site-search-form" role="search" novalidate>
+            <label class="sr-only" for="site-search-input">Buscar produtos</label>
+            <svg class="navbar__search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              class="navbar__search-input"
+              id="site-search-input"
+              type="search"
+              placeholder="O que voce procura hoje?"
+              autocomplete="off"
+            >
+            <div class="navbar__search-results" id="site-search-results" hidden></div>
+          </form>
 
           <div class="navbar__actions">
+            <a href="${AuthManager.user ? "account.html" : "auth.html"}" class="navbar__account-link">
+              <span class="navbar__account-label">${AuthManager.user ? "Minha conta" : "Entrar"}</span>
+              <span class="navbar__account-caption">${AuthManager.user ? "Pedidos e cadastro" : "Entrar ou cadastrar"}</span>
+            </a>
             <a href="favoritos.html" class="navbar__icon-btn" aria-label="Lista de desejos">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -1321,36 +1355,39 @@ function buildHeader() {
               </svg>
               <span class="navbar__cart-badge" id="cart-count">0</span>
             </a>
-            ${AuthManager.user 
-              ? `
-                <a href="account.html" class="navbar__btn-primary">
-                  Minha conta
-                </a>
-              `
-              : `
-                <a href="auth.html" class="navbar__btn-primary">
-                  Entrar
-                </a>
-              `
-            }
           </div>
-        </div>
 
-        <button class="navbar__hamburger" id="btn-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-          <span></span><span></span><span></span>
-        </button>
+          <button class="navbar__hamburger" id="btn-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="navbar__categories">
+        <div class="navbar__categories-inner">
+          ${categoryLinks.map((link) => `<a class="navbar__category-link" href="${link.href}">${link.label}</a>`).join("")}
+        </div>
       </div>
 
       <div class="mobile-menu" id="mobile-menu" hidden>
-        ${links
-          .map((link) => `<a href="${link.href}" class="mobile-menu__link">${link.label}</a>`)
-          .join("")}
-        <a href="favoritos.html" class="mobile-menu__link">Favoritos</a>
-        <a href="carrinho.html" class="mobile-menu__link">Carrinho</a>
-        ${AuthManager.user 
+        <div class="mobile-menu__section">
+          <div class="mobile-menu__title">Categorias</div>
+          ${categoryLinks.map((link) => `<a href="${link.href}" class="mobile-menu__link">${link.label}</a>`).join("")}
+        </div>
+        <div class="mobile-menu__section">
+          <div class="mobile-menu__title">Ajuda</div>
+          ${utilityLinks
+            .map((link) => `<a href="${link.href}" class="mobile-menu__link" ${link.toast ? `data-toast="${link.toast}"` : ""}>${link.label}</a>`)
+            .join("")}
+        </div>
+        ${AuthManager.user
           ? `<a href="account.html" class="mobile-menu__cta">Minha conta</a>`
-          : `<a href="auth.html" class="mobile-menu__cta">Entrar</a>`
+          : `<a href="auth.html" class="mobile-menu__cta">Entrar ou criar conta</a>`
         }
+        <div class="mobile-menu__quicklinks">
+          <a href="favoritos.html" class="mobile-menu__link">Favoritos</a>
+          <a href="carrinho.html" class="mobile-menu__link">Carrinho</a>
+        </div>
       </div>
     </nav>
   `;
@@ -1363,17 +1400,17 @@ function buildFooter() {
         <div>
           <div class="footer__brand-name">Grand<span>Parfum</span></div>
           <p class="footer__desc">
-            Curadoria de fragrancias de luxo com experiencia consistente do catalogo ao checkout.
+            Loja online de perfumes originais com busca simples, envio para todo o Brasil e suporte no pos-venda.
           </p>
-          <div class="footer__social" aria-label="Redes sociais">
+          <div class="footer__social" aria-label="Canais de atendimento">
             <a href="#" class="footer__social-link" aria-label="Instagram">IG</a>
             <a href="#" class="footer__social-link" aria-label="WhatsApp">WA</a>
-            <a href="#" class="footer__social-link" aria-label="Facebook">FB</a>
+            <a href="#" class="footer__social-link" aria-label="E-mail">EM</a>
           </div>
         </div>
 
         <div>
-          <h3 class="footer__col-title">Loja</h3>
+          <h3 class="footer__col-title">Compre</h3>
           <ul class="footer__links" role="list">
             <li><a href="produtos.html" class="footer__link">Todos os produtos</a></li>
             <li><a href="produtos.html?filter=sale" class="footer__link">Ofertas</a></li>
@@ -1383,22 +1420,22 @@ function buildFooter() {
         </div>
 
         <div>
-          <h3 class="footer__col-title">Suporte</h3>
+          <h3 class="footer__col-title">Ajuda</h3>
           <ul class="footer__links" role="list">
-            <li><a href="#" class="footer__link" data-toast="Central de ajuda em breve.">Central de ajuda</a></li>
-            <li><a href="#" class="footer__link" data-toast="Rastreio em manutencao.">Rastrear pedido</a></li>
-            <li><a href="#" class="footer__link" data-toast="Politica de devolucao: 30 dias.">Politica de devolucao</a></li>
-            <li><a href="${navHref("#contato")}" class="footer__link">Fale conosco</a></li>
+            <li><a href="#" class="footer__link" data-toast="Atendimento por WhatsApp em breve.">Central de atendimento</a></li>
+            <li><a href="#" class="footer__link" data-toast="Consulte o rastreio pelo e-mail do pedido.">Rastrear pedido</a></li>
+            <li><a href="#" class="footer__link" data-toast="Trocas em ate 30 dias para produtos lacrados.">Trocas e devolucoes</a></li>
+            <li><a href="#" class="footer__link" data-toast="Frete gratis acima de R$ 199.">Entrega e frete</a></li>
           </ul>
         </div>
 
         <div>
-          <h3 class="footer__col-title">Empresa</h3>
+          <h3 class="footer__col-title">Institucional</h3>
           <ul class="footer__links" role="list">
-            <li><a href="${navHref("#sobre")}" class="footer__link">Sobre nos</a></li>
-            <li><a href="#" class="footer__link" data-toast="Conteudos editoriais em breve.">Blog</a></li>
-            <li><a href="#" class="footer__link" data-toast="Programa de afiliados em breve.">Afiliados</a></li>
-            <li><a href="#" class="footer__link" data-toast="Atendimento premium por WhatsApp em breve.">Atendimento premium</a></li>
+            <li><a href="auth.html" class="footer__link">Minha conta</a></li>
+            <li><a href="#" class="footer__link" data-toast="Blog e conteudos entram em breve.">Blog</a></li>
+            <li><a href="#" class="footer__link" data-toast="Politica de privacidade em atualizacao.">Privacidade</a></li>
+            <li><a href="#" class="footer__link" data-toast="Termos de uso em atualizacao.">Termos de uso</a></li>
           </ul>
         </div>
       </div>
@@ -1406,9 +1443,9 @@ function buildFooter() {
       <div class="footer__bottom">
         <p class="footer__copy">© 2026 Grand Parfum. Todos os direitos reservados.</p>
         <nav class="footer__bottom-links" aria-label="Links legais">
-          <a href="#" class="footer__bottom-link" data-toast="Politica de privacidade em atualizacao.">Privacidade</a>
-          <a href="#" class="footer__bottom-link" data-toast="Termos de uso em atualizacao.">Termos</a>
-          <a href="#" class="footer__bottom-link" data-toast="Utilizamos apenas cookies essenciais.">Cookies</a>
+          <a href="#" class="footer__bottom-link" data-toast="Compras com cartao, Pix e parcelamento.">Pagamentos</a>
+          <a href="#" class="footer__bottom-link" data-toast="Suporte de segunda a sexta, das 9h as 18h.">Atendimento</a>
+          <a href="#" class="footer__bottom-link" data-toast="Receba novidades no cadastro de e-mail.">Novidades</a>
         </nav>
       </div>
     </footer>
@@ -1437,7 +1474,7 @@ function setupNavbarBehavior() {
   }
 
   const syncNavbarState = () => {
-    const shouldBeScrolled = PAGE !== "home" || window.scrollY > 18;
+    const shouldBeScrolled = window.scrollY > 12;
     navbar.classList.toggle("scrolled", shouldBeScrolled);
   };
 
@@ -1631,13 +1668,29 @@ function getFeaturedProducts(products, count = 4) {
 }
 
 async function initHomePage() {
-  const featuredGrid = document.getElementById("featured-products");
-  if (!featuredGrid) {
+  const bestSellersGrid = document.getElementById("best-sellers-grid");
+  const saleGrid = document.getElementById("sale-products-grid");
+  const newGrid = document.getElementById("new-products-grid");
+  if (!bestSellersGrid && !saleGrid && !newGrid) {
     return;
   }
 
   const products = await loadProductCatalog();
-  renderProducts("featured-products", getFeaturedProducts(products, 4));
+  const bestSellers = [...products]
+    .sort((a, b) => (b.reviews || 0) + (b.rating || 0) - ((a.reviews || 0) + (a.rating || 0)))
+    .slice(0, 4);
+  const saleProducts = products.filter((product) => product.isSale).slice(0, 4);
+  const newProducts = products.filter((product) => product.isNew).slice(0, 4);
+
+  if (bestSellersGrid) {
+    renderProducts("best-sellers-grid", bestSellers);
+  }
+  if (saleGrid) {
+    renderProducts("sale-products-grid", saleProducts);
+  }
+  if (newGrid) {
+    renderProducts("new-products-grid", newProducts);
+  }
 }
 
 function matchesCategory(product, category) {
@@ -1659,11 +1712,14 @@ async function initProductsPage() {
   const resultsCount = document.getElementById("products-count");
   const filterButtons = [...document.querySelectorAll("[data-category-filter]")];
   const viewButtons = [...document.querySelectorAll("[data-product-filter]")];
+  const sortSelect = document.getElementById("products-sort");
+  const activeSummary = document.getElementById("products-active-summary");
   const products = await loadProductCatalog();
 
   let activeCategory = params.get("cat") || "all";
   let queryText = params.get("q") || "";
   let activeFilter = params.get("filter") || "all";
+  let activeSort = "featured";
 
   if (pageSearch) {
     pageSearch.value = queryText;
@@ -1682,6 +1738,9 @@ async function initProductsPage() {
         normalizeText(button.dataset.productFilter) === normalizeText(activeFilter),
       );
     });
+    if (sortSelect) {
+      sortSelect.value = activeSort;
+    }
   }
 
   function syncUrl() {
@@ -1697,6 +1756,20 @@ async function initProductsPage() {
     }
     const nextQuery = nextParams.toString();
     window.history.replaceState({}, "", `produtos.html${nextQuery ? `?${nextQuery}` : ""}`);
+  }
+
+  function applySort(productList) {
+    const sorted = [...productList];
+    if (activeSort === "price-asc") {
+      sorted.sort((a, b) => a.price - b.price);
+    } else if (activeSort === "price-desc") {
+      sorted.sort((a, b) => b.price - a.price);
+    } else if (activeSort === "rating") {
+      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (activeSort === "newest") {
+      sorted.sort((a, b) => Number(Boolean(b.isNew)) - Number(Boolean(a.isNew)));
+    }
+    return sorted;
   }
 
   function renderPageProducts() {
@@ -1715,9 +1788,23 @@ async function initProductsPage() {
       filtered = filtered.filter((product) => wishlistIds.includes(product.id));
     }
 
-    renderProducts(gridId, filtered);
+    const sortedProducts = applySort(filtered);
+    renderProducts(gridId, sortedProducts);
     if (resultsCount) {
-      resultsCount.textContent = `${filtered.length} produto${filtered.length === 1 ? "" : "s"}`;
+      resultsCount.textContent = `${sortedProducts.length} produto${sortedProducts.length === 1 ? "" : "s"}`;
+    }
+    if (activeSummary) {
+      const pieces = [];
+      if (normalizeText(activeCategory) !== "all") {
+        pieces.push(activeCategory);
+      }
+      if (normalizeText(activeFilter) !== "all") {
+        pieces.push(activeFilter === "sale" ? "em oferta" : activeFilter === "new" ? "lancamentos" : "favoritos");
+      }
+      if (queryText) {
+        pieces.push(`busca: "${queryText}"`);
+      }
+      activeSummary.textContent = pieces.length ? pieces.join(" - ") : "Todos os perfumes disponiveis";
     }
     syncButtons();
     syncUrl();
@@ -1735,6 +1822,11 @@ async function initProductsPage() {
       activeFilter = button.dataset.productFilter;
       renderPageProducts();
     });
+  });
+
+  sortSelect?.addEventListener("change", (event) => {
+    activeSort = event.target.value;
+    renderPageProducts();
   });
 
   pageSearch?.addEventListener("input", (event) => {
@@ -1784,80 +1876,93 @@ function renderProductDetail(product) {
   }
 
   const gallery = getProductGallery(product);
+  const discountPercentage = getDiscountPercentage(product);
   detailRoot.innerHTML = `
     <div class="product-detail">
-      <div class="product-detail__gallery">
-        <div class="product-breadcrumbs">
-          <a href="index.html">Home</a>
-          <span>/</span>
-          <a href="produtos.html?cat=${encodeURIComponent(product.category)}">${product.category}</a>
-          <span>/</span>
-          <strong>${product.name}</strong>
-        </div>
-
-        <div class="detail-stage" id="detail-stage">
-          ${renderGalleryStage(product, gallery[0])}
-        </div>
-
-        <div class="detail-thumbs" id="detail-thumbs">
-          ${gallery
-            .map(
-              (asset, index) => `
-                <button class="detail-thumb ${index === 0 ? "is-active" : ""}" type="button" data-gallery-index="${index}">
-                  ${createProductVisual(product, "thumb", asset)}
-                </button>
-              `,
-            )
-            .join("")}
-        </div>
+      <div class="product-breadcrumbs">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <a href="produtos.html">Perfumes</a>
+        <span>/</span>
+        <a href="produtos.html?cat=${encodeURIComponent(product.category)}">${product.category}</a>
+        <span>/</span>
+        <strong>${product.name}</strong>
       </div>
 
-      <div class="product-detail__summary">
-        <div class="detail-kicker">${product.brand} · ${product.category}</div>
-        <h1 class="detail-title">${product.name}</h1>
-        <p class="detail-tagline">${product.tagline || product.description}</p>
+      <div class="product-detail__layout">
+        <div class="product-detail__gallery">
+          <div class="detail-stage" id="detail-stage">
+            ${renderGalleryStage(product, gallery[0])}
+          </div>
 
-        <div class="detail-rating-row">
-          <span class="detail-rating">★★★★★</span>
-          <span>${product.rating.toFixed(1)} · ${product.reviews} avaliacoes</span>
+          <div class="detail-thumbs" id="detail-thumbs">
+            ${gallery
+              .map(
+                (asset, index) => `
+                  <button class="detail-thumb ${index === 0 ? "is-active" : ""}" type="button" data-gallery-index="${index}">
+                    ${createProductVisual(product, "thumb", asset)}
+                  </button>
+                `,
+              )
+              .join("")}
+          </div>
         </div>
 
-        <div class="detail-price-row">
-          <strong class="detail-price">${formatPrice(product.price)}</strong>
-          ${product.oldPrice ? `<span class="detail-old-price">${formatPrice(product.oldPrice)}</span>` : ""}
-          ${product.isSale ? `<span class="detail-discount-badge">Oferta ativa</span>` : ""}
-        </div>
+        <div class="product-detail__summary">
+          <div class="detail-kicker">${product.brand} - ${product.category}</div>
+          <h1 class="detail-title">${product.name}</h1>
+          <p class="detail-tagline">${product.tagline || product.description}</p>
 
-        <div class="detail-stock-row ${product.stock > 0 ? "" : "is-empty"}">
-          ${getStockCopy(product)}
-        </div>
+          <div class="detail-rating-row">
+            <span class="detail-rating">★★★★★</span>
+            <span>${product.rating.toFixed(1)} - ${product.reviews} avaliacoes</span>
+          </div>
 
-        <p class="detail-copy">${product.longDescription}</p>
+          <div class="detail-price-box">
+            <div class="detail-price-row">
+              <strong class="detail-price">${formatPrice(product.price)}</strong>
+              ${product.oldPrice ? `<span class="detail-old-price">${formatPrice(product.oldPrice)}</span>` : ""}
+              ${product.isSale ? `<span class="detail-discount-badge">${discountPercentage ? `${discountPercentage}% off` : "Oferta ativa"}</span>` : ""}
+            </div>
+            <div class="detail-installments">ou em 12x sem juros no cartao</div>
+            <div class="detail-stock-row ${product.stock > 0 ? "" : "is-empty"}">
+              ${getStockCopy(product)}
+            </div>
+          </div>
 
-        <div class="detail-chip-list">
-          ${createListChips(product.highlights)}
-        </div>
+          <div class="detail-actions">
+            <label class="detail-qty">
+              <span>Quantidade</span>
+              <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="${product.stock > 0 ? 1 : 0}" ${product.stock > 0 ? "" : "disabled"}>
+            </label>
+            <button class="btn-primary" id="detail-add-cart" ${product.stock > 0 ? "" : "disabled"}>
+              ${product.stock > 0 ? "Adicionar ao carrinho" : "Indisponivel"}
+            </button>
+            <button class="btn-outline btn-outline--dark" id="detail-favorite">
+              ${Wishlist.hasItem(product.id) ? "Remover favorito" : "Salvar favorito"}
+            </button>
+          </div>
 
-        <div class="detail-actions">
-          <label class="detail-qty">
-            <span>Qtd.</span>
-            <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="${product.stock > 0 ? 1 : 0}" ${product.stock > 0 ? "" : "disabled"}>
-          </label>
-          <button class="btn-primary" id="detail-add-cart" ${product.stock > 0 ? "" : "disabled"}>
-            ${product.stock > 0 ? "Adicionar ao carrinho" : "Indisponivel"}
-          </button>
-          <button class="btn-outline btn-outline--dark" id="detail-favorite">
-            ${Wishlist.hasItem(product.id) ? "Remover favorito" : "Salvar favorito"}
-          </button>
-        </div>
+          <div class="detail-benefits">
+            <div class="detail-benefit">
+              <strong>Frete</strong>
+              <span>${product.price >= 199 ? "Gratis para este item" : "A partir de R$ 25"}</span>
+            </div>
+            <div class="detail-benefit">
+              <strong>Trocas</strong>
+              <span>Ate 30 dias para produtos lacrados</span>
+            </div>
+            <div class="detail-benefit">
+              <strong>Originalidade</strong>
+              <span>Curadoria com procedencia verificada</span>
+            </div>
+          </div>
 
-        <div class="detail-spec-grid">
-          ${createSpecificationItem("Volume", product.volumeMl)}
-          ${createSpecificationItem("Concentracao", product.concentration)}
-          ${createSpecificationItem("Familia", product.olfactiveFamily)}
-          ${createSpecificationItem("Ocasião", product.occasion)}
-          ${createSpecificationItem("SKU", product.sku)}
-          ${createSpecificationItem("Marca", product.brand)}
+          <p class="detail-copy">${product.longDescription}</p>
+
+          <div class="detail-chip-list">
+            ${createListChips(product.highlights)}
+          </div>
         </div>
       </div>
     </div>
@@ -1865,7 +1970,22 @@ function renderProductDetail(product) {
     <div class="detail-sections">
       <section class="detail-section">
         <div class="detail-section__header">
-          <h2>Construção olfativa</h2>
+          <h2>Informacoes do produto</h2>
+          <p>Detalhes importantes para comparar antes de comprar.</p>
+        </div>
+        <div class="detail-spec-grid">
+          ${createSpecificationItem("Volume", product.volumeMl)}
+          ${createSpecificationItem("Concentracao", product.concentration)}
+          ${createSpecificationItem("Familia olfativa", product.olfactiveFamily)}
+          ${createSpecificationItem("Melhor ocasiao", product.occasion)}
+          ${createSpecificationItem("SKU", product.sku)}
+          ${createSpecificationItem("Marca", product.brand)}
+        </div>
+      </section>
+
+      <section class="detail-section">
+        <div class="detail-section__header">
+          <h2>Piramide olfativa</h2>
           <p>Uma leitura rapida das notas principais do perfume.</p>
         </div>
         <div class="notes-grid">
@@ -1886,7 +2006,7 @@ function renderProductDetail(product) {
 
       <section class="detail-section detail-section--split">
         <article class="detail-info-card">
-          <h2>Por que escolher este item</h2>
+          <h2>Destaques</h2>
           <ul class="detail-points">
             ${product.highlights.map((item) => `<li>${item}</li>`).join("")}
           </ul>
@@ -1894,7 +2014,7 @@ function renderProductDetail(product) {
         <article class="detail-info-card">
           <h2>Entrega e trocas</h2>
           <ul class="detail-points">
-            <li>Envio premium com rastreio e embalagem discreta.</li>
+            <li>Envio com rastreio e embalagem discreta.</li>
             <li>Troca em ate 30 dias para produtos lacrados.</li>
             <li>Suporte especializado para indicacao e pos-venda.</li>
           </ul>
@@ -2034,18 +2154,24 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = subtotal > 199 ? 0 : 25;
   const total = subtotal + shipping;
+  const missingForFreeShipping = Math.max(0, 199 - subtotal);
 
   cartRoot.innerHTML = `
     <div class="cart-layout">
       <section class="cart-items">
+        <div class="cart-section-heading">
+          <h2>Itens do carrinho</h2>
+          <p>${items.length} item${items.length === 1 ? "" : "s"} prontos para finalizar</p>
+        </div>
         ${items
           .map(
             (item) => `
               <article class="cart-item" data-cart-id="${item.id}">
                 ${createCartMedia(item)}
                 <div class="cart-item__body">
+                  <span class="cart-item__category">${item.category}</span>
                   <h3>${item.name}</h3>
-                  <p>${item.brand} · ${item.category}</p>
+                  <p>${item.brand} - ${item.concentration || "Eau de Parfum"}</p>
                   <strong>${formatPrice(item.price)}</strong>
                 </div>
                 <div class="cart-item__controls">
@@ -2063,7 +2189,8 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
       </section>
 
       <aside class="cart-summary">
-        <h2>Resumo da compra</h2>
+        <h2>Resumo do pedido</h2>
+        <p class="cart-summary__lead">${shipping === 0 ? "Voce ganhou frete gratis." : `Faltam ${formatPrice(missingForFreeShipping)} para liberar frete gratis.`}</p>
         <div class="cart-summary__row">
           <span>Subtotal</span>
           <strong>${formatPrice(subtotal)}</strong>
@@ -2084,7 +2211,7 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
           <input id="checkout-address" type="text" placeholder="Endereco de entrega" value="${escapeHtml(checkoutDraft.address || "")}">
         </div>
 
-        <button class="btn-primary btn-block" id="checkout-submit">Finalizar compra</button>
+        <button class="btn-primary btn-block" id="checkout-submit">Ir para pagamento</button>
         <a class="btn-outline btn-outline--dark btn-block" href="produtos.html">Continuar comprando</a>
       </aside>
     </div>

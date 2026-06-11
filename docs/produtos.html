@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Catalogo Grand Parfum com filtros por categoria, ofertas, favoritos e busca em tempo real.">
+  <meta name="description" content="Catalogo Grand Parfum com filtros por categoria, ofertas, favoritos, busca em tempo real e ordenacao.">
   <title>Produtos - Grand Parfum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,24 +14,30 @@
   <div data-site-header></div>
 
   <main class="page-main">
-    <section class="page-hero">
+    <section class="page-hero page-hero--catalog">
       <div class="section__container">
+        <div class="page-breadcrumbs">
+          <a href="index.html">Home</a>
+          <span>/</span>
+          <strong>Produtos</strong>
+        </div>
         <div class="page-hero__content">
           <div class="page-hero__copy">
             <div class="page-kicker">Catalogo completo</div>
-            <h1 class="page-title">Encontre o perfume certo sem atrito.</h1>
-            <p class="page-subtitle">Filtre por categoria, navegue por ofertas e refine a busca com o mesmo motor usado no header ao vivo.</p>
+            <h1 class="page-title">Encontre o perfume certo com filtros mais claros.</h1>
+            <p class="page-subtitle">Busque por marca, categoria ou notas, refine a vitrine e adicione ao carrinho sem sair da grade.</p>
           </div>
-          <div class="toolbar__meta" id="products-count">0 produtos</div>
+          <div class="toolbar__meta toolbar__meta--count" id="products-count">0 produtos</div>
         </div>
       </div>
     </section>
 
-    <section class="section" style="padding-top: 1rem;">
-      <div class="section__container">
-        <div class="toolbar">
-          <div class="toolbar__row">
-            <div class="toolbar__filters">
+    <section class="section section--compact">
+      <div class="section__container catalog-layout">
+        <aside class="catalog-sidebar">
+          <div class="catalog-panel">
+            <h2 class="catalog-panel__title">Categorias</h2>
+            <div class="toolbar__filters toolbar__filters--stacked">
               <button class="filter-btn active" type="button" data-category-filter="all">Todos</button>
               <button class="filter-btn" type="button" data-category-filter="Masculino">Masculino</button>
               <button class="filter-btn" type="button" data-category-filter="Feminino">Feminino</button>
@@ -39,27 +45,50 @@
               <button class="filter-btn" type="button" data-category-filter="Nicho">Nicho</button>
               <button class="filter-btn" type="button" data-category-filter="Acessorios">Acessorios</button>
             </div>
-            <label class="toolbar__search" for="products-page-search">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <input id="products-page-search" type="search" placeholder="Refinar busca na pagina...">
-            </label>
           </div>
 
-          <div class="toolbar__row">
-            <div class="toolbar__filters">
+          <div class="catalog-panel">
+            <h2 class="catalog-panel__title">Filtros rapidos</h2>
+            <div class="toolbar__filters toolbar__filters--stacked">
               <button class="chip-btn active" type="button" data-product-filter="all">Tudo</button>
               <button class="chip-btn" type="button" data-product-filter="sale">Em oferta</button>
-              <button class="chip-btn" type="button" data-product-filter="new">Novos</button>
+              <button class="chip-btn" type="button" data-product-filter="new">Lancamentos</button>
               <button class="chip-btn" type="button" data-product-filter="wishlist">Favoritos</button>
             </div>
-            <div class="toolbar__meta">Clique em qualquer card para abrir a pagina do produto.</div>
           </div>
-        </div>
+        </aside>
 
-        <div class="products__grid" id="all-products-grid"></div>
+        <div class="catalog-content">
+          <div class="toolbar toolbar--catalog">
+            <div class="toolbar__row toolbar__row--catalog">
+              <label class="toolbar__search" for="products-page-search">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input id="products-page-search" type="search" placeholder="Buscar no catalogo...">
+              </label>
+
+              <label class="toolbar__sort" for="products-sort">
+                <span>Ordenar por</span>
+                <select id="products-sort">
+                  <option value="featured">Destaques</option>
+                  <option value="price-asc">Menor preco</option>
+                  <option value="price-desc">Maior preco</option>
+                  <option value="rating">Melhor avaliados</option>
+                  <option value="newest">Lancamentos</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="toolbar__row toolbar__row--catalog-meta">
+              <div class="toolbar__meta" id="products-active-summary">Todos os perfumes disponiveis</div>
+              <div class="toolbar__meta">Clique em qualquer card para abrir a pagina do produto.</div>
+            </div>
+          </div>
+
+          <div class="products__grid" id="all-products-grid"></div>
+        </div>
       </div>
     </section>
   </main>

@@ -13,58 +13,71 @@
   <div data-site-header></div>
 
   <main class="auth-page">
-    <div class="auth-container">
-      <div class="auth-card" id="login-card">
-        <h1 class="auth-title">Bem-vindo de volta</h1>
-        <p class="auth-subtitle">Acesse sua conta para gerenciar pedidos e favoritos.</p>
-        
-        <form class="auth-form" id="login-form">
-          <div class="form-group">
-            <label for="login-email">E-mail</label>
-            <input type="email" id="login-email" required placeholder="seu@email.com">
-          </div>
-          <div class="form-group">
-            <label for="login-password">Senha</label>
-            <input type="password" id="login-password" required placeholder="••••••••">
-          </div>
-          <button type="submit" class="btn-primary w-full">Entrar</button>
-        </form>
+    <div class="section__container auth-layout">
+      <section class="auth-intro">
+        <span class="page-kicker">Minha conta</span>
+        <h1 class="page-title">Entre para acompanhar pedidos, favoritos e checkout.</h1>
+        <p class="page-subtitle">Use sua conta Grand Parfum para salvar selecoes, preencher seus dados mais rapido e manter seu historico de compras em um unico lugar.</p>
+        <ul class="auth-benefits">
+          <li>Pedidos salvos com mais contexto</li>
+          <li>Favoritos sincronizados com a conta</li>
+          <li>Checkout com dados reaproveitados</li>
+        </ul>
+      </section>
 
-        <div class="auth-divider"><span>ou</span></div>
+      <div class="auth-container">
+        <div class="auth-card" id="login-card">
+          <h2 class="auth-title">Bem-vindo de volta</h2>
+          <p class="auth-subtitle">Acesse sua conta para gerenciar pedidos e favoritos.</p>
 
-        <button class="btn-outline w-full" id="btn-google-login">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" width="18" height="18">
-          Entrar com Google
-        </button>
+          <form class="auth-form" id="login-form">
+            <div class="form-group">
+              <label for="login-email">E-mail</label>
+              <input type="email" id="login-email" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label for="login-password">Senha</label>
+              <input type="password" id="login-password" required placeholder="Digite sua senha">
+            </div>
+            <button type="submit" class="btn-primary w-full">Entrar</button>
+          </form>
 
-        <p class="auth-switch">
-          Nao tem uma conta? <a href="#" id="show-register">Cadastre-se</a>
-        </p>
-      </div>
+          <div class="auth-divider"><span>ou</span></div>
 
-      <div class="auth-card" id="register-card" hidden>
-        <h1 class="auth-title">Crie sua conta</h1>
-        <p class="auth-subtitle">Junte-se a Grand Parfum para uma experiencia exclusiva.</p>
-        
-        <form class="auth-form" id="register-form">
-          <div class="form-group">
-            <label for="register-name">Nome completo</label>
-            <input type="text" id="register-name" required placeholder="Seu Nome">
-          </div>
-          <div class="form-group">
-            <label for="register-email">E-mail</label>
-            <input type="email" id="register-email" required placeholder="seu@email.com">
-          </div>
-          <div class="form-group">
-            <label for="register-password">Senha</label>
-            <input type="password" id="register-password" required placeholder="Mínimo 6 caracteres">
-          </div>
-          <button type="submit" class="btn-primary w-full">Criar conta</button>
-        </form>
+          <button class="btn-outline btn-outline--dark w-full" id="btn-google-login">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" width="18" height="18">
+            Entrar com Google
+          </button>
 
-        <p class="auth-switch">
-          Ja tem uma conta? <a href="#" id="show-login">Faca login</a>
-        </p>
+          <p class="auth-switch">
+            Nao tem uma conta? <a href="#" id="show-register">Cadastre-se</a>
+          </p>
+        </div>
+
+        <div class="auth-card" id="register-card" hidden>
+          <h2 class="auth-title">Crie sua conta</h2>
+          <p class="auth-subtitle">Cadastre-se para salvar pedidos, favoritos e dados de entrega.</p>
+
+          <form class="auth-form" id="register-form">
+            <div class="form-group">
+              <label for="register-name">Nome completo</label>
+              <input type="text" id="register-name" required placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+              <label for="register-email">E-mail</label>
+              <input type="email" id="register-email" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label for="register-password">Senha</label>
+              <input type="password" id="register-password" required placeholder="Minimo 6 caracteres">
+            </div>
+            <button type="submit" class="btn-primary w-full">Criar conta</button>
+          </form>
+
+          <p class="auth-switch">
+            Ja tem uma conta? <a href="#" id="show-login">Faca login</a>
+          </p>
+        </div>
       </div>
     </div>
   </main>

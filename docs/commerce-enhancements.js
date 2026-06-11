@@ -16,6 +16,30 @@ const db = getFirestore(app);
 const PAGE = document.body.dataset.page || "";
 const CART_KEY = "minhaloja_cart";
 const COUPON_KEY = "minhaloja_cart_coupon";
+let cartMutationObserver = null;
+
+function observeCartMutations() {
+  if (!cartMutationObserver || PAGE !== "cart") {
+    return;
+  }
+  const cartRoot = document.getElementById("cart-content");
+  if (!cartRoot) {
+    return;
+  }
+  cartMutationObserver.observe(cartRoot, { childList: true, subtree: true });
+}
+
+function runWithCartObserverPaused(task) {
+  if (!cartMutationObserver) {
+    return task();
+  }
+  cartMutationObserver.disconnect();
+  try {
+    return task();
+  } finally {
+    observeCartMutations();
+  }
+}
 
 function nowIsoString() {
   return new Date().toISOString();
@@ -187,84 +211,86 @@ async function applyCoupon() {
 }
 
 function renderCartCouponPanel() {
-  if (PAGE !== "cart") {
-    return;
-  }
-
-  syncCouponStaleness();
-  const cartRoot = document.getElementById("cart-content");
-  const summary = cartRoot?.querySelector(".cart-summary");
-  const items = readCartItems();
-  if (!summary || !items.length) {
-    clearCoupon();
-    return;
-  }
-
-  const coupon = readCoupon();
-  const pricing = getPricing(items, coupon);
-
-  let panel = document.getElementById("coupon-panel");
-  if (!panel) {
-    panel = document.createElement("div");
-    panel.id = "coupon-panel";
-    panel.className = "coupon-panel";
-    const checkoutFields = summary.querySelector(".checkout-fields");
-    if (checkoutFields) {
-      summary.insertBefore(panel, checkoutFields);
-    } else {
-      summary.appendChild(panel);
+  return runWithCartObserverPaused(() => {
+    if (PAGE !== "cart") {
+      return;
     }
-  }
 
-  const couponMessage = coupon
-    ? pricing.couponStillValid
-      ? `Cupom ${coupon.code} aplicado.`
-      : "O carrinho mudou. Reaplique o cupom."
-    : "Use um cupom valido do sistema local.";
+    syncCouponStaleness();
+    const cartRoot = document.getElementById("cart-content");
+    const summary = cartRoot?.querySelector(".cart-summary");
+    const items = readCartItems();
+    if (!summary || !items.length) {
+      clearCoupon();
+      return;
+    }
 
-  panel.innerHTML = `
-    <label class="coupon-panel__label" for="coupon-code">Cupom</label>
-    <div class="coupon-panel__row">
-      <input
-        id="coupon-code"
-        class="coupon-panel__input"
-        type="text"
-        value="${escapeHtml(coupon?.code || "")}"
-        placeholder="Ex.: BEMVINDO10"
-      >
-      <button type="button" class="btn-outline btn-outline--dark" id="coupon-apply">Aplicar</button>
-      <button type="button" class="btn-outline btn-outline--dark" id="coupon-remove" ${coupon ? "" : "disabled"}>Remover</button>
-    </div>
-    <p class="coupon-panel__message ${pricing.couponStillValid ? "is-success" : coupon ? "is-warning" : ""}">
-      ${couponMessage}
-    </p>
-  `;
+    const coupon = readCoupon();
+    const pricing = getPricing(items, coupon);
 
-  const rows = [...summary.querySelectorAll(".cart-summary__row")];
-  if (rows[0]) {
-    rows[0].querySelector("strong").textContent = formatPrice(pricing.subtotal);
-  }
-  if (rows[1]) {
-    rows[1].querySelector("strong").textContent =
-      pricing.shipping === 0 ? "Gratis" : formatPrice(pricing.shipping);
-  }
+    let panel = document.getElementById("coupon-panel");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "coupon-panel";
+      panel.className = "coupon-panel";
+      const checkoutFields = summary.querySelector(".checkout-fields");
+      if (checkoutFields) {
+        summary.insertBefore(panel, checkoutFields);
+      } else {
+        summary.appendChild(panel);
+      }
+    }
 
-  let discountRow = document.getElementById("cart-discount-row");
-  if (!discountRow) {
-    discountRow = document.createElement("div");
-    discountRow.id = "cart-discount-row";
-    discountRow.className = "cart-summary__row cart-summary__row--discount";
-    rows[1]?.insertAdjacentElement("afterend", discountRow);
-  }
-  discountRow.innerHTML = `
-    <span>Desconto</span>
-    <strong>${pricing.discount > 0 ? `- ${formatPrice(pricing.discount)}` : "R$ 0,00"}</strong>
-  `;
+    const couponMessage = coupon
+      ? pricing.couponStillValid
+        ? `Cupom ${coupon.code} aplicado.`
+        : "O carrinho mudou. Reaplique o cupom."
+      : "Use um cupom valido do sistema local.";
 
-  const totalRow = summary.querySelector(".cart-summary__row--total strong");
-  if (totalRow) {
-    totalRow.textContent = formatPrice(pricing.total);
-  }
+    panel.innerHTML = `
+      <label class="coupon-panel__label" for="coupon-code">Cupom</label>
+      <div class="coupon-panel__row">
+        <input
+          id="coupon-code"
+          class="coupon-panel__input"
+          type="text"
+          value="${escapeHtml(coupon?.code || "")}"
+          placeholder="Ex.: BEMVINDO10"
+        >
+        <button type="button" class="btn-outline btn-outline--dark" id="coupon-apply">Aplicar</button>
+        <button type="button" class="btn-outline btn-outline--dark" id="coupon-remove" ${coupon ? "" : "disabled"}>Remover</button>
+      </div>
+      <p class="coupon-panel__message ${pricing.couponStillValid ? "is-success" : coupon ? "is-warning" : ""}">
+        ${couponMessage}
+      </p>
+    `;
+
+    const rows = [...summary.querySelectorAll(".cart-summary__row")];
+    if (rows[0]) {
+      rows[0].querySelector("strong").textContent = formatPrice(pricing.subtotal);
+    }
+    if (rows[1]) {
+      rows[1].querySelector("strong").textContent =
+        pricing.shipping === 0 ? "Gratis" : formatPrice(pricing.shipping);
+    }
+
+    let discountRow = document.getElementById("cart-discount-row");
+    if (!discountRow) {
+      discountRow = document.createElement("div");
+      discountRow.id = "cart-discount-row";
+      discountRow.className = "cart-summary__row cart-summary__row--discount";
+      rows[1]?.insertAdjacentElement("afterend", discountRow);
+    }
+    discountRow.innerHTML = `
+      <span>Desconto</span>
+      <strong>${pricing.discount > 0 ? `- ${formatPrice(pricing.discount)}` : "R$ 0,00"}</strong>
+    `;
+
+    const totalRow = summary.querySelector(".cart-summary__row--total strong");
+    if (totalRow) {
+      totalRow.textContent = formatPrice(pricing.total);
+    }
+  });
 }
 
 async function handleEnhancedCheckout() {
@@ -357,10 +383,10 @@ function setupCartEnhancements() {
     return;
   }
 
-  const observer = new MutationObserver(() => {
+  cartMutationObserver = new MutationObserver(() => {
     renderCartCouponPanel();
   });
-  observer.observe(cartRoot, { childList: true, subtree: true });
+  observeCartMutations();
   renderCartCouponPanel();
 
   document.addEventListener("click", (event) => {

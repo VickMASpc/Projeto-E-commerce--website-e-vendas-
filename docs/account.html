@@ -14,6 +14,12 @@
 
   <main class="account-page">
     <div class="section__container">
+      <div class="page-breadcrumbs">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <strong>Minha conta</strong>
+      </div>
+
       <div class="account-grid">
         <aside class="account-sidebar">
           <div class="account-user-info">
@@ -24,15 +30,18 @@
             </div>
           </div>
           <nav class="account-nav">
-            <button class="account-nav-item is-active" data-tab="orders">Meus Pedidos</button>
-            <button class="account-nav-item" data-tab="profile">Dados Pessoais</button>
+            <button class="account-nav-item is-active" data-tab="orders">Meus pedidos</button>
+            <button class="account-nav-item" data-tab="profile">Dados pessoais</button>
             <button class="account-nav-item" id="btn-logout">Sair da conta</button>
           </nav>
         </aside>
 
         <section class="account-content">
-          <div id="tab-orders">
-            <h2 class="auth-title">Historico de Pedidos</h2>
+          <div class="account-panel" id="tab-orders">
+            <div class="account-panel__header">
+              <h1 class="auth-title">Historico de pedidos</h1>
+              <p class="auth-subtitle">Acompanhe compras recentes e confira o resumo de cada pedido.</p>
+            </div>
             <div id="orders-list">
               <div class="empty-state">
                 <p>Carregando seus pedidos...</p>
@@ -40,8 +49,11 @@
             </div>
           </div>
 
-          <div id="tab-profile" hidden>
-            <h2 class="auth-title">Meus Dados</h2>
+          <div class="account-panel" id="tab-profile" hidden>
+            <div class="account-panel__header">
+              <h2 class="auth-title">Meus dados</h2>
+              <p class="auth-subtitle">Atualize as informacoes usadas no checkout.</p>
+            </div>
             <form class="auth-form" id="profile-form">
               <div class="form-group">
                 <label>E-mail (nao pode ser alterado)</label>

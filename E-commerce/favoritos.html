@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lista de favoritos Grand Parfum com o mesmo header, footer e grade do restante da loja.">
+  <meta name="description" content="Lista de favoritos Grand Parfum com a mesma vitrine do catalogo para comparar e voltar a comprar depois.">
   <title>Favoritos - Grand Parfum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,17 +14,22 @@
   <div data-site-header></div>
 
   <main class="page-main">
-    <section class="page-hero">
+    <section class="page-hero page-hero--compact">
       <div class="section__container">
+        <div class="page-breadcrumbs">
+          <a href="index.html">Home</a>
+          <span>/</span>
+          <strong>Favoritos</strong>
+        </div>
         <div class="page-hero__copy">
           <div class="page-kicker">Sua selecao salva</div>
-          <h1 class="page-title">Favoritos em um layout consistente.</h1>
-          <p class="page-subtitle">Os mesmos cards do catalogo e os mesmos atalhos do restante da loja, sem mudar de linguagem visual.</p>
+          <h1 class="page-title">Compare depois sem sair da mesma linguagem de loja.</h1>
+          <p class="page-subtitle">Os itens salvos continuam com os mesmos cards, atalhos e acesso rapido ao carrinho.</p>
         </div>
       </div>
     </section>
 
-    <section class="section" style="padding-top: 1rem;">
+    <section class="section section--compact">
       <div class="section__container">
         <div class="products__grid" id="favorites-grid"></div>
       </div>
