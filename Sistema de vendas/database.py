@@ -1,10 +1,27 @@
 import json
 import os
+import config
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime
+from domain.product import (
+    DEFAULT_PRODUCT as DOMAIN_DEFAULT_PRODUCT,
+    normalize_product as domain_normalize_product,
+    parse_bool as domain_parse_bool,
+    parse_float as domain_parse_float,
+    parse_int as domain_parse_int,
+    parse_list as domain_parse_list,
+)
+from domain.order import (
+    normalize_order as domain_normalize_order,
+    normalize_order_item as domain_normalize_order_item,
+)
+from services.product_service import ProductService
+from services.inventory_service import InventoryService
+from services.coupon_service import CouponService
+from services.dashboard_service import DashboardService
 
-USE_FIREBASE = True
+USE_FIREBASE = config.USE_FIREBASE
 db = None
 
 if USE_FIREBASE:
@@ -12,21 +29,21 @@ if USE_FIREBASE:
         import firebase_admin
         from firebase_admin import credentials, firestore
 
-        cred_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+        cred_path = config.FIREBASE_CREDENTIALS_PATH
         if os.path.exists(cred_path):
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
             db = firestore.client()
             print("Firebase initialized successfully")
         else:
-            print("Aviso: serviceAccountKey.json nao encontrado. Operando em modo mock.")
+            print(f"Aviso: {os.path.basename(config.FIREBASE_CREDENTIALS_PATH)} nao encontrado. Operando em modo mock.")
             USE_FIREBASE = False
     except Exception as error:
         print(f"Erro ao inicializar Firebase: {error}")
         USE_FIREBASE = False
 
 
-DB_FILE = os.path.join(os.path.dirname(__file__), "db_mock.json")
+DB_FILE = config.DB_FILE
 
 
 def _now_iso():
@@ -253,16 +270,7 @@ DEFAULT_PRODUCT = {
     "images": [],
 }
 
-DEFAULT_COUPON = {
-    "code": "",
-    "type": "percent",
-    "value": 0.0,
-    "active": False,
-    "min_subtotal": 0.0,
-    "max_discount": None,
-    "expires_at": None,
-    "usage_limit": None,
-}
+from domain.coupon import DEFAULT_COUPON, normalize_coupon as domain_normalize_coupon
 
 SEED_COUPONS = [
     {
@@ -270,7 +278,7 @@ SEED_COUPONS = [
         "type": "percent",
         "value": 10,
         "active": True,
-        "min_subtotal": 250,
+        "min_order_total": 250,
         "max_discount": 180,
     },
     {
@@ -278,7 +286,7 @@ SEED_COUPONS = [
         "type": "fixed",
         "value": 150,
         "active": True,
-        "min_subtotal": 1200,
+        "min_order_total": 1200,
         "usage_limit": 25,
     },
     {
@@ -286,7 +294,7 @@ SEED_COUPONS = [
         "type": "percent",
         "value": 5,
         "active": False,
-        "min_subtotal": 0,
+        "min_order_total": 0,
     },
 ]
 
@@ -300,37 +308,19 @@ SEED_PRODUCTS_BY_NAME = {
 
 
 def _to_float(value, fallback=0.0):
-    try:
-        return float(str(value).replace(",", "."))
-    except (TypeError, ValueError):
-        return fallback
+    return domain_parse_float(value, fallback)
 
 
 def _to_int(value, fallback=0):
-    try:
-        return int(float(value))
-    except (TypeError, ValueError):
-        return fallback
+    return domain_parse_int(value, fallback)
 
 
 def _to_bool(value):
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, (int, float)):
-        return value == 1
-    return str(value).strip().lower() in {"1", "true", "sim", "yes"}
+    return domain_parse_bool(value)
 
 
 def _parse_list(value):
-    if isinstance(value, list):
-        return [str(item).strip() for item in value if str(item).strip()]
-    if not value:
-        return []
-    separators = [",", ";", "|", "\n"]
-    text = str(value)
-    for separator in separators[1:]:
-        text = text.replace(separator, separators[0])
-    return [item.strip() for item in text.split(separators[0]) if item.strip()]
+    return domain_parse_list(value)
 
 
 def _parse_optional_date(value):
@@ -346,24 +336,7 @@ def _normalize_coupon_type(value):
 
 
 def normalize_coupon(coupon):
-    coupon = coupon or {}
-    normalized = deepcopy(DEFAULT_COUPON)
-    normalized.update(coupon)
-
-    code = str(normalized.get("code", "")).strip().upper()
-    max_discount = normalized.get("max_discount")
-    usage_limit = normalized.get("usage_limit")
-
-    return {
-        "code": code,
-        "type": _normalize_coupon_type(normalized.get("type")),
-        "value": max(_to_float(normalized.get("value"), 0.0), 0.0),
-        "active": _to_bool(normalized.get("active")),
-        "min_subtotal": max(_to_float(normalized.get("min_subtotal"), 0.0), 0.0),
-        "max_discount": max(_to_float(max_discount, 0.0), 0.0) if max_discount not in (None, "") else None,
-        "expires_at": normalized.get("expires_at") or None,
-        "usage_limit": max(_to_int(usage_limit, 0), 0) if usage_limit not in (None, "") else None,
-    }
+    return domain_normalize_coupon(coupon)
 
 
 def normalize_product(product):
@@ -460,158 +433,52 @@ def _next_order_id(existing_orders):
 
 
 def _normalize_order_item(item):
-    product_id = (
-        item.get("product_id")
-        or item.get("produto_id")
-        or item.get("produtoId")
-        or item.get("id")
-        or ""
-    )
-    product_name = (
-        item.get("product_name")
-        or item.get("produtoNome")
-        or item.get("nome_prod")
-        or item.get("name")
-        or "Item"
-    )
-    quantity = _to_int(item.get("quantity", item.get("quantidade", 1)), 1)
-    unit_price = _to_float(item.get("unit_price", item.get("preco_unit", item.get("preco", 0))))
-
-    return {
-        "product_id": product_id,
-        "product_name": product_name,
-        "quantity": max(quantity, 1),
-        "unit_price": unit_price,
-    }
+    return domain_normalize_order_item(item)
 
 
 def normalize_order(order, fallback_id=None):
-    customer = order.get("customer") or {}
-    items = order.get("items") or order.get("itens") or []
-    normalized_items = [_normalize_order_item(item) for item in items]
-    subtotal = _to_float(
-        order.get("subtotal"),
-        sum(item["quantity"] * item["unit_price"] for item in normalized_items),
-    )
-    shipping = _to_float(order.get("shipping"), 0.0)
-    discount_total = _to_float(order.get("discount_total", order.get("discount")), 0.0)
-    total = _to_float(order.get("total"), subtotal - discount_total + shipping)
-    coupon_code = str(order.get("coupon_code") or order.get("couponCode") or "").strip().upper() or None
-
-    return {
-        "id": order.get("id") or fallback_id or "",
-        "customer_id": order.get("customer_id") or order.get("clienteId") or order.get("userId") or customer.get("id") or None,
-        "customer_name": order.get("customer_name") or order.get("clienteNome") or customer.get("name") or "Cliente",
-        "customer_email": order.get("customer_email") or order.get("clienteEmail") or customer.get("email") or "",
-        "customer_phone": order.get("customer_phone") or order.get("clienteTelefone") or customer.get("phone") or "",
-        "customer_address": order.get("customer_address") or order.get("clienteEndereco") or customer.get("address") or "",
-        "items": normalized_items,
-        "subtotal": subtotal,
-        "shipping": shipping,
-        "discount_total": max(discount_total, 0.0),
-        "coupon_code": coupon_code,
-        "total": total,
-        "status": str(order.get("status") or "pendente").lower(),
-        "created_at": order.get("created_at") or order.get("dataCriacao") or _now_iso(),
-        "updated_at": order.get("updated_at") or order.get("atualizadoEm") or _now_iso(),
-        "schema_version": int(order.get("schema_version") or order.get("schemaVersion") or 2),
-    }
+    return domain_normalize_order(order, fallback_id)
 
 
-def _initial_data():
-    return {
-        "produtos": [normalize_product(product) for product in SEED_PRODUCTS],
-        "cupons": [normalize_coupon(coupon) for coupon in SEED_COUPONS],
-        "pedidos": [
-            {
-                "id": "ord-001",
-                "customer_name": "Juliana Silva",
-                "customer_email": "juliana@example.com",
-                "items": [
-                    {
-                        "product_id": "perf-3",
-                        "product_name": "Chanel No. 5",
-                        "quantity": 1,
-                        "unit_price": 920.00,
-                    }
-                ],
-                "subtotal": 920.00,
-                "shipping": 0.0,
-                "discount_total": 0.0,
-                "coupon_code": None,
-                "total": 920.00,
-                "status": "enviado",
-                "created_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
-            }
-        ],
-        "vendas": [],
-    }
+repository = None
 
+def _get_repo():
+    global repository
+    if repository is None:
+        from repositories.json_repository import JsonRepository
+        from repositories.firebase_repository import FirebaseRepository
+        import config
+        json_repo = JsonRepository(config.DB_FILE)
+        if USE_FIREBASE and db is not None:
+            repository = FirebaseRepository(db, json_repo)
+        else:
+            repository = json_repo
+    return repository
 
 def _init_db():
-    if not os.path.exists(DB_FILE):
-        with open(DB_FILE, "w", encoding="utf-8") as file:
-            json.dump(_initial_data(), file, indent=4, ensure_ascii=False)
-
+    pass
 
 def _read_db():
-    _init_db()
-    with open(DB_FILE, "r", encoding="utf-8") as file:
-        data = json.load(file)
-
-    data["produtos"] = [normalize_product(product) for product in data.get("produtos", [])]
-    data["cupons"] = [normalize_coupon(coupon) for coupon in data.get("cupons", SEED_COUPONS)]
-    data["pedidos"] = [normalize_order(order) for order in data.get("pedidos", [])]
-    data.setdefault("vendas", [])
-    return data
-
+    return _get_repo().read_data()
 
 def _write_db(data):
-    clean_data = {
-        "produtos": [normalize_product(product) for product in data.get("produtos", [])],
-        "cupons": [normalize_coupon(coupon) for coupon in data.get("cupons", [])],
-        "pedidos": [normalize_order(order) for order in data.get("pedidos", [])],
-        "vendas": data.get("vendas", []),
-    }
-
-    with open(DB_FILE, "w", encoding="utf-8") as file:
-        json.dump(clean_data, file, indent=4, ensure_ascii=False)
-
-    _export_to_frontend(clean_data)
+    _get_repo().write_data(data)
 
 
 def _export_to_frontend(data):
-    frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "E-commerce")
-    if not os.path.exists(frontend_dir):
-        return
+    from services.export_service import export_frontend_snapshot
 
-    export_path = os.path.join(frontend_dir, "products_live.js")
-    content = "/* Gerado automaticamente pelo Sistema de Vendas */\n"
-    content += f"const PRODUCTS_LIVE = {json.dumps(data['produtos'], indent=2, ensure_ascii=False)};\n"
-    content += f"const ORDERS_LIVE = {json.dumps(data['pedidos'], indent=2, ensure_ascii=False)};\n"
-    content += "window.PRODUCTS_LIVE = PRODUCTS_LIVE;\n"
-    content += "window.ORDERS_LIVE = ORDERS_LIVE;\n"
-
-    with open(export_path, "w", encoding="utf-8") as file:
-        file.write(content)
+    result = export_frontend_snapshot(data)
+    if result.get("status") == "error":
+        print(result.get("message", "Erro ao exportar para frontend."))
 
 
 def get_products():
-    if USE_FIREBASE and db is not None:
-        try:
-            docs = db.collection("produtos").get()
-            return [normalize_product(doc.to_dict() | {"id": doc.id}) for doc in docs]
-        except Exception as error:
-            print(f"Erro ao buscar produtos no Firebase: {error}")
-            return []
-
-    return _read_db()["produtos"]
+    return ProductService(_get_repo()).list_products()
 
 
 def add_product(nome, descricao, preco, estoque, categoria, detalhes=None):
-    new_id = f"perf-{int(datetime.now().timestamp() % 1000000)}"
     payload = {
-        "id": new_id,
         "name": nome,
         "description": descricao,
         "price": preco,
@@ -621,94 +488,33 @@ def add_product(nome, descricao, preco, estoque, categoria, detalhes=None):
     if detalhes:
         payload.update(detalhes)
 
-    normalized = normalize_product(payload)
-    normalized["id"] = new_id
-
-    if USE_FIREBASE and db is not None:
-        try:
-            db.collection("produtos").document(new_id).set(normalized)
-            return new_id
-        except Exception as error:
-            print(f"Erro ao salvar produto no Firebase: {error}")
-            return None
-
-    data = _read_db()
-    data["produtos"].append(normalized)
-    _write_db(data)
-    return new_id
+    result = ProductService(_get_repo()).create_product(payload)
+    product = result.get("product") or {}
+    return product.get("id") if result.get("ok") else None
 
 
 def update_product(product_id, dados):
-    normalized = normalize_product({"id": product_id, **(dados or {})})
-
-    if USE_FIREBASE and db is not None:
-        try:
-            db.collection("produtos").document(product_id).set(normalized)
-            return True
-        except Exception as error:
-            print(f"Erro ao atualizar produto no Firebase: {error}")
-            return False
-
-    data = _read_db()
-    updated = False
-    for index, product in enumerate(data["produtos"]):
-        if product["id"] == product_id:
-            data["produtos"][index] = normalized
-            updated = True
-            break
-
-    if updated:
-        _write_db(data)
-    return updated
+    return ProductService(_get_repo()).update_product(product_id, dados).get("ok", False)
 
 
 def update_product_stock(product_id, novo_estoque):
-    products = get_products()
-    current = next((product for product in products if product["id"] == product_id), None)
-    if not current:
-        return
-
-    current["stock"] = _to_int(novo_estoque)
-    update_product(product_id, current)
+    return ProductService(_get_repo()).update_stock(product_id, novo_estoque).get("ok", False)
 
 
 def delete_product(produto_id):
-    if USE_FIREBASE and db is not None:
-        try:
-            db.collection("produtos").document(produto_id).delete()
-            return
-        except Exception as error:
-            print(f"Erro ao deletar no Firebase: {error}")
-
-    data = _read_db()
-    data["produtos"] = [product for product in data["produtos"] if product["id"] != produto_id]
-    _write_db(data)
+    return ProductService(_get_repo()).delete_product(produto_id).get("ok", False)
 
 
 def listen_to_orders(callback):
-    if not USE_FIREBASE or db is None:
-        return None
-
-    def on_snapshot(col_snapshot, changes, read_time):
-        callback()
-
-    return db.collection("pedidos").on_snapshot(on_snapshot)
+    return _get_repo().listen_to_orders(callback)
 
 
 def get_orders():
-    if USE_FIREBASE and db is not None:
-        try:
-            docs = db.collection("pedidos").get()
-            return [normalize_order(doc.to_dict() | {"id": doc.id}) for doc in docs]
-        except Exception as error:
-            print(f"Erro ao buscar pedidos no Firebase: {error}")
-            return []
-
-    return _read_db()["pedidos"]
+    return _get_repo().get_orders()
 
 
 def get_coupons():
-    return _read_db()["cupons"]
+    return _get_repo().get_coupons()
 
 
 def _count_coupon_usage(coupon_code, orders):
@@ -719,237 +525,34 @@ def _count_coupon_usage(coupon_code, orders):
 
 
 def validate_coupon(code, subtotal, orders=None):
-    normalized_code = str(code or "").strip().upper()
-    subtotal_value = max(_to_float(subtotal, 0.0), 0.0)
-
-    if not normalized_code:
-        return {
-            "valid": False,
-            "code": None,
-            "discount": 0.0,
-            "message": "Informe um cupom.",
-            "adjusted_total": subtotal_value,
-        }
-
-    coupons = get_coupons()
-    coupon = next((entry for entry in coupons if entry["code"] == normalized_code), None)
-    if not coupon:
-        return {
-            "valid": False,
-            "code": normalized_code,
-            "discount": 0.0,
-            "message": "Cupom nao encontrado.",
-            "adjusted_total": subtotal_value,
-        }
-
-    if not coupon.get("active"):
-        return {
-            "valid": False,
-            "code": normalized_code,
-            "discount": 0.0,
-            "message": "Cupom inativo.",
-            "adjusted_total": subtotal_value,
-        }
-
-    expires_at = _parse_optional_date(coupon.get("expires_at"))
-    if expires_at and expires_at < datetime.utcnow():
-        return {
-            "valid": False,
-            "code": normalized_code,
-            "discount": 0.0,
-            "message": "Cupom expirado.",
-            "adjusted_total": subtotal_value,
-        }
-
-    if subtotal_value < coupon.get("min_subtotal", 0.0):
-        return {
-            "valid": False,
-            "code": normalized_code,
-            "discount": 0.0,
-            "message": f"Cupom disponivel apenas para pedidos acima de R$ {coupon['min_subtotal']:.2f}.",
-            "adjusted_total": subtotal_value,
-        }
-
-    if orders is None:
-        orders = get_orders()
-    usage_limit = coupon.get("usage_limit")
-    if usage_limit is not None and _count_coupon_usage(normalized_code, orders) >= usage_limit:
-        return {
-            "valid": False,
-            "code": normalized_code,
-            "discount": 0.0,
-            "message": "Cupom esgotado.",
-            "adjusted_total": subtotal_value,
-        }
-
-    if coupon.get("type") == "fixed":
-        discount = coupon.get("value", 0.0)
-    else:
-        discount = subtotal_value * (coupon.get("value", 0.0) / 100.0)
-
-    max_discount = coupon.get("max_discount")
-    if max_discount is not None:
-        discount = min(discount, max_discount)
-
-    discount = max(0.0, min(discount, subtotal_value))
-    adjusted_total = max(subtotal_value - discount, 0.0)
-
-    return {
-        "valid": True,
-        "code": normalized_code,
-        "discount": round(discount, 2),
-        "message": "Cupom aplicado com sucesso.",
-        "adjusted_total": round(adjusted_total, 2),
-    }
+    # 'orders' parameter is ignored now as we use used_count in the coupon itself
+    # or the service handles it. But we keep it for signature compatibility.
+    from services.coupon_service import CouponService
+    return CouponService(_get_repo()).validate_coupon(code, subtotal)
 
 
 def create_local_order(order):
-    if USE_FIREBASE and db is not None:
-        normalized = normalize_order(order, f"ord-{int(datetime.now().timestamp() * 1000)}")
-        if not normalized["items"]:
-            return {
-                "ok": False,
-                "message": "Pedido sem itens.",
-                "order_id": None,
-            }
+    from services.order_service import create_order
 
-        coupon_result = validate_coupon(normalized.get("coupon_code"), normalized["subtotal"]) if normalized.get("coupon_code") else None
-        if normalized.get("coupon_code") and not coupon_result["valid"]:
-            return {
-                "ok": False,
-                "message": coupon_result["message"],
-                "order_id": None,
-            }
-
-        discount_total = coupon_result["discount"] if coupon_result else 0.0
-        expected_total = round(normalized["subtotal"] - discount_total + normalized["shipping"], 2)
-        if abs(normalized["total"] - expected_total) > 0.01:
-            normalized["total"] = expected_total
-        normalized["discount_total"] = discount_total
-
-        transaction = db.transaction()
-
-        @firestore.transactional
-        def process_order(txn):
-            product_refs = {
-                item["product_id"]: db.collection("produtos").document(item["product_id"])
-                for item in normalized["items"]
-                if item.get("product_id")
-            }
-
-            snapshots = {
-                product_id: product_ref.get(transaction=txn)
-                for product_id, product_ref in product_refs.items()
-            }
-
-            insufficient_stock = []
-            products_by_id = {}
-            for item in normalized["items"]:
-                product_id = item.get("product_id")
-                snapshot = snapshots.get(product_id)
-                if snapshot is None or not snapshot.exists:
-                    insufficient_stock.append(item["product_name"])
-                    continue
-
-                product = normalize_product(snapshot.to_dict() | {"id": snapshot.id})
-                products_by_id[product_id] = product
-                if int(product.get("stock", 0)) < item["quantity"]:
-                    insufficient_stock.append(item["product_name"])
-
-            if insufficient_stock:
-                return {
-                    "ok": False,
-                    "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
-                    "order_id": None,
-                }
-
-            for item in normalized["items"]:
-                product_id = item["product_id"]
-                product_ref = product_refs[product_id]
-                current_stock = int(products_by_id[product_id].get("stock", 0))
-                txn.update(product_ref, {"stock": current_stock - item["quantity"]})
-
-            normalized["status"] = "pago"
-            normalized["created_at"] = _now_iso()
-            normalized["updated_at"] = normalized["created_at"]
-            order_ref = db.collection("pedidos").document(normalized["id"])
-            txn.set(order_ref, normalized)
-            return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
-
-        try:
-            return process_order(transaction)
-        except Exception as error:
-            print(f"Erro ao registrar pedido no Firebase: {error}")
-            return {
-                "ok": False,
-                "message": "Nao foi possivel registrar o pedido no Firebase.",
-                "order_id": None,
-            }
-
-    data = _read_db()
-    normalized = normalize_order(order, _next_order_id(data["pedidos"]))
-    if not normalized["items"]:
-        return {
-            "ok": False,
-            "message": "Pedido sem itens.",
-            "order_id": None,
-        }
-
-    coupon_result = validate_coupon(normalized.get("coupon_code"), normalized["subtotal"], data["pedidos"]) if normalized.get("coupon_code") else None
-    if normalized.get("coupon_code") and not coupon_result["valid"]:
-        return {
-            "ok": False,
-            "message": coupon_result["message"],
-            "order_id": None,
-        }
-    normalized["discount_total"] = coupon_result["discount"] if coupon_result else 0.0
-    normalized["total"] = round(normalized["subtotal"] - normalized["discount_total"] + normalized["shipping"], 2)
-
-    products_by_id = {product["id"]: product for product in data["produtos"]}
-    insufficient_stock = []
-    for item in normalized["items"]:
-        product = products_by_id.get(item["product_id"])
-        if not product or int(product.get("stock", 0)) < item["quantity"]:
-            insufficient_stock.append(item["product_name"])
-
-    if insufficient_stock:
-        return {
-            "ok": False,
-            "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
-            "order_id": None,
-        }
-
-    for item in normalized["items"]:
-        product = products_by_id.get(item["product_id"])
-        if product:
-            product["stock"] = int(product.get("stock", 0)) - item["quantity"]
-
-    normalized["status"] = "pago"
-    normalized["created_at"] = _now_iso()
-    normalized["updated_at"] = normalized["created_at"]
-    data["pedidos"].append(normalized)
-    _write_db(data)
-    return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
+    return create_order(order)
 
 
 def update_order_status(pedido_id, novo_status):
-    if USE_FIREBASE and db is not None:
-        try:
-            db.collection("pedidos").document(pedido_id).update({
-                "status": novo_status,
-                "updated_at": _now_iso(),
-            })
-            return
-        except Exception as error:
-            print(f"Erro ao atualizar status no Firebase: {error}")
+    from services.order_service import update_status
 
-    data = _read_db()
-    for order in data["pedidos"]:
-        if order["id"] == pedido_id:
-            order["status"] = novo_status
-            order["updated_at"] = _now_iso()
-            break
-    _write_db(data)
+    return update_status(pedido_id, novo_status)
+
+
+def list_inventory_movements(product_id=None):
+    return InventoryService(_get_repo()).list_movements(product_id)
+
+
+def record_inventory_movement(product_id, quantity_delta, movement_type, reason, source_order_id=None, note=None):
+    return InventoryService(_get_repo()).record_movement(product_id, quantity_delta, movement_type, reason, source_order_id, note)
+
+
+def adjust_inventory_stock(product_id, quantity_delta, reason, note=None):
+    return InventoryService(_get_repo()).adjust_stock(product_id, quantity_delta, reason, note)
 
 
 def _parse_date(value):
@@ -1049,171 +652,7 @@ def _growth_pct(current, previous):
     return round(((current - previous) / previous) * 100, 1)
 
 
+
 def get_stats():
-    products = get_products()
-    orders = get_orders()
-
-    paid_orders = [order for order in orders if order.get("status") in {"pago", "enviado", "pendente"}]
-    total_revenue = sum(_to_float(order.get("total")) for order in paid_orders)
-    total_orders = len(paid_orders)
-    average_ticket = total_revenue / total_orders if total_orders else 0
-
-    inventory_by_category = defaultdict(int)
-    products_by_id = {product["id"]: product for product in products}
-    product_names = {product["id"]: product["name"] for product in products}
-    for product in products:
-        inventory_by_category[product.get("category", "Outros")] += int(product.get("stock", 0))
-
-    sales_by_product = defaultdict(int)
-    category_sales = defaultdict(lambda: {"value": 0.0, "orders": 0, "units": 0})
-    customer_sales = defaultdict(lambda: {"revenue": 0.0, "orders": 0})
-    recent_activity = []
-    for order in paid_orders:
-        order_total = _to_float(order.get("total"))
-        recent_activity.append(
-            {
-                "id": order.get("id", ""),
-                "label": f"Pedido {order.get('id', '')} - {order.get('status', 'pendente')}",
-                "customer": order.get("customer_name", "Cliente"),
-                "created_at": order.get("created_at", ""),
-                "total": round(order_total, 2),
-                "status": order.get("status", "pendente"),
-            }
-        )
-
-        customer_name = order.get("customer_name", "Cliente")
-        customer_sales[customer_name]["revenue"] += order_total
-        customer_sales[customer_name]["orders"] += 1
-
-        seen_categories = set()
-        for item in order.get("items", []):
-            name = item.get("product_name") or product_names.get(item.get("product_id"), "Item")
-            quantity = _to_int(item.get("quantity"), 1)
-            unit_price = _to_float(item.get("unit_price"))
-            product = products_by_id.get(item.get("product_id"))
-            category_name = (product or {}).get("category", "Outros")
-
-            sales_by_product[name] += quantity
-            category_sales[category_name]["value"] += quantity * unit_price
-            category_sales[category_name]["units"] += quantity
-            if category_name not in seen_categories:
-                category_sales[category_name]["orders"] += 1
-                seen_categories.add(category_name)
-
-    top_products = sorted(
-        ({"name": name, "sales": quantity} for name, quantity in sales_by_product.items()),
-        key=lambda item: item["sales"],
-        reverse=True,
-    )[:5]
-
-    timeline = _build_time_series(paid_orders, 30)
-    sales_over_time = [
-        {
-            "date": point["date"],
-            "isoDate": point["isoDate"],
-            "sales": point["sales"],
-            "orders": point["orders"],
-        }
-        for point in timeline
-    ]
-
-    last_day = datetime.now().date()
-    last_7_start = last_day.fromordinal(last_day.toordinal() - 6)
-    prev_7_end = last_day.fromordinal(last_day.toordinal() - 7)
-    prev_7_start = prev_7_end.fromordinal(prev_7_end.toordinal() - 6)
-
-    current_period = _period_totals(paid_orders, last_7_start, last_day)
-    previous_period = _period_totals(paid_orders, prev_7_start, prev_7_end)
-
-    low_stock_items = sorted(
-        [
-            {
-                "id": product["id"],
-                "name": product.get("name", "Produto"),
-                "category": product.get("category", "Outros"),
-                "stock": int(product.get("stock", 0)),
-            }
-            for product in products
-            if int(product.get("stock", 0)) <= 12
-        ],
-        key=lambda item: item["stock"],
-    )[:6]
-
-    order_status = defaultdict(int)
-    for order in orders:
-        order_status[str(order.get("status", "pendente")).lower()] += 1
-
-    category_performance = sorted(
-        (
-            {
-                "name": category,
-                "value": round(metrics["value"], 2),
-                "orders": metrics["orders"],
-                "units": metrics["units"],
-            }
-            for category, metrics in category_sales.items()
-        ),
-        key=lambda item: item["value"],
-        reverse=True,
-    )
-
-    top_customers = sorted(
-        (
-            {
-                "name": customer,
-                "revenue": round(metrics["revenue"], 2),
-                "orders": metrics["orders"],
-            }
-            for customer, metrics in customer_sales.items()
-        ),
-        key=lambda item: item["revenue"],
-        reverse=True,
-    )[:5]
-
-    orders_today = sum(
-        1 for order in orders if _parse_date(order.get("created_at")).date() == last_day
-    )
-    realtime_revenue = sum(
-        _to_float(order.get("total"))
-        for order in orders
-        if _parse_date(order.get("created_at")).date() == last_day
-    )
-
-    return {
-        "totalRevenue": round(total_revenue, 2),
-        "totalOrders": total_orders,
-        "averageTicket": round(average_ticket, 2),
-        "inventoryUnits": sum(int(product.get("stock", 0)) for product in products),
-        "activeCategories": len(inventory_by_category),
-        "ordersToday": orders_today,
-        "paidOrders": order_status["pago"],
-        "pendingOrders": order_status["pendente"],
-        "shippedOrders": order_status["enviado"],
-        "lowStockCount": len(low_stock_items),
-        "revenueDeltaPct": _growth_pct(
-            current_period["revenue"], previous_period["revenue"]
-        ),
-        "ordersDeltaPct": _growth_pct(
-            current_period["orders"], previous_period["orders"]
-        ),
-        "realtimeRevenue": round(realtime_revenue, 2),
-        "lastUpdated": datetime.now().isoformat(timespec="seconds"),
-        "periodSummary": {
-            "current": current_period,
-            "previous": previous_period,
-        },
-        "inventoryStatus": [
-            {"name": category, "value": quantity}
-            for category, quantity in sorted(inventory_by_category.items())
-        ],
-        "salesOverTime": sales_over_time,
-        "topProducts": top_products,
-        "recentActivity": recent_activity[-5:][::-1],
-        "categoryPerformance": category_performance,
-        "orderStatus": [
-            {"name": status.title(), "value": total}
-            for status, total in sorted(order_status.items())
-        ],
-        "lowStockItems": low_stock_items,
-        "topCustomers": top_customers,
-    }
+    """Compatibility facade – delegates to DashboardService."""
+    return DashboardService(_get_repo()).get_dashboard_stats()
