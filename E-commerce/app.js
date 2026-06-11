@@ -232,7 +232,7 @@ const PRODUCT_PRESETS = {
 
 let productCache = null;
 let productCachePromise = null;
-let searchState = { open: false };
+let searchState = { open: false, activeIndex: -1 };
 let observer = null;
 let currentProductId = null;
 
@@ -1332,8 +1332,12 @@ function buildHeader() {
               type="search"
               placeholder="O que voce procura hoje?"
               autocomplete="off"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="site-search-results"
             >
-            <div class="navbar__search-results" id="site-search-results" hidden></div>
+            <button class="navbar__search-submit" type="submit" aria-label="Buscar">Buscar</button>
+            <div class="navbar__search-results" id="site-search-results" role="listbox" hidden></div>
           </form>
 
           <div class="navbar__actions">
@@ -1400,7 +1404,7 @@ function buildFooter() {
         <div>
           <div class="footer__brand-name">Grand<span>Parfum</span></div>
           <p class="footer__desc">
-            Loja online de perfumes originais com busca simples, envio para todo o Brasil e suporte no pos-venda.
+            Perfumes originais, ofertas selecionadas e atendimento para acompanhar sua compra do pedido ao pos-venda.
           </p>
           <div class="footer__social" aria-label="Canais de atendimento">
             <a href="#" class="footer__social-link" aria-label="Instagram">IG</a>
@@ -1499,11 +1503,31 @@ function setupNavbarBehavior() {
   }
 }
 
-function renderSearchResults(resultsContainer, products, queryText) {
+function closeSearchResults(resultsContainer, searchInput) {
+  resultsContainer.hidden = true;
+  resultsContainer.innerHTML = "";
+  searchState.open = false;
+  searchState.activeIndex = -1;
+  searchInput?.setAttribute("aria-expanded", "false");
+}
+
+function highlightSearchResult(resultsContainer, nextIndex) {
+  const options = [...resultsContainer.querySelectorAll(".search-result, .search-results__all")];
+  if (!options.length) {
+    searchState.activeIndex = -1;
+    return;
+  }
+
+  const boundedIndex = ((nextIndex % options.length) + options.length) % options.length;
+  searchState.activeIndex = boundedIndex;
+  options.forEach((option, index) => {
+    option.classList.toggle("is-active", index === boundedIndex);
+  });
+}
+
+function renderSearchResults(resultsContainer, products, queryText, searchInput) {
   if (!queryText.trim()) {
-    resultsContainer.hidden = true;
-    resultsContainer.innerHTML = "";
-    searchState.open = false;
+    closeSearchResults(resultsContainer, searchInput);
     return;
   }
 
@@ -1517,6 +1541,8 @@ function renderSearchResults(resultsContainer, products, queryText) {
     `;
     resultsContainer.hidden = false;
     searchState.open = true;
+    searchState.activeIndex = -1;
+    searchInput?.setAttribute("aria-expanded", "true");
     return;
   }
 
@@ -1525,7 +1551,7 @@ function renderSearchResults(resultsContainer, products, queryText) {
       ${matches
         .map(
           (product) => `
-            <a class="search-result" href="produto.html?id=${encodeURIComponent(product.id)}">
+            <a class="search-result" href="produto.html?id=${encodeURIComponent(product.id)}" role="option">
               <div class="search-result__media">
                 ${createProductVisual(product, "search", getProductGallery(product)[0])}
               </div>
@@ -1545,6 +1571,8 @@ function renderSearchResults(resultsContainer, products, queryText) {
   `;
   resultsContainer.hidden = false;
   searchState.open = true;
+  searchState.activeIndex = -1;
+  searchInput?.setAttribute("aria-expanded", "true");
 }
 
 async function setupSiteSearch() {
@@ -1562,26 +1590,75 @@ async function setupSiteSearch() {
   }
 
   searchInput.addEventListener("input", (event) => {
-    renderSearchResults(searchResults, products, event.target.value);
+    renderSearchResults(searchResults, products, event.target.value, searchInput);
   });
 
   searchInput.addEventListener("focus", (event) => {
-    renderSearchResults(searchResults, products, event.target.value);
+    renderSearchResults(searchResults, products, event.target.value, searchInput);
   });
 
   searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const queryValue = searchInput.value.trim();
+    closeSearchResults(searchResults, searchInput);
     window.location.href = queryValue
       ? `produtos.html?q=${encodeURIComponent(queryValue)}`
       : "produtos.html";
   });
 
+  searchInput.addEventListener("keydown", (event) => {
+    if (!searchState.open) {
+      if (event.key === "Escape") {
+        closeSearchResults(searchResults, searchInput);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      highlightSearchResult(searchResults, searchState.activeIndex + 1);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      highlightSearchResult(searchResults, searchState.activeIndex - 1);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeSearchResults(searchResults, searchInput);
+      searchInput.blur();
+      return;
+    }
+
+    if (event.key === "Enter" && searchState.activeIndex >= 0) {
+      const options = [...searchResults.querySelectorAll(".search-result, .search-results__all")];
+      const activeOption = options[searchState.activeIndex];
+      if (activeOption) {
+        event.preventDefault();
+        activeOption.click();
+      }
+    }
+  });
+
+  searchResults.addEventListener("mousemove", (event) => {
+    const option = event.target.closest(".search-result, .search-results__all");
+    if (!option) {
+      return;
+    }
+    const options = [...searchResults.querySelectorAll(".search-result, .search-results__all")];
+    highlightSearchResult(searchResults, options.indexOf(option));
+  });
+
+  searchResults.addEventListener("click", () => {
+    closeSearchResults(searchResults, searchInput);
+  });
+
   document.addEventListener("click", (event) => {
     if (!searchForm.contains(event.target) && searchState.open) {
-      searchResults.hidden = true;
-      searchResults.innerHTML = "";
-      searchState.open = false;
+      closeSearchResults(searchResults, searchInput);
     }
   });
 }
@@ -2144,7 +2221,7 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
     cartRoot.innerHTML = `
       <div class="empty-state">
         <h2>Seu carrinho esta vazio</h2>
-        <p>Adicione produtos ao carrinho para ver o resumo da compra aqui.</p>
+        <p>Escolha seus perfumes favoritos e volte aqui para revisar o pedido.</p>
         <a class="btn-primary" href="produtos.html">Explorar produtos</a>
       </div>
     `;
@@ -2155,13 +2232,27 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
   const shipping = subtotal > 199 ? 0 : 25;
   const total = subtotal + shipping;
   const missingForFreeShipping = Math.max(0, 199 - subtotal);
+  const totalUnits = items.reduce((sum, item) => sum + item.qty, 0);
+  const shippingProgress = Math.min(100, (subtotal / 199) * 100);
 
   cartRoot.innerHTML = `
     <div class="cart-layout">
       <section class="cart-items">
         <div class="cart-section-heading">
-          <h2>Itens do carrinho</h2>
-          <p>${items.length} item${items.length === 1 ? "" : "s"} prontos para finalizar</p>
+          <div>
+            <h2>Seu pedido</h2>
+            <p>${totalUnits} unidade${totalUnits === 1 ? "" : "s"} em ${items.length} produto${items.length === 1 ? "" : "s"}.</p>
+          </div>
+          <a class="cart-link" href="produtos.html">Adicionar mais itens</a>
+        </div>
+        <div class="cart-shipping-banner">
+          <div class="cart-shipping-banner__copy">
+            <strong>${shipping === 0 ? "Frete gratis liberado." : `Faltam ${formatPrice(missingForFreeShipping)} para o frete gratis.`}</strong>
+            <span>${shipping === 0 ? "Seu pedido ja saiu com entrega promocional." : "Aproveite para incluir mais um item no pedido."}</span>
+          </div>
+          <div class="cart-shipping-banner__progress" aria-hidden="true">
+            <span style="width:${shippingProgress}%"></span>
+          </div>
         </div>
         ${items
           .map(
@@ -2169,19 +2260,32 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
               <article class="cart-item" data-cart-id="${item.id}">
                 ${createCartMedia(item)}
                 <div class="cart-item__body">
-                  <span class="cart-item__category">${item.category}</span>
+                  <div class="cart-item__meta">
+                    <span class="cart-item__category">${item.category}</span>
+                    <span class="cart-item__size">${item.size || item.volume || "100 ml"}</span>
+                  </div>
                   <h3>${item.name}</h3>
                   <p>${item.brand} - ${item.concentration || "Eau de Parfum"}</p>
+                  <div class="cart-item__tags">
+                    <span class="cart-item__tag">Pronta entrega</span>
+                    <span class="cart-item__tag">Original e lacrado</span>
+                  </div>
+                </div>
+                <div class="cart-item__pricing">
+                  <span class="cart-item__unit-label">Unitario</span>
                   <strong>${formatPrice(item.price)}</strong>
+                  <span class="cart-item__line-total">Total ${formatPrice(item.price * item.qty)}</span>
                 </div>
-                <div class="cart-item__controls">
-                  <button type="button" class="qty-btn" data-cart-action="decrease" data-cart-id="${item.id}">-</button>
-                  <span class="qty-value">${item.qty}</span>
-                  <button type="button" class="qty-btn" data-cart-action="increase" data-cart-id="${item.id}">+</button>
+                <div class="cart-item__actions">
+                  <div class="cart-item__controls">
+                    <button type="button" class="qty-btn" data-cart-action="decrease" data-cart-id="${item.id}" aria-label="Diminuir quantidade">-</button>
+                    <span class="qty-value">${item.qty}</span>
+                    <button type="button" class="qty-btn" data-cart-action="increase" data-cart-id="${item.id}" aria-label="Aumentar quantidade">+</button>
+                  </div>
+                  <button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${item.id}">
+                    Remover
+                  </button>
                 </div>
-                <button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${item.id}">
-                  Remover
-                </button>
               </article>
             `,
           )
@@ -2189,8 +2293,14 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
       </section>
 
       <aside class="cart-summary">
-        <h2>Resumo do pedido</h2>
-        <p class="cart-summary__lead">${shipping === 0 ? "Voce ganhou frete gratis." : `Faltam ${formatPrice(missingForFreeShipping)} para liberar frete gratis.`}</p>
+        <div class="cart-summary__header">
+          <h2>Resumo do pedido</h2>
+          <p class="cart-summary__lead">Confira os valores finais e informe os dados para entrega.</p>
+        </div>
+        <div class="cart-summary__delivery">
+          <strong>Entrega estimada</strong>
+          <span>${shipping === 0 ? "Frete promocional para todo o Brasil." : "Frete padrao calculado no pedido."}</span>
+        </div>
         <div class="cart-summary__row">
           <span>Subtotal</span>
           <strong>${formatPrice(subtotal)}</strong>
@@ -2204,6 +2314,10 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
           <strong>${formatPrice(total)}</strong>
         </div>
 
+        <div class="cart-summary__block">
+          <h3>Dados para entrega</h3>
+          <p>Use um endereco com alguem disponivel para receber o pedido.</p>
+        </div>
         <div class="checkout-fields">
           <input id="checkout-name" type="text" placeholder="Nome completo" value="${escapeHtml(checkoutDraft.name || "")}">
           <input id="checkout-email" type="email" placeholder="E-mail" value="${escapeHtml(checkoutDraft.email || "")}">
@@ -2211,7 +2325,7 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
           <input id="checkout-address" type="text" placeholder="Endereco de entrega" value="${escapeHtml(checkoutDraft.address || "")}">
         </div>
 
-        <button class="btn-primary btn-block" id="checkout-submit">Ir para pagamento</button>
+        <button class="btn-primary btn-block" id="checkout-submit">Finalizar compra</button>
         <a class="btn-outline btn-outline--dark btn-block" href="produtos.html">Continuar comprando</a>
       </aside>
     </div>
