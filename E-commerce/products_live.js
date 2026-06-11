@@ -9,7 +9,7 @@ const PRODUCTS_LIVE = [
     "longDescription": "Bleu de Chanel combina frescor citrico, especiarias elegantes e um fundo amadeirado limpo. Um perfume versatil para quem quer presenca refinada no dia a dia.",
     "price": 850.0,
     "oldPrice": 930.0,
-    "stock": 45,
+    "stock": 69,
     "category": "Masculino",
     "image_url": "",
     "imageEmoji": "🧊",
@@ -267,6 +267,7 @@ const PRODUCTS_LIVE = [
 const ORDERS_LIVE = [
   {
     "id": "ord-001",
+    "customer_id": null,
     "customer_name": "Juliana Silva",
     "customer_email": "juliana@example.com",
     "customer_phone": "",
@@ -279,12 +280,19 @@ const ORDERS_LIVE = [
         "unit_price": 920.0
       }
     ],
+    "subtotal": 920.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
     "total": 920.0,
     "status": "enviado",
-    "created_at": "14/05/2026 07:33"
+    "created_at": "14/05/2026 07:33",
+    "updated_at": "2026-06-11T14:01:15+00:00Z",
+    "schema_version": 2
   },
   {
     "id": "ord-002",
+    "customer_id": null,
     "customer_name": "Victor",
     "customer_email": "Victor@gmail.com",
     "customer_phone": "11111111111",
@@ -297,12 +305,19 @@ const ORDERS_LIVE = [
         "unit_price": 920.0
       }
     ],
+    "subtotal": 920.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
     "total": 920.0,
     "status": "pago",
-    "created_at": "14/05/2026 12:02"
+    "created_at": "14/05/2026 12:02",
+    "updated_at": "2026-06-11T14:01:15+00:00Z",
+    "schema_version": 2
   },
   {
     "id": "ord-003",
+    "customer_id": null,
     "customer_name": "11",
     "customer_email": "1@gmail.com",
     "customer_phone": "11111111111",
@@ -315,9 +330,90 @@ const ORDERS_LIVE = [
         "unit_price": 1414.0
       }
     ],
+    "subtotal": 1414.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
     "total": 1414.0,
     "status": "pago",
-    "created_at": "27/05/2026 10:42"
+    "created_at": "27/05/2026 10:42",
+    "updated_at": "2026-06-11T14:01:15+00:00Z",
+    "schema_version": 2
+  },
+  {
+    "id": "ord-004",
+    "customer_id": null,
+    "customer_name": "Test User",
+    "customer_email": "test@example.com",
+    "customer_phone": "",
+    "customer_address": "",
+    "items": [
+      {
+        "product_id": "perf-1",
+        "product_name": "Bleu de Chanel",
+        "quantity": 2,
+        "unit_price": 850.0
+      }
+    ],
+    "subtotal": 1700.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
+    "total": 1700.0,
+    "status": "pago",
+    "created_at": "2026-06-11T14:01:15Z",
+    "updated_at": "2026-06-11T14:01:15Z",
+    "schema_version": 2
+  },
+  {
+    "id": "ord-005",
+    "customer_id": null,
+    "customer_name": "Test User",
+    "customer_email": "test@example.com",
+    "customer_phone": "",
+    "customer_address": "",
+    "items": [
+      {
+        "product_id": "perf-1",
+        "product_name": "Bleu de Chanel",
+        "quantity": 2,
+        "unit_price": 850.0
+      }
+    ],
+    "subtotal": 1700.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
+    "total": 1700.0,
+    "status": "pendente",
+    "created_at": "2026-06-11T14:01:35+00:00Z",
+    "updated_at": "2026-06-11T14:01:35+00:00Z",
+    "schema_version": 2
+  },
+  {
+    "id": "ord-006",
+    "customer_id": null,
+    "customer_name": "Test User",
+    "customer_email": "test@example.com",
+    "customer_phone": "",
+    "customer_address": "",
+    "items": [
+      {
+        "product_id": "perf-1",
+        "product_name": "Bleu de Chanel",
+        "quantity": 2,
+        "unit_price": 850.0
+      }
+    ],
+    "subtotal": 1700.0,
+    "shipping": 0.0,
+    "discount_total": 0.0,
+    "coupon_code": null,
+    "total": 1700.0,
+    "status": "pago",
+    "created_at": "2026-06-11T14:25:51Z",
+    "updated_at": "2026-06-11T14:25:51Z",
+    "schema_version": 2
   }
 ];
 window.PRODUCTS_LIVE = PRODUCTS_LIVE;
