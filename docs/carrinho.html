@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Carrinho Grand Parfum com resumo de pedido, dados de entrega e o mesmo layout base da home.">
+  <meta name="description" content="Carrinho Grand Parfum com resumo claro do pedido, frete, dados de entrega e acesso rapido ao pagamento.">
   <title>Carrinho - Grand Parfum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,17 +14,22 @@
   <div data-site-header></div>
 
   <main class="page-main">
-    <section class="page-hero">
+    <section class="page-hero page-hero--compact">
       <div class="section__container">
+        <div class="page-breadcrumbs">
+          <a href="index.html">Home</a>
+          <span>/</span>
+          <strong>Carrinho</strong>
+        </div>
         <div class="page-hero__copy">
-          <div class="page-kicker">Resumo da compra</div>
-          <h1 class="page-title">Checkout mais claro, sem pagina paralela.</h1>
-          <p class="page-subtitle">Mesma identidade, mesmo header e um resumo de compra mais limpo para fechar o pedido com menos atrito.</p>
+          <div class="page-kicker">Resumo do pedido</div>
+          <h1 class="page-title">Revise seus itens antes de seguir para o pagamento.</h1>
+          <p class="page-subtitle">Confira quantidades, frete e dados de entrega em um fluxo mais claro.</p>
         </div>
       </div>
     </section>
 
-    <section class="section" style="padding-top: 1rem;">
+    <section class="section section--compact">
       <div class="section__container">
         <div id="cart-content"></div>
       </div>
@@ -44,5 +49,6 @@
     }
   </script>
   <script type="module" src="app.js"></script>
+  <script type="module" src="commerce-enhancements.js"></script>
 </body>
 </html>

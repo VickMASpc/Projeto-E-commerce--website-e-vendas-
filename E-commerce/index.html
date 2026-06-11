@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Grand Parfum - perfumaria premium com curadoria de fragrancias originais e experiencia de compra refinada.">
-  <title>Grand Parfum - Curadoria Premium</title>
+  <meta name="description" content="Grand Parfum - loja online de perfumes originais com busca simples, categorias claras e experiencia de compra refinada.">
+  <title>Grand Parfum - Loja Online</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,105 +13,85 @@
 <body data-page="home">
   <div data-site-header></div>
 
-  <main>
-    <section class="hero" id="hero" aria-label="Destaque principal">
+  <main class="shop-main">
+    <section class="hero hero--shop" id="hero" aria-label="Promocao principal">
       <div class="hero__grid">
         <div class="hero__content">
-          <div class="hero__badge">
-            <span class="hero__badge-dot" aria-hidden="true"></span>
-            curadoria da semana
-          </div>
-
-          <h1 class="hero__title">
-            Essencias que<br>
-            <span class="hero__title-highlight">entram antes de voce.</span>
-          </h1>
-
+          <div class="hero__eyebrow">Semana do perfume</div>
+          <h1 class="hero__title">Compre fragrancias originais com uma navegacao mais direta.</h1>
           <p class="hero__desc">
-            Descubra perfumes de assinatura, nicho e classicos atemporais com navegacao fluida, busca por notas e paginas de produto completas.
+            Explore masculinos, femininos, unissex, nicho e acessorios com busca rapida, filtros claros e paginas de produto completas.
           </p>
-
           <div class="hero__cta">
-            <a href="produtos.html" class="btn-primary">Ver colecao</a>
-            <a href="#categorias" class="btn-outline">Explorar categorias</a>
+            <a href="produtos.html" class="btn-primary">Comprar agora</a>
+            <a href="produtos.html?filter=sale" class="btn-outline btn-outline--light">Ver ofertas</a>
           </div>
-
           <div class="hero__stats" aria-label="Numeros da loja">
             <div>
               <div class="hero__stat-value">200+</div>
-              <div class="hero__stat-label">Fragrancias selecionadas</div>
+              <div class="hero__stat-label">Perfumes no catalogo</div>
             </div>
             <div>
-              <div class="hero__stat-value">5k+</div>
-              <div class="hero__stat-label">Clientes recorrentes</div>
+              <div class="hero__stat-value">12x</div>
+              <div class="hero__stat-label">Parcelamento sem juros</div>
             </div>
             <div>
-              <div class="hero__stat-value">100%</div>
-              <div class="hero__stat-label">Produtos originais</div>
+              <div class="hero__stat-value">R$ 199</div>
+              <div class="hero__stat-label">Frete gratis a partir</div>
             </div>
           </div>
         </div>
 
-        <div class="hero__image-wrapper" aria-hidden="true">
-          <div class="hero__image-card">
-            <div class="product-visual product-visual--detail" style="--visual-start:#20150c; --visual-end:#050505; --visual-accent:#d4af37;">
-              <span class="product-visual__label">Grand Parfum</span>
-              <div class="product-visual__emoji">✨</div>
-              <strong class="product-visual__title">Selecao premium em evidencia</strong>
-              <span class="product-visual__meta">Busca inteligente, vitrine refinada e detalhe completo.</span>
-            </div>
-          </div>
-          <div class="hero__floating-badge hero__floating-badge--top">Compra assistida</div>
-          <div class="hero__floating-badge hero__floating-badge--bottom">Frete gratis acima de R$ 199</div>
-        </div>
+        <aside class="hero__offer-card" aria-label="Oferta da semana">
+          <span class="hero__offer-badge">Oferta da semana</span>
+          <h2>Perfumes selecionados com ate 40% off</h2>
+          <p>Escolha entre classicos de assinatura, lancamentos e itens em estoque com envio para todo o Brasil.</p>
+          <ul class="hero__offer-list">
+            <li>Busca por marca, categoria e notas</li>
+            <li>Favoritos sincronizados com sua conta</li>
+            <li>Carrinho com resumo claro antes do pagamento</li>
+          </ul>
+          <a href="produtos.html?filter=sale" class="btn-primary btn-block">Explorar promocoes</a>
+        </aside>
       </div>
     </section>
 
-    <div class="trust-bar" aria-label="Diferenciais da loja">
-      <div class="trust-bar__inner">
-        <div class="trust-bar__item">Frete premium para todo o Brasil</div>
-        <div class="trust-bar__item">Pagamento facilitado e parcelamento em 12x</div>
-        <div class="trust-bar__item">Produtos originais com procedencia</div>
-        <div class="trust-bar__item">Suporte humano para indicacao e pos-venda</div>
-      </div>
-    </div>
-
-    <section class="section" id="categorias" aria-labelledby="categorias-title">
+    <section class="section section--compact" id="categorias" aria-labelledby="categorias-title">
       <div class="section__container">
         <header class="section__header animate-on-scroll">
-          <span class="section__eyebrow">Navegue por</span>
-          <h2 class="section__title" id="categorias-title">Categorias em destaque</h2>
-          <p class="section__subtitle">Escolha um caminho rapido para descobrir marcas, familias e perfis que combinam com o momento.</p>
+          <span class="section__eyebrow">Categorias</span>
+          <h2 class="section__title" id="categorias-title">Compre por departamento</h2>
+          <p class="section__subtitle">Atalhos diretos para os grupos mais buscados da vitrine.</p>
         </header>
 
         <div class="categories__grid">
           <a href="produtos.html?cat=Masculino" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#161616,#3d3d3d);">🖤</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#161616,#3d3d3d);">M</div>
             <div class="category-card__name">Masculino</div>
-            <div class="category-card__count">Assinaturas secas e elegantes</div>
+            <div class="category-card__count">Perfumes amadeirados e aromaticos</div>
           </a>
           <a href="produtos.html?cat=Feminino" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff1f5,#ffd1e6);">🌸</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff1f5,#ffd1e6);">F</div>
             <div class="category-card__name">Feminino</div>
             <div class="category-card__count">Florais, gourmands e classicos</div>
           </a>
           <a href="produtos.html?cat=Unissex" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#f1f5f9,#dbeafe);">🌙</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#f1f5f9,#dbeafe);">U</div>
             <div class="category-card__name">Unissex</div>
             <div class="category-card__count">Perfis leves e compartilhaveis</div>
           </a>
           <a href="produtos.html?cat=Nicho" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#27113d,#4f1f6f);">💎</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#27113d,#4f1f6f);">N</div>
             <div class="category-card__name">Nicho</div>
             <div class="category-card__count">Alta assinatura e exclusividade</div>
           </a>
           <a href="produtos.html?cat=Acessorios" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);">🧳</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);">A</div>
             <div class="category-card__name">Acessorios</div>
-            <div class="category-card__count">Itens para compor o ritual</div>
+            <div class="category-card__count">Complementos para o ritual</div>
           </a>
           <a href="produtos.html?filter=sale" class="category-card animate-on-scroll">
-            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);">🏷️</div>
+            <div class="category-card__icon" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);">%</div>
             <div class="category-card__name">Ofertas</div>
             <div class="category-card__count">Descontos ativos na vitrine</div>
           </a>
@@ -122,74 +102,44 @@
     <section class="section section--light" id="produtos" aria-labelledby="produtos-title">
       <div class="section__container">
         <header class="section__header animate-on-scroll">
-          <span class="section__eyebrow">Mais procurados</span>
-          <h2 class="section__title" id="produtos-title">Produtos em destaque</h2>
-          <p class="section__subtitle">A grade abaixo e alimentada pela mesma base usada na busca e nas paginas de produto.</p>
+          <span class="section__eyebrow">Mais vendidos</span>
+          <h2 class="section__title" id="produtos-title">Perfumes em destaque</h2>
+          <p class="section__subtitle">Os itens mais buscados por quem compra na Grand Parfum.</p>
         </header>
-        <div class="products__grid" id="featured-products"></div>
+        <div class="products__grid" id="best-sellers-grid"></div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="promo-title">
-      <div class="section__container">
-        <div class="promo-banner animate-on-scroll">
-          <div>
-            <p class="promo-banner__eyebrow">Oferta especial</p>
-            <h2 class="promo-banner__title" id="promo-title">Ate 40% off em selecao rotativa</h2>
-            <p class="promo-banner__desc">Acompanhe a vitrine com busca ao vivo e use os filtros para encontrar rapidamente produtos novos, em oferta ou salvos nos favoritos.</p>
-          </div>
-          <a href="produtos.html?filter=sale" class="btn-primary">Ver ofertas</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section section--light" id="sobre" aria-labelledby="reviews-title">
+    <section class="section" aria-labelledby="sale-title">
       <div class="section__container">
         <header class="section__header animate-on-scroll">
-          <span class="section__eyebrow">Como a loja ajuda</span>
-          <h2 class="section__title" id="reviews-title">Experiencia de compra</h2>
-          <p class="section__subtitle">Pontos praticos que ajudam a escolher, comparar e finalizar o pedido com menos atrito nesta versao beta.</p>
+          <span class="section__eyebrow">Promocoes</span>
+          <h2 class="section__title" id="sale-title">Ofertas para comprar agora</h2>
+          <p class="section__subtitle">Selecao com desconto ativo e acesso rapido ao carrinho.</p>
         </header>
-
-        <div class="reviews__grid">
-          <article class="review-card animate-on-scroll">
-            <div class="review-card__header">
-              <div class="review-card__avatar">01</div>
-              <div>
-                <div class="review-card__name">Busca por intencao</div>
-                <div class="review-card__date">Catalogo</div>
-              </div>
-            </div>
-            <div class="review-card__stars">Marca, notas e categoria</div>
-            <p class="review-card__text">O mesmo catalogo alimenta a vitrine, a busca do header, a pagina de produtos e os detalhes de cada item.</p>
-          </article>
-
-          <article class="review-card animate-on-scroll">
-            <div class="review-card__header">
-              <div class="review-card__avatar">02</div>
-              <div>
-                <div class="review-card__name">Comparacao simples</div>
-                <div class="review-card__date">Favoritos</div>
-              </div>
-            </div>
-            <div class="review-card__stars">Lista local salva</div>
-            <p class="review-card__text">Os favoritos permitem separar fragrancias para comparar notas, concentracao, familia olfativa e preco depois.</p>
-          </article>
-
-          <article class="review-card animate-on-scroll">
-            <div class="review-card__header">
-              <div class="review-card__avatar">03</div>
-              <div>
-                <div class="review-card__name">Checkout direto</div>
-                <div class="review-card__date">Carrinho</div>
-              </div>
-            </div>
-            <div class="review-card__stars">Resumo e entrega</div>
-            <p class="review-card__text">O carrinho concentra itens, quantidades, frete e dados de entrega antes de enviar o pedido ao sistema de vendas.</p>
-          </article>
-        </div>
+        <div class="products__grid" id="sale-products-grid"></div>
       </div>
     </section>
+
+    <section class="section section--light" aria-labelledby="new-title">
+      <div class="section__container">
+        <header class="section__header animate-on-scroll">
+          <span class="section__eyebrow">Lancamentos</span>
+          <h2 class="section__title" id="new-title">Novidades da vitrine</h2>
+          <p class="section__subtitle">Itens recentes para quem quer descobrir algo novo sem sair do fluxo de compra.</p>
+        </header>
+        <div class="products__grid" id="new-products-grid"></div>
+      </div>
+    </section>
+
+    <div class="trust-bar" aria-label="Diferenciais da loja">
+      <div class="trust-bar__inner">
+        <div class="trust-bar__item">Frete gratis acima de R$ 199</div>
+        <div class="trust-bar__item">Pagamento facilitado em 12x sem juros</div>
+        <div class="trust-bar__item">Produtos originais com procedencia</div>
+        <div class="trust-bar__item">Suporte humano no pos-venda</div>
+      </div>
+    </div>
 
     <section class="newsletter" id="contato" aria-labelledby="newsletter-title">
       <div class="section__container newsletter__inner">

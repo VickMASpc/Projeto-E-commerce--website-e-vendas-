@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Conta - Grand Parfum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="account">
+  <div data-site-header></div>
+
+  <main class="account-page">
+    <div class="section__container">
+      <div class="page-breadcrumbs">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <strong>Minha conta</strong>
+      </div>
+
+      <div class="account-grid">
+        <aside class="account-sidebar">
+          <div class="account-user-info">
+            <div class="account-avatar" id="user-avatar">?</div>
+            <div class="account-user-details">
+              <strong id="user-display-name">Carregando...</strong>
+              <span id="user-email">...</span>
+            </div>
+          </div>
+          <nav class="account-nav">
+            <button class="account-nav-item is-active" data-tab="orders">Meus pedidos</button>
+            <button class="account-nav-item" data-tab="profile">Dados pessoais</button>
+            <button class="account-nav-item" id="btn-logout">Sair da conta</button>
+          </nav>
+        </aside>
+
+        <section class="account-content">
+          <div class="account-panel" id="tab-orders">
+            <div class="account-panel__header">
+              <h1 class="auth-title">Historico de pedidos</h1>
+              <p class="auth-subtitle">Acompanhe compras recentes e confira o resumo de cada pedido.</p>
+            </div>
+            <div id="orders-list">
+              <div class="empty-state">
+                <p>Carregando seus pedidos...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="account-panel" id="tab-profile" hidden>
+            <div class="account-panel__header">
+              <h2 class="auth-title">Meus dados</h2>
+              <p class="auth-subtitle">Atualize as informacoes usadas no checkout.</p>
+            </div>
+            <form class="auth-form" id="profile-form">
+              <div class="form-group">
+                <label>E-mail (nao pode ser alterado)</label>
+                <input type="email" id="profile-email" readonly disabled>
+              </div>
+              <div class="form-group">
+                <label for="profile-name">Nome de exibicao</label>
+                <input type="text" id="profile-name">
+              </div>
+              <div class="form-group">
+                <label for="profile-phone">Telefone</label>
+                <input type="tel" id="profile-phone">
+              </div>
+              <div class="form-group">
+                <label for="profile-address">Endereco</label>
+                <input type="text" id="profile-address">
+              </div>
+              <button type="submit" class="btn-primary">Salvar alteracoes</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

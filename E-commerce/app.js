@@ -1,17 +1,26 @@
-import { initializeApp } from "firebase/app";
 import {
   addDoc,
   collection,
   doc,
   getDocs,
+  getDoc,
   getFirestore,
   limit,
   query,
   setDoc,
+  where,
 } from "firebase/firestore";
-import firebaseConfig from "./firebase-config.js";
+import { 
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "firebase/auth";
+import firebaseConfig, { app, auth } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const PAGE = document.body.dataset.page || "home";
@@ -19,6 +28,61 @@ const CART_KEY = "minhaloja_cart";
 const WISHLIST_KEY = "minhaloja_wishlist";
 const DEFAULT_PRODUCT_LIMIT = 60;
 const MAX_CART_QUANTITY = 99;
+
+function nowIsoString() {
+  return new Date().toISOString();
+}
+
+function parseDateValue(value) {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value?.toDate === "function") {
+    return value.toDate().getTime();
+  }
+
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  if (typeof value === "string") {
+    const direct = Date.parse(value);
+    if (Number.isFinite(direct)) {
+      return direct;
+    }
+
+    const parts = value.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+    if (parts) {
+      const [, day, month, year, hour = "00", minute = "00"] = parts;
+      return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime();
+    }
+  }
+
+  return 0;
+}
+
+function getOrderItems(order) {
+  if (Array.isArray(order?.items)) {
+    return order.items;
+  }
+  if (Array.isArray(order?.itens)) {
+    return order.itens;
+  }
+  return [];
+}
+
+function getOrderCreatedAt(order) {
+  return order?.created_at || order?.dataCriacao || "";
+}
+
+function formatOrderDate(value) {
+  const timestamp = parseDateValue(value);
+  if (!timestamp) {
+    return "Data indisponivel";
+  }
+  return new Date(timestamp).toLocaleDateString("pt-BR");
+}
 
 const CATEGORY_THEMES = {
   Masculino: { start: "#0f172a", end: "#1e293b", accent: "#d4af37", emoji: "🖤" },
@@ -170,6 +234,136 @@ let productCache = null;
 let productCachePromise = null;
 let searchState = { open: false };
 let observer = null;
+let currentProductId = null;
+
+const AuthManager = {
+  user: null,
+  profile: null,
+
+  async ensureUserDocuments(user, overrides = {}) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    const existing = snap.exists() ? snap.data() : {};
+    const nextProfile = {
+      email: user.email || existing.email || "",
+      name: overrides.name || existing.name || user.displayName || "Usuario",
+      phone: existing.phone || "",
+      address: existing.address || "",
+      updatedAt: nowIsoString(),
+    };
+
+    if (!snap.exists()) {
+      nextProfile.createdAt = nowIsoString();
+    } else if (existing.createdAt) {
+      nextProfile.createdAt = existing.createdAt;
+    }
+
+    await setDoc(userRef, nextProfile, { merge: true });
+    this.profile = { ...existing, ...nextProfile };
+
+    await Promise.all([
+      setDoc(doc(db, "carts", user.uid), {
+        ownerId: user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true }),
+      setDoc(doc(db, "wishlists", user.uid), {
+        ownerId: user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true })
+    ]);
+  },
+  
+  init() {
+    onAuthStateChanged(auth, async (user) => {
+      this.user = user;
+
+      if (user) {
+        try {
+          await this.ensureUserDocuments(user);
+        } catch(e) {
+          console.error("Erro ao gerenciar usuario no firestore:", e);
+        }
+
+        if (typeof Cart !== 'undefined') await Cart.loadFromCloud(user.uid);
+        if (typeof Wishlist !== 'undefined') await Wishlist.loadFromCloud(user.uid);
+      } else {
+        if (typeof Cart !== 'undefined') Cart.clearCloudRef();
+        if (typeof Wishlist !== 'undefined') Wishlist.clearCloudRef();
+      }
+
+      renderSiteChrome();
+      setupNavbarBehavior();
+      if (typeof Cart !== 'undefined') Cart.updateBadge();
+      if (typeof Wishlist !== 'undefined') Wishlist.updateBadge();
+      
+      // Se estiver na pagina de conta e deslogar, redireciona
+      if (!user && PAGE === "account") {
+        window.location.href = "auth.html";
+      }
+    });
+  },
+
+  async login(email, password) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no login:", error);
+      return { success: false, message: this.getFriendlyError(error.code) };
+    }
+  },
+
+  async register(name, email, password) {
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      if (name?.trim()) {
+        await updateProfile(credential.user, { displayName: name.trim() });
+      }
+      await this.ensureUserDocuments(credential.user, { name: name?.trim() || "Usuario" });
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no cadastro:", error);
+      return { success: false, message: this.getFriendlyError(error.code) };
+    }
+  },
+
+  async loginWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      return { success: true };
+    } catch (error) {
+      console.error("Erro no Google Login:", error);
+      return { success: false, message: "Falha ao entrar com Google." };
+    }
+  },
+
+  async logout() {
+    try {
+      await signOut(auth);
+      Cart.showToast("Sessao encerrada.");
+      return true;
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      return false;
+    }
+  },
+
+  getFriendlyError(code) {
+    switch (code) {
+      case "auth/user-not-found": return "Usuario nao encontrado.";
+      case "auth/wrong-password": return "Senha incorreta.";
+      case "auth/email-already-in-use": return "E-mail ja cadastrado.";
+      case "auth/weak-password": return "Senha muito fraca.";
+      case "auth/invalid-email": return "E-mail invalido.";
+      default: return "Ocorreu um erro. Tente novamente.";
+    }
+  }
+};
 
 const FirebaseDB = {
   async getProducts(count = DEFAULT_PRODUCT_LIMIT) {
@@ -187,7 +381,7 @@ const FirebaseDB = {
     try {
       await addDoc(collection(db, "newsletter"), {
         email,
-        createdAt: new Date(),
+        createdAt: nowIsoString(),
       });
       return true;
     } catch (error) {
@@ -199,7 +393,15 @@ const FirebaseDB = {
   async createOrder(orderData) {
     try {
       const localOrderPayload = {
-        customer: orderData.customer || {},
+        customer: {
+          ...(orderData.customer || {}),
+          id: orderData.userId || orderData.customer?.id || null,
+        },
+        customer_id: orderData.userId || orderData.customer?.id || null,
+        subtotal: orderData.subtotal || 0,
+        shipping: orderData.shipping || 0,
+        discount_total: orderData.discount_total || 0,
+        coupon_code: orderData.coupon_code || null,
         total: orderData.total || 0,
         items: (orderData.items || []).map((item) => ({
           product_id: item.product_id || item.id || "",
@@ -228,21 +430,32 @@ const FirebaseDB = {
         return result.order_id;
       }
 
+      if (orderData.coupon_code) {
+        throw new Error("Cupons exigem o sistema local de vendas online.");
+      }
+
       const orderId = `ord-${Date.now().toString().slice(-6)}`;
       const payload = {
-        clienteNome: orderData.customer?.name || "Cliente",
-        clienteEmail: orderData.customer?.email || "",
-        clienteTelefone: orderData.customer?.phone || "",
-        clienteEndereco: orderData.customer?.address || "",
-        itens: (orderData.items || []).map((item) => ({
-          produtoId: item.product_id || item.id || "",
-          produtoNome: item.name || item.product_name || "Produto",
-          preco: item.price || item.unit_price || 0,
-          quantidade: item.quantity || 1,
+        customer_id: orderData.userId || AuthManager.user?.uid || null,
+        customer_name: orderData.customer?.name || "Cliente",
+        customer_email: orderData.customer?.email || "",
+        customer_phone: orderData.customer?.phone || "",
+        customer_address: orderData.customer?.address || "",
+        items: (orderData.items || []).map((item) => ({
+          product_id: item.product_id || item.id || "",
+          product_name: item.name || item.product_name || "Produto",
+          unit_price: item.price || item.unit_price || 0,
+            quantity: item.quantity || 1,
         })),
+        subtotal: orderData.subtotal || 0,
+        shipping: orderData.shipping || 0,
+        discount_total: orderData.discount_total || 0,
+        coupon_code: orderData.coupon_code || null,
         total: orderData.total || 0,
         status: "pendente",
-        dataCriacao: new Date().toISOString(),
+        created_at: nowIsoString(),
+        updated_at: nowIsoString(),
+        schemaVersion: 2,
       };
 
       await setDoc(doc(db, "pedidos", orderId), payload);
@@ -261,6 +474,134 @@ const FirebaseDB = {
     if (containerId) {
       renderProducts(containerId, scopedProducts);
     }
+  },
+
+  async validateCoupon(code, items, subtotal) {
+    try {
+      const response = await fetch("http://localhost:5000/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          subtotal,
+          items: (items || []).map((item) => ({
+            product_id: item.id || item.product_id || "",
+            quantity: item.qty || item.quantity || 1,
+            unit_price: item.price || item.unit_price || 0,
+          })),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.message || "Nao foi possivel validar o cupom.");
+      }
+      return result;
+    } catch (error) {
+      console.error("Erro ao validar cupom:", error);
+      throw error;
+    }
+  },
+};
+
+const Reviews = {
+  buildId(productId, userId) {
+    return `${userId}__${productId}`;
+  },
+
+  async loadProductReviews(productId) {
+    try {
+      const snapshot = await getDocs(
+        query(collection(db, "reviews"), where("product_id", "==", productId), limit(50)),
+      );
+      const entries = snapshot.docs
+        .map((entry) => ({ id: entry.id, ...entry.data() }))
+        .sort((left, right) => {
+          const leftValue = parseDateValue(left.updated_at || left.created_at);
+          const rightValue = parseDateValue(right.updated_at || right.created_at);
+          return rightValue - leftValue;
+        });
+
+      const count = entries.length;
+      const average = count
+        ? entries.reduce((sum, entry) => sum + toNumber(entry.score, 0), 0) / count
+        : 0;
+      const currentUserReview = AuthManager.user
+        ? entries.find((entry) => entry.user_id === AuthManager.user.uid) || null
+        : null;
+
+      return {
+        entries,
+        count,
+        average,
+        currentUserReview,
+      };
+    } catch (error) {
+      console.error("Erro ao carregar avaliacoes:", error);
+      return {
+        entries: [],
+        count: 0,
+        average: 0,
+        currentUserReview: null,
+      };
+    }
+  },
+
+  async syncAggregate(productId, entries) {
+    const count = entries.length;
+    const average = count
+      ? entries.reduce((sum, entry) => sum + toNumber(entry.score, 0), 0) / count
+      : 0;
+    await setDoc(doc(db, "produtos", productId), {
+      rating: count ? Number(average.toFixed(1)) : 0,
+      reviews: count,
+      updatedAt: nowIsoString(),
+    }, { merge: true });
+
+    if (Array.isArray(productCache)) {
+      const current = productCache.find((entry) => entry.id === productId);
+      if (current) {
+        current.rating = count ? Number(average.toFixed(1)) : 0;
+        current.reviews = count;
+      }
+    }
+
+    return {
+      count,
+      average,
+    };
+  },
+
+  async saveProductReview(productId, payload) {
+    if (!AuthManager.user) {
+      throw new Error("Entre na sua conta para avaliar.");
+    }
+
+    const reviewRef = doc(db, "reviews", this.buildId(productId, AuthManager.user.uid));
+    const nextReview = {
+      product_id: productId,
+      user_id: AuthManager.user.uid,
+      user_name:
+        AuthManager.profile?.name ||
+        AuthManager.user.displayName ||
+        AuthManager.user.email ||
+        "Cliente",
+      score: Math.max(1, Math.min(5, Number.parseInt(payload.score, 10) || 5)),
+      title: String(payload.title || "").trim(),
+      comment: String(payload.comment || "").trim(),
+      updated_at: nowIsoString(),
+    };
+
+    const existing = await getDoc(reviewRef);
+    if (!existing.exists()) {
+      nextReview.created_at = nowIsoString();
+    } else {
+      nextReview.created_at = existing.data().created_at || nowIsoString();
+    }
+
+    await setDoc(reviewRef, nextReview, { merge: true });
+    const nextState = await this.loadProductReviews(productId);
+    await this.syncAggregate(productId, nextState.entries);
+    return this.loadProductReviews(productId);
   },
 };
 
@@ -520,9 +861,17 @@ function createProductVisual(product, variant = "card", asset = null) {
   `;
 }
 
+function getDiscountPercentage(product) {
+  if (!product.oldPrice || product.oldPrice <= product.price) {
+    return 0;
+  }
+  return Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
+}
+
 function createProductCard(product) {
+  const discountPercentage = getDiscountPercentage(product);
   const badge = product.isSale
-    ? `<span class="product-card__badge product-card__badge--sale">Oferta</span>`
+    ? `<span class="product-card__badge product-card__badge--sale">${discountPercentage ? `${discountPercentage}% off` : "Oferta"}</span>`
     : product.isNew
       ? `<span class="product-card__badge product-card__badge--new">Novo</span>`
       : "";
@@ -558,22 +907,26 @@ function createProductCard(product) {
       <div class="product-card__body">
         <div class="product-card__category-row">
           <span class="product-card__category">${product.category}</span>
-          <span class="product-card__stock ${product.stock > 0 ? "" : "is-empty"}">
-            ${product.stock > 0 ? `${product.stock} em estoque` : "Sem estoque"}
-          </span>
+          <span class="product-card__brand">${product.brand}</span>
         </div>
         <h3 class="product-card__name">${product.name}</h3>
         <p class="product-card__copy">${product.tagline || product.description}</p>
         <div class="product-card__rating">
           <span class="product-card__stars" aria-label="${product.rating} estrelas">★★★★★</span>
-          <span class="product-card__rating-count">(${product.reviews})</span>
+          <span class="product-card__rating-count">${product.rating.toFixed(1)} (${product.reviews})</span>
         </div>
-        <div class="product-card__footer">
+        <div class="product-card__price-block">
           <div>
             <div class="product-card__price-current">${formatPrice(product.price)}</div>
             ${oldPrice}
           </div>
+          <span class="product-card__stock ${product.stock > 0 ? "" : "is-empty"}">
+            ${product.stock > 0 ? `${product.stock} em estoque` : "Sem estoque"}
+          </span>
+        </div>
+        <div class="product-card__footer">
           <div class="product-card__installments">12x sem juros</div>
+          <div class="product-card__shipping">${product.price >= 199 ? "Frete gratis" : "Frete a partir de R$ 25"}</div>
         </div>
       </div>
     </article>
@@ -601,6 +954,75 @@ function renderProducts(containerId, productList = []) {
 }
 
 const Cart = {
+  userId: null,
+
+  readStorage() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(CART_KEY));
+      if (Array.isArray(raw)) {
+        return { items: raw, coupon: null };
+      }
+      return {
+        items: Array.isArray(raw?.items) ? raw.items : [],
+        coupon: raw?.coupon || null,
+      };
+    } catch {
+      return { items: [], coupon: null };
+    }
+  },
+
+  writeStorage(payload) {
+    localStorage.setItem(CART_KEY, JSON.stringify(payload));
+  },
+
+  async loadFromCloud(uid) {
+    this.userId = uid;
+    const items = this.getItems();
+    const coupon = this.getCoupon();
+    try {
+      const docRef = doc(db, "carts", uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+         const cloudItems = snap.data().items || [];
+         const merged = [...cloudItems];
+         for (const item of items) {
+           const existing = merged.find(i => i.id === item.id);
+           if (existing) {
+             existing.qty = Math.max(existing.qty, item.qty);
+           } else {
+             merged.push(item);
+           }
+         }
+        this.writeStorage({ items: merged, coupon });
+        if (merged.length !== cloudItems.length) {
+           await setDoc(docRef, {
+             ownerId: uid,
+             schemaVersion: 2,
+             updatedAt: nowIsoString(),
+             items: merged,
+           }, { merge: true });
+         }
+      } else if (items.length > 0) {
+         await setDoc(docRef, {
+           ownerId: uid,
+           schemaVersion: 2,
+           updatedAt: nowIsoString(),
+           items,
+         }, { merge: true });
+      }
+    } catch(err) {
+      console.error("Erro sincronizando cart:", err);
+    }
+    this.updateBadge();
+    if (PAGE === "cart") {
+      if (typeof renderCartPage === 'function') renderCartPage();
+    }
+  },
+
+  clearCloudRef() {
+    this.userId = null;
+  },
+
   getProduct(productId) {
     return productCache?.find((entry) => entry.id === productId) || null;
   },
@@ -646,6 +1068,15 @@ const Cart = {
 
     localStorage.setItem(CART_KEY, JSON.stringify(normalizedItems));
     this.updateBadge();
+
+    if (this.userId) {
+      setDoc(doc(db, "carts", this.userId), {
+        ownerId: this.userId,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: normalizedItems,
+      }, { merge: true }).catch(console.error);
+    }
   },
 
   addItem(productOrId, name, price, imageEmoji = "📦", quantity = 1) {
@@ -746,6 +1177,47 @@ const Cart = {
 };
 
 const Wishlist = {
+  userId: null,
+
+  async loadFromCloud(uid) {
+    this.userId = uid;
+    const items = this.getItems();
+    try {
+      const docRef = doc(db, "wishlists", uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudItems = snap.data().items || [];
+        const merged = Array.from(new Set([...cloudItems, ...items]));
+        localStorage.setItem(WISHLIST_KEY, JSON.stringify(merged));
+        if (merged.length !== cloudItems.length) {
+          await setDoc(docRef, {
+            ownerId: uid,
+            schemaVersion: 2,
+            updatedAt: nowIsoString(),
+            items: merged,
+          }, { merge: true });
+        }
+      } else if (items.length > 0) {
+        await setDoc(docRef, {
+          ownerId: uid,
+          schemaVersion: 2,
+          updatedAt: nowIsoString(),
+          items,
+        }, { merge: true });
+      }
+    } catch(err) {
+       console.error("Erro sincronizando wishlist:", err);
+    }
+    this.updateBadge();
+    if (PAGE === "favorites") {
+      if (typeof initFavoritesPage === 'function') initFavoritesPage();
+    }
+  },
+  
+  clearCloudRef() {
+    this.userId = null;
+  },
+
   getItems() {
     try {
       return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
@@ -757,6 +1229,15 @@ const Wishlist = {
   save(items) {
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
     this.updateBadge();
+
+    if (this.userId) {
+      setDoc(doc(db, "wishlists", this.userId), {
+        ownerId: this.userId,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items,
+      }, { merge: true }).catch(console.error);
+    }
   },
 
   hasItem(productId) {
@@ -791,53 +1272,75 @@ function navHref(anchor) {
 }
 
 function buildHeader() {
-  const links = [
-    { label: "Home", href: "index.html", page: "home" },
-    { label: "Produtos", href: "produtos.html", page: "products" },
-    { label: "Categorias", href: navHref("#categorias"), page: "" },
-    { label: "Sobre", href: navHref("#sobre"), page: "" },
-    { label: "Contato", href: navHref("#contato"), page: "" },
+  const utilityLinks = [
+    { label: "Atendimento", href: "#", toast: "Atendimento por WhatsApp em breve." },
+    { label: "Envio e entrega", href: "#", toast: "Consulte prazos e opcoes no checkout." },
+    { label: "Trocas e devolucoes", href: "#", toast: "Trocas em ate 30 dias para produtos lacrados." },
+  ];
+  const categoryLinks = [
+    { label: "Todos", href: "produtos.html" },
+    { label: "Masculino", href: "produtos.html?cat=Masculino" },
+    { label: "Feminino", href: "produtos.html?cat=Feminino" },
+    { label: "Unissex", href: "produtos.html?cat=Unissex" },
+    { label: "Nicho", href: "produtos.html?cat=Nicho" },
+    { label: "Acessorios", href: "produtos.html?cat=Acessorios" },
+    { label: "Ofertas", href: "produtos.html?filter=sale" },
+    { label: "Lancamentos", href: "produtos.html?filter=new" },
   ];
 
   return `
     <nav class="navbar ${PAGE === "home" ? "" : "scrolled"}" id="navbar" aria-label="Menu principal">
-      <div class="navbar__inner">
-        <a class="navbar__logo" href="index.html" aria-label="Grand Parfum - Home">
-          Grand<span>Parfum</span>
-        </a>
+      <div class="navbar__promo">
+        <div class="navbar__promo-inner">
+          <span>Frete gratis acima de R$ 199</span>
+          <strong>10% off na primeira compra com o cupom PRIMEIRACOMPRA</strong>
+        </div>
+      </div>
 
-        <form class="navbar__search" id="site-search-form" role="search" novalidate>
-          <label class="sr-only" for="site-search-input">Buscar produtos</label>
-          <svg class="navbar__search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
-          <input
-            class="navbar__search-input"
-            id="site-search-input"
-            type="search"
-            placeholder="Buscar fragrancias, marcas ou notas..."
-            autocomplete="off"
-          >
-          <div class="navbar__search-results" id="site-search-results" hidden></div>
-        </form>
-
-        <div class="navbar__right">
-          <ul class="navbar__links" role="list">
-            ${links
+      <div class="navbar__utility">
+        <div class="navbar__utility-inner">
+          <div class="navbar__utility-links">
+            ${utilityLinks
               .map(
                 (link) => `
-                  <li>
-                    <a class="navbar__link ${PAGE === link.page ? "is-active" : ""}" href="${link.href}">
+                    <a class="navbar__utility-link" href="${link.href}" ${link.toast ? `data-toast="${link.toast}"` : ""}>
                       ${link.label}
                     </a>
-                  </li>
                 `,
               )
               .join("")}
-          </ul>
+          </div>
+          <a class="navbar__utility-link" href="produtos.html?filter=sale">Promocoes da semana</a>
+        </div>
+      </div>
+
+      <div class="navbar__main">
+        <div class="navbar__inner">
+          <a class="navbar__logo" href="index.html" aria-label="Grand Parfum - Home">
+            Grand<span>Parfum</span>
+          </a>
+
+          <form class="navbar__search" id="site-search-form" role="search" novalidate>
+            <label class="sr-only" for="site-search-input">Buscar produtos</label>
+            <svg class="navbar__search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              class="navbar__search-input"
+              id="site-search-input"
+              type="search"
+              placeholder="O que voce procura hoje?"
+              autocomplete="off"
+            >
+            <div class="navbar__search-results" id="site-search-results" hidden></div>
+          </form>
 
           <div class="navbar__actions">
+            <a href="${AuthManager.user ? "account.html" : "auth.html"}" class="navbar__account-link">
+              <span class="navbar__account-label">${AuthManager.user ? "Minha conta" : "Entrar"}</span>
+              <span class="navbar__account-caption">${AuthManager.user ? "Pedidos e cadastro" : "Entrar ou cadastrar"}</span>
+            </a>
             <a href="favoritos.html" class="navbar__icon-btn" aria-label="Lista de desejos">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -852,24 +1355,39 @@ function buildHeader() {
               </svg>
               <span class="navbar__cart-badge" id="cart-count">0</span>
             </a>
-            <a href="#" class="navbar__btn-primary" data-toast="Area de clientes em breve.">
-              Minha conta
-            </a>
           </div>
-        </div>
 
-        <button class="navbar__hamburger" id="btn-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-          <span></span><span></span><span></span>
-        </button>
+          <button class="navbar__hamburger" id="btn-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="navbar__categories">
+        <div class="navbar__categories-inner">
+          ${categoryLinks.map((link) => `<a class="navbar__category-link" href="${link.href}">${link.label}</a>`).join("")}
+        </div>
       </div>
 
       <div class="mobile-menu" id="mobile-menu" hidden>
-        ${links
-          .map((link) => `<a href="${link.href}" class="mobile-menu__link">${link.label}</a>`)
-          .join("")}
-        <a href="favoritos.html" class="mobile-menu__link">Favoritos</a>
-        <a href="carrinho.html" class="mobile-menu__link">Carrinho</a>
-        <a href="#" class="mobile-menu__cta" data-toast="Area de clientes em breve.">Minha conta</a>
+        <div class="mobile-menu__section">
+          <div class="mobile-menu__title">Categorias</div>
+          ${categoryLinks.map((link) => `<a href="${link.href}" class="mobile-menu__link">${link.label}</a>`).join("")}
+        </div>
+        <div class="mobile-menu__section">
+          <div class="mobile-menu__title">Ajuda</div>
+          ${utilityLinks
+            .map((link) => `<a href="${link.href}" class="mobile-menu__link" ${link.toast ? `data-toast="${link.toast}"` : ""}>${link.label}</a>`)
+            .join("")}
+        </div>
+        ${AuthManager.user
+          ? `<a href="account.html" class="mobile-menu__cta">Minha conta</a>`
+          : `<a href="auth.html" class="mobile-menu__cta">Entrar ou criar conta</a>`
+        }
+        <div class="mobile-menu__quicklinks">
+          <a href="favoritos.html" class="mobile-menu__link">Favoritos</a>
+          <a href="carrinho.html" class="mobile-menu__link">Carrinho</a>
+        </div>
       </div>
     </nav>
   `;
@@ -882,17 +1400,17 @@ function buildFooter() {
         <div>
           <div class="footer__brand-name">Grand<span>Parfum</span></div>
           <p class="footer__desc">
-            Curadoria de fragrancias de luxo com experiencia consistente do catalogo ao checkout.
+            Loja online de perfumes originais com busca simples, envio para todo o Brasil e suporte no pos-venda.
           </p>
-          <div class="footer__social" aria-label="Redes sociais">
+          <div class="footer__social" aria-label="Canais de atendimento">
             <a href="#" class="footer__social-link" aria-label="Instagram">IG</a>
             <a href="#" class="footer__social-link" aria-label="WhatsApp">WA</a>
-            <a href="#" class="footer__social-link" aria-label="Facebook">FB</a>
+            <a href="#" class="footer__social-link" aria-label="E-mail">EM</a>
           </div>
         </div>
 
         <div>
-          <h3 class="footer__col-title">Loja</h3>
+          <h3 class="footer__col-title">Compre</h3>
           <ul class="footer__links" role="list">
             <li><a href="produtos.html" class="footer__link">Todos os produtos</a></li>
             <li><a href="produtos.html?filter=sale" class="footer__link">Ofertas</a></li>
@@ -902,22 +1420,22 @@ function buildFooter() {
         </div>
 
         <div>
-          <h3 class="footer__col-title">Suporte</h3>
+          <h3 class="footer__col-title">Ajuda</h3>
           <ul class="footer__links" role="list">
-            <li><a href="#" class="footer__link" data-toast="Central de ajuda em breve.">Central de ajuda</a></li>
-            <li><a href="#" class="footer__link" data-toast="Rastreio em manutencao.">Rastrear pedido</a></li>
-            <li><a href="#" class="footer__link" data-toast="Politica de devolucao: 30 dias.">Politica de devolucao</a></li>
-            <li><a href="${navHref("#contato")}" class="footer__link">Fale conosco</a></li>
+            <li><a href="#" class="footer__link" data-toast="Atendimento por WhatsApp em breve.">Central de atendimento</a></li>
+            <li><a href="#" class="footer__link" data-toast="Consulte o rastreio pelo e-mail do pedido.">Rastrear pedido</a></li>
+            <li><a href="#" class="footer__link" data-toast="Trocas em ate 30 dias para produtos lacrados.">Trocas e devolucoes</a></li>
+            <li><a href="#" class="footer__link" data-toast="Frete gratis acima de R$ 199.">Entrega e frete</a></li>
           </ul>
         </div>
 
         <div>
-          <h3 class="footer__col-title">Empresa</h3>
+          <h3 class="footer__col-title">Institucional</h3>
           <ul class="footer__links" role="list">
-            <li><a href="${navHref("#sobre")}" class="footer__link">Sobre nos</a></li>
-            <li><a href="#" class="footer__link" data-toast="Conteudos editoriais em breve.">Blog</a></li>
-            <li><a href="#" class="footer__link" data-toast="Programa de afiliados em breve.">Afiliados</a></li>
-            <li><a href="#" class="footer__link" data-toast="Atendimento premium por WhatsApp em breve.">Atendimento premium</a></li>
+            <li><a href="auth.html" class="footer__link">Minha conta</a></li>
+            <li><a href="#" class="footer__link" data-toast="Blog e conteudos entram em breve.">Blog</a></li>
+            <li><a href="#" class="footer__link" data-toast="Politica de privacidade em atualizacao.">Privacidade</a></li>
+            <li><a href="#" class="footer__link" data-toast="Termos de uso em atualizacao.">Termos de uso</a></li>
           </ul>
         </div>
       </div>
@@ -925,9 +1443,9 @@ function buildFooter() {
       <div class="footer__bottom">
         <p class="footer__copy">© 2026 Grand Parfum. Todos os direitos reservados.</p>
         <nav class="footer__bottom-links" aria-label="Links legais">
-          <a href="#" class="footer__bottom-link" data-toast="Politica de privacidade em atualizacao.">Privacidade</a>
-          <a href="#" class="footer__bottom-link" data-toast="Termos de uso em atualizacao.">Termos</a>
-          <a href="#" class="footer__bottom-link" data-toast="Utilizamos apenas cookies essenciais.">Cookies</a>
+          <a href="#" class="footer__bottom-link" data-toast="Compras com cartao, Pix e parcelamento.">Pagamentos</a>
+          <a href="#" class="footer__bottom-link" data-toast="Suporte de segunda a sexta, das 9h as 18h.">Atendimento</a>
+          <a href="#" class="footer__bottom-link" data-toast="Receba novidades no cadastro de e-mail.">Novidades</a>
         </nav>
       </div>
     </footer>
@@ -956,7 +1474,7 @@ function setupNavbarBehavior() {
   }
 
   const syncNavbarState = () => {
-    const shouldBeScrolled = PAGE !== "home" || window.scrollY > 18;
+    const shouldBeScrolled = window.scrollY > 12;
     navbar.classList.toggle("scrolled", shouldBeScrolled);
   };
 
@@ -1150,13 +1668,29 @@ function getFeaturedProducts(products, count = 4) {
 }
 
 async function initHomePage() {
-  const featuredGrid = document.getElementById("featured-products");
-  if (!featuredGrid) {
+  const bestSellersGrid = document.getElementById("best-sellers-grid");
+  const saleGrid = document.getElementById("sale-products-grid");
+  const newGrid = document.getElementById("new-products-grid");
+  if (!bestSellersGrid && !saleGrid && !newGrid) {
     return;
   }
 
   const products = await loadProductCatalog();
-  renderProducts("featured-products", getFeaturedProducts(products, 4));
+  const bestSellers = [...products]
+    .sort((a, b) => (b.reviews || 0) + (b.rating || 0) - ((a.reviews || 0) + (a.rating || 0)))
+    .slice(0, 4);
+  const saleProducts = products.filter((product) => product.isSale).slice(0, 4);
+  const newProducts = products.filter((product) => product.isNew).slice(0, 4);
+
+  if (bestSellersGrid) {
+    renderProducts("best-sellers-grid", bestSellers);
+  }
+  if (saleGrid) {
+    renderProducts("sale-products-grid", saleProducts);
+  }
+  if (newGrid) {
+    renderProducts("new-products-grid", newProducts);
+  }
 }
 
 function matchesCategory(product, category) {
@@ -1178,11 +1712,14 @@ async function initProductsPage() {
   const resultsCount = document.getElementById("products-count");
   const filterButtons = [...document.querySelectorAll("[data-category-filter]")];
   const viewButtons = [...document.querySelectorAll("[data-product-filter]")];
+  const sortSelect = document.getElementById("products-sort");
+  const activeSummary = document.getElementById("products-active-summary");
   const products = await loadProductCatalog();
 
   let activeCategory = params.get("cat") || "all";
   let queryText = params.get("q") || "";
   let activeFilter = params.get("filter") || "all";
+  let activeSort = "featured";
 
   if (pageSearch) {
     pageSearch.value = queryText;
@@ -1201,6 +1738,9 @@ async function initProductsPage() {
         normalizeText(button.dataset.productFilter) === normalizeText(activeFilter),
       );
     });
+    if (sortSelect) {
+      sortSelect.value = activeSort;
+    }
   }
 
   function syncUrl() {
@@ -1216,6 +1756,20 @@ async function initProductsPage() {
     }
     const nextQuery = nextParams.toString();
     window.history.replaceState({}, "", `produtos.html${nextQuery ? `?${nextQuery}` : ""}`);
+  }
+
+  function applySort(productList) {
+    const sorted = [...productList];
+    if (activeSort === "price-asc") {
+      sorted.sort((a, b) => a.price - b.price);
+    } else if (activeSort === "price-desc") {
+      sorted.sort((a, b) => b.price - a.price);
+    } else if (activeSort === "rating") {
+      sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (activeSort === "newest") {
+      sorted.sort((a, b) => Number(Boolean(b.isNew)) - Number(Boolean(a.isNew)));
+    }
+    return sorted;
   }
 
   function renderPageProducts() {
@@ -1234,9 +1788,23 @@ async function initProductsPage() {
       filtered = filtered.filter((product) => wishlistIds.includes(product.id));
     }
 
-    renderProducts(gridId, filtered);
+    const sortedProducts = applySort(filtered);
+    renderProducts(gridId, sortedProducts);
     if (resultsCount) {
-      resultsCount.textContent = `${filtered.length} produto${filtered.length === 1 ? "" : "s"}`;
+      resultsCount.textContent = `${sortedProducts.length} produto${sortedProducts.length === 1 ? "" : "s"}`;
+    }
+    if (activeSummary) {
+      const pieces = [];
+      if (normalizeText(activeCategory) !== "all") {
+        pieces.push(activeCategory);
+      }
+      if (normalizeText(activeFilter) !== "all") {
+        pieces.push(activeFilter === "sale" ? "em oferta" : activeFilter === "new" ? "lancamentos" : "favoritos");
+      }
+      if (queryText) {
+        pieces.push(`busca: "${queryText}"`);
+      }
+      activeSummary.textContent = pieces.length ? pieces.join(" - ") : "Todos os perfumes disponiveis";
     }
     syncButtons();
     syncUrl();
@@ -1254,6 +1822,11 @@ async function initProductsPage() {
       activeFilter = button.dataset.productFilter;
       renderPageProducts();
     });
+  });
+
+  sortSelect?.addEventListener("change", (event) => {
+    activeSort = event.target.value;
+    renderPageProducts();
   });
 
   pageSearch?.addEventListener("input", (event) => {
@@ -1303,80 +1876,93 @@ function renderProductDetail(product) {
   }
 
   const gallery = getProductGallery(product);
+  const discountPercentage = getDiscountPercentage(product);
   detailRoot.innerHTML = `
     <div class="product-detail">
-      <div class="product-detail__gallery">
-        <div class="product-breadcrumbs">
-          <a href="index.html">Home</a>
-          <span>/</span>
-          <a href="produtos.html?cat=${encodeURIComponent(product.category)}">${product.category}</a>
-          <span>/</span>
-          <strong>${product.name}</strong>
-        </div>
-
-        <div class="detail-stage" id="detail-stage">
-          ${renderGalleryStage(product, gallery[0])}
-        </div>
-
-        <div class="detail-thumbs" id="detail-thumbs">
-          ${gallery
-            .map(
-              (asset, index) => `
-                <button class="detail-thumb ${index === 0 ? "is-active" : ""}" type="button" data-gallery-index="${index}">
-                  ${createProductVisual(product, "thumb", asset)}
-                </button>
-              `,
-            )
-            .join("")}
-        </div>
+      <div class="product-breadcrumbs">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <a href="produtos.html">Perfumes</a>
+        <span>/</span>
+        <a href="produtos.html?cat=${encodeURIComponent(product.category)}">${product.category}</a>
+        <span>/</span>
+        <strong>${product.name}</strong>
       </div>
 
-      <div class="product-detail__summary">
-        <div class="detail-kicker">${product.brand} · ${product.category}</div>
-        <h1 class="detail-title">${product.name}</h1>
-        <p class="detail-tagline">${product.tagline || product.description}</p>
+      <div class="product-detail__layout">
+        <div class="product-detail__gallery">
+          <div class="detail-stage" id="detail-stage">
+            ${renderGalleryStage(product, gallery[0])}
+          </div>
 
-        <div class="detail-rating-row">
-          <span class="detail-rating">★★★★★</span>
-          <span>${product.rating.toFixed(1)} · ${product.reviews} avaliacoes</span>
+          <div class="detail-thumbs" id="detail-thumbs">
+            ${gallery
+              .map(
+                (asset, index) => `
+                  <button class="detail-thumb ${index === 0 ? "is-active" : ""}" type="button" data-gallery-index="${index}">
+                    ${createProductVisual(product, "thumb", asset)}
+                  </button>
+                `,
+              )
+              .join("")}
+          </div>
         </div>
 
-        <div class="detail-price-row">
-          <strong class="detail-price">${formatPrice(product.price)}</strong>
-          ${product.oldPrice ? `<span class="detail-old-price">${formatPrice(product.oldPrice)}</span>` : ""}
-          ${product.isSale ? `<span class="detail-discount-badge">Oferta ativa</span>` : ""}
-        </div>
+        <div class="product-detail__summary">
+          <div class="detail-kicker">${product.brand} - ${product.category}</div>
+          <h1 class="detail-title">${product.name}</h1>
+          <p class="detail-tagline">${product.tagline || product.description}</p>
 
-        <div class="detail-stock-row ${product.stock > 0 ? "" : "is-empty"}">
-          ${getStockCopy(product)}
-        </div>
+          <div class="detail-rating-row">
+            <span class="detail-rating">★★★★★</span>
+            <span>${product.rating.toFixed(1)} - ${product.reviews} avaliacoes</span>
+          </div>
 
-        <p class="detail-copy">${product.longDescription}</p>
+          <div class="detail-price-box">
+            <div class="detail-price-row">
+              <strong class="detail-price">${formatPrice(product.price)}</strong>
+              ${product.oldPrice ? `<span class="detail-old-price">${formatPrice(product.oldPrice)}</span>` : ""}
+              ${product.isSale ? `<span class="detail-discount-badge">${discountPercentage ? `${discountPercentage}% off` : "Oferta ativa"}</span>` : ""}
+            </div>
+            <div class="detail-installments">ou em 12x sem juros no cartao</div>
+            <div class="detail-stock-row ${product.stock > 0 ? "" : "is-empty"}">
+              ${getStockCopy(product)}
+            </div>
+          </div>
 
-        <div class="detail-chip-list">
-          ${createListChips(product.highlights)}
-        </div>
+          <div class="detail-actions">
+            <label class="detail-qty">
+              <span>Quantidade</span>
+              <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="${product.stock > 0 ? 1 : 0}" ${product.stock > 0 ? "" : "disabled"}>
+            </label>
+            <button class="btn-primary" id="detail-add-cart" ${product.stock > 0 ? "" : "disabled"}>
+              ${product.stock > 0 ? "Adicionar ao carrinho" : "Indisponivel"}
+            </button>
+            <button class="btn-outline btn-outline--dark" id="detail-favorite">
+              ${Wishlist.hasItem(product.id) ? "Remover favorito" : "Salvar favorito"}
+            </button>
+          </div>
 
-        <div class="detail-actions">
-          <label class="detail-qty">
-            <span>Qtd.</span>
-            <input id="detail-qty" type="number" min="1" max="${Math.max(product.stock, 1)}" value="${product.stock > 0 ? 1 : 0}" ${product.stock > 0 ? "" : "disabled"}>
-          </label>
-          <button class="btn-primary" id="detail-add-cart" ${product.stock > 0 ? "" : "disabled"}>
-            ${product.stock > 0 ? "Adicionar ao carrinho" : "Indisponivel"}
-          </button>
-          <button class="btn-outline btn-outline--dark" id="detail-favorite">
-            ${Wishlist.hasItem(product.id) ? "Remover favorito" : "Salvar favorito"}
-          </button>
-        </div>
+          <div class="detail-benefits">
+            <div class="detail-benefit">
+              <strong>Frete</strong>
+              <span>${product.price >= 199 ? "Gratis para este item" : "A partir de R$ 25"}</span>
+            </div>
+            <div class="detail-benefit">
+              <strong>Trocas</strong>
+              <span>Ate 30 dias para produtos lacrados</span>
+            </div>
+            <div class="detail-benefit">
+              <strong>Originalidade</strong>
+              <span>Curadoria com procedencia verificada</span>
+            </div>
+          </div>
 
-        <div class="detail-spec-grid">
-          ${createSpecificationItem("Volume", product.volumeMl)}
-          ${createSpecificationItem("Concentracao", product.concentration)}
-          ${createSpecificationItem("Familia", product.olfactiveFamily)}
-          ${createSpecificationItem("Ocasião", product.occasion)}
-          ${createSpecificationItem("SKU", product.sku)}
-          ${createSpecificationItem("Marca", product.brand)}
+          <p class="detail-copy">${product.longDescription}</p>
+
+          <div class="detail-chip-list">
+            ${createListChips(product.highlights)}
+          </div>
         </div>
       </div>
     </div>
@@ -1384,7 +1970,22 @@ function renderProductDetail(product) {
     <div class="detail-sections">
       <section class="detail-section">
         <div class="detail-section__header">
-          <h2>Construção olfativa</h2>
+          <h2>Informacoes do produto</h2>
+          <p>Detalhes importantes para comparar antes de comprar.</p>
+        </div>
+        <div class="detail-spec-grid">
+          ${createSpecificationItem("Volume", product.volumeMl)}
+          ${createSpecificationItem("Concentracao", product.concentration)}
+          ${createSpecificationItem("Familia olfativa", product.olfactiveFamily)}
+          ${createSpecificationItem("Melhor ocasiao", product.occasion)}
+          ${createSpecificationItem("SKU", product.sku)}
+          ${createSpecificationItem("Marca", product.brand)}
+        </div>
+      </section>
+
+      <section class="detail-section">
+        <div class="detail-section__header">
+          <h2>Piramide olfativa</h2>
           <p>Uma leitura rapida das notas principais do perfume.</p>
         </div>
         <div class="notes-grid">
@@ -1405,7 +2006,7 @@ function renderProductDetail(product) {
 
       <section class="detail-section detail-section--split">
         <article class="detail-info-card">
-          <h2>Por que escolher este item</h2>
+          <h2>Destaques</h2>
           <ul class="detail-points">
             ${product.highlights.map((item) => `<li>${item}</li>`).join("")}
           </ul>
@@ -1413,7 +2014,7 @@ function renderProductDetail(product) {
         <article class="detail-info-card">
           <h2>Entrega e trocas</h2>
           <ul class="detail-points">
-            <li>Envio premium com rastreio e embalagem discreta.</li>
+            <li>Envio com rastreio e embalagem discreta.</li>
             <li>Troca em ate 30 dias para produtos lacrados.</li>
             <li>Suporte especializado para indicacao e pos-venda.</li>
           </ul>
@@ -1523,11 +2124,12 @@ function createCartMedia(item) {
 }
 
 function readCheckoutDraft() {
+  const p = AuthManager.profile || {};
   return {
-    name: document.getElementById("checkout-name")?.value.trim() || "",
-    email: document.getElementById("checkout-email")?.value.trim() || "",
-    phone: document.getElementById("checkout-phone")?.value.trim() || "",
-    address: document.getElementById("checkout-address")?.value.trim() || "",
+    name: document.getElementById("checkout-name")?.value.trim() || p.name || AuthManager.user?.displayName || "",
+    email: document.getElementById("checkout-email")?.value.trim() || p.email || AuthManager.user?.email || "",
+    phone: document.getElementById("checkout-phone")?.value.trim() || p.phone || "",
+    address: document.getElementById("checkout-address")?.value.trim() || p.address || "",
   };
 }
 
@@ -1552,18 +2154,24 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = subtotal > 199 ? 0 : 25;
   const total = subtotal + shipping;
+  const missingForFreeShipping = Math.max(0, 199 - subtotal);
 
   cartRoot.innerHTML = `
     <div class="cart-layout">
       <section class="cart-items">
+        <div class="cart-section-heading">
+          <h2>Itens do carrinho</h2>
+          <p>${items.length} item${items.length === 1 ? "" : "s"} prontos para finalizar</p>
+        </div>
         ${items
           .map(
             (item) => `
               <article class="cart-item" data-cart-id="${item.id}">
                 ${createCartMedia(item)}
                 <div class="cart-item__body">
+                  <span class="cart-item__category">${item.category}</span>
                   <h3>${item.name}</h3>
-                  <p>${item.brand} · ${item.category}</p>
+                  <p>${item.brand} - ${item.concentration || "Eau de Parfum"}</p>
                   <strong>${formatPrice(item.price)}</strong>
                 </div>
                 <div class="cart-item__controls">
@@ -1581,7 +2189,8 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
       </section>
 
       <aside class="cart-summary">
-        <h2>Resumo da compra</h2>
+        <h2>Resumo do pedido</h2>
+        <p class="cart-summary__lead">${shipping === 0 ? "Voce ganhou frete gratis." : `Faltam ${formatPrice(missingForFreeShipping)} para liberar frete gratis.`}</p>
         <div class="cart-summary__row">
           <span>Subtotal</span>
           <strong>${formatPrice(subtotal)}</strong>
@@ -1602,7 +2211,7 @@ function renderCartPage(checkoutDraft = readCheckoutDraft()) {
           <input id="checkout-address" type="text" placeholder="Endereco de entrega" value="${escapeHtml(checkoutDraft.address || "")}">
         </div>
 
-        <button class="btn-primary btn-block" id="checkout-submit">Finalizar compra</button>
+        <button class="btn-primary btn-block" id="checkout-submit">Ir para pagamento</button>
         <a class="btn-outline btn-outline--dark btn-block" href="produtos.html">Continuar comprando</a>
       </aside>
     </div>
@@ -1671,10 +2280,23 @@ async function handleCheckout() {
         unit_price: item.price,
         quantity: item.qty,
       })),
+      userId: AuthManager.user?.uid || null
     });
 
-    Cart.clear();
-    renderCartPage();
+    if (AuthManager.user) {
+      Cart.clear();
+      // Em produção, se o pedido deu certo, limpamos a nuvem também
+      setDoc(doc(db, "carts", AuthManager.user.uid), {
+        ownerId: AuthManager.user.uid,
+        schemaVersion: 2,
+        updatedAt: nowIsoString(),
+        items: [],
+      }, { merge: true }).catch(console.error);
+    } else {
+      Cart.clear();
+    }
+    
+    if (typeof renderCartPage === 'function') renderCartPage();
     Cart.showToast(`Pedido ${orderId} confirmado.`);
   } catch (error) {
     console.error(error);
@@ -1745,7 +2367,260 @@ function initNewsletter() {
   });
 }
 
+function initAuthPage() {
+  const loginCard = document.getElementById("login-card");
+  const registerCard = document.getElementById("register-card");
+  const showRegister = document.getElementById("show-register");
+  const showLogin = document.getElementById("show-login");
+
+  if (showRegister && showLogin && loginCard && registerCard) {
+    showRegister.addEventListener("click", (e) => {
+      e.preventDefault();
+      loginCard.hidden = true;
+      registerCard.hidden = false;
+    });
+    showLogin.addEventListener("click", (e) => {
+      e.preventDefault();
+      registerCard.hidden = true;
+      loginCard.hidden = false;
+    });
+  }
+
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value;
+      const pass = document.getElementById("login-password").value;
+      const btn = loginForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Entrando...";
+      
+      const res = await AuthManager.login(email, pass);
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+        btn.disabled = false;
+        btn.textContent = "Entrar";
+      }
+    });
+  }
+
+  const registerForm = document.getElementById("register-form");
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("register-name").value;
+      const email = document.getElementById("register-email").value;
+      const pass = document.getElementById("register-password").value;
+      const btn = registerForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Criando...";
+
+      const res = await AuthManager.register(name, email, pass);
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+        btn.disabled = false;
+        btn.textContent = "Criar conta";
+      }
+    });
+  }
+
+  const btnGoogle = document.getElementById("btn-google-login");
+  if (btnGoogle) {
+    btnGoogle.addEventListener("click", async () => {
+      const res = await AuthManager.loginWithGoogle();
+      if (res.success) {
+        window.location.href = "account.html";
+      } else {
+        Cart.showToast(res.message);
+      }
+    });
+  }
+}
+
+async function initAccountPage() {
+  // Redireciona se nao logado (init ja trata, mas garantimos aqui)
+  if (!AuthManager.user && !auth.currentUser) {
+    // Aguarda um pouco o estado do firebase
+    await new Promise(r => setTimeout(r, 1000));
+    if (!auth.currentUser) {
+      window.location.href = "auth.html";
+      return;
+    }
+  }
+
+  const user = auth.currentUser;
+  const nameEl = document.getElementById("user-display-name");
+  const emailEl = document.getElementById("user-email");
+  const avatarEl = document.getElementById("user-avatar");
+
+  const profileForm = document.getElementById("profile-form");
+  const profileEmail = document.getElementById("profile-email");
+  const profileName = document.getElementById("profile-name");
+  const profilePhone = document.getElementById("profile-phone");
+  const profileAddress = document.getElementById("profile-address");
+
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      const displayName = data.name || user.displayName || "Usuario";
+      if (nameEl) nameEl.textContent = displayName;
+      if (emailEl) emailEl.textContent = data.email || user.email;
+      if (avatarEl) avatarEl.textContent = displayName[0].toUpperCase();
+
+      if (profileEmail) profileEmail.value = data.email || user.email;
+      if (profileName) profileName.value = displayName;
+      if (profilePhone) profilePhone.value = data.phone || "";
+      if (profileAddress) profileAddress.value = data.address || "";
+    }
+  } catch (err) {
+    console.error("Erro ao carregar perfil:", err);
+  }
+
+  if (profileForm) {
+    profileForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = profileForm.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Salvando...";
+      try {
+        const nextName = profileName?.value.trim() || AuthManager.profile?.name || user.displayName || "Usuario";
+        const nextPhone = profilePhone?.value.trim() || "";
+        const nextAddress = profileAddress?.value.trim() || "";
+        const updatedAt = nowIsoString();
+        if (nextName && nextName !== user.displayName) {
+          await updateProfile(user, { displayName: nextName });
+        }
+        await setDoc(doc(db, "users", user.uid), {
+          name: nextName,
+          email: user.email || AuthManager.profile?.email || "",
+          phone: nextPhone,
+          address: nextAddress,
+          updatedAt,
+        }, { merge: true });
+        AuthManager.profile = {
+          ...(AuthManager.profile || {}),
+          name: nextName,
+          email: user.email || AuthManager.profile?.email || "",
+          phone: nextPhone,
+          address: nextAddress,
+          updatedAt,
+        };
+        Cart.showToast("Perfil atualizado!");
+        if (nameEl) nameEl.textContent = AuthManager.profile.name;
+        if (emailEl) emailEl.textContent = AuthManager.profile.email;
+        if (avatarEl) avatarEl.textContent = AuthManager.profile.name[0].toUpperCase();
+      } catch(err) {
+        Cart.showToast("Erro ao salvar.");
+      }
+      btn.disabled = false;
+      btn.textContent = "Salvar alteracoes";
+    });
+  }
+
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => AuthManager.logout());
+  }
+
+  // Abas
+  const navItems = document.querySelectorAll(".account-nav-item[data-tab]");
+  navItems.forEach(item => {
+    item.addEventListener("click", () => {
+      const tab = item.dataset.tab;
+      document.querySelectorAll("[id^='tab-']").forEach(t => t.hidden = true);
+      document.getElementById(`tab-${tab}`).hidden = false;
+      navItems.forEach(n => n.classList.remove("is-active"));
+      item.classList.add("is-active");
+    });
+  });
+
+  // Carregar pedidos
+  loadUserOrdersV2(user.uid);
+}
+
+async function loadUserOrders(userId) {
+  const list = document.getElementById("orders-list");
+  if (!list) return;
+
+  try {
+    const q = query(collection(db, "pedidos"), where("clienteId", "==", userId), limit(20));
+    const snapshot = await getDocs(q);
+    const orders = snapshot.docs
+      .map(d => ({ id: d.id, ...d.data() }));
+
+    if (orders.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Voce ainda nao realizou nenhum pedido.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = orders.map(order => `
+      <div class="order-item">
+        <div class="order-header">
+          <strong>Pedido #${order.id.slice(-6)}</strong>
+          <span class="order-status is-${order.status}">${order.status}</span>
+        </div>
+        <div class="order-body">
+          <p>${order.itens.length} ${order.itens.length === 1 ? "item" : "itens"} · ${formatPrice(order.total)}</p>
+          <span class="order-date">${new Date(order.dataCriacao).toLocaleDateString("pt-BR")}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `<p>Erro ao carregar pedidos.</p>`;
+  }
+}
+
+async function loadUserOrdersV2(userId) {
+  const list = document.getElementById("orders-list");
+  if (!list) return;
+
+  try {
+    const [primarySnapshot, legacySnapshot] = await Promise.all([
+      getDocs(query(collection(db, "pedidos"), where("customer_id", "==", userId), limit(20))),
+      getDocs(query(collection(db, "pedidos"), where("clienteId", "==", userId), limit(20))),
+    ]);
+    const orderMap = new Map();
+    [...primarySnapshot.docs, ...legacySnapshot.docs].forEach((entry) => {
+      orderMap.set(entry.id, { id: entry.id, ...entry.data() });
+    });
+    const orders = Array.from(orderMap.values())
+      .sort((a, b) => parseDateValue(getOrderCreatedAt(b)) - parseDateValue(getOrderCreatedAt(a)));
+
+    if (orders.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Voce ainda nao realizou nenhum pedido.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = orders.map((order) => {
+      const items = getOrderItems(order);
+      return `
+      <div class="order-item">
+        <div class="order-header">
+          <strong>Pedido #${order.id.slice(-6)}</strong>
+          <span class="order-status is-${order.status}">${order.status}</span>
+        </div>
+        <div class="order-body">
+          <p>${items.length} ${items.length === 1 ? "item" : "itens"} · ${formatPrice(order.total)}</p>
+          <span class="order-date">${formatOrderDate(getOrderCreatedAt(order))}</span>
+        </div>
+      </div>
+    `;
+    }).join("");
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `<p>Erro ao carregar pedidos.</p>`;
+  }
+}
+
 async function initPage() {
+  AuthManager.init();
   renderSiteChrome();
   setupNavbarBehavior();
   Cart.updateBadge();
@@ -1771,11 +2646,18 @@ async function initPage() {
   if (PAGE === "cart") {
     renderCartPage();
   }
+  if (PAGE === "auth") {
+    initAuthPage();
+  }
+  if (PAGE === "account") {
+    initAccountPage();
+  }
 }
 
 window.FirebaseDB = FirebaseDB;
 window.renderProducts = renderProducts;
 window.Cart = Cart;
 window.Wishlist = Wishlist;
+window.AuthManager = AuthManager;
 
 initPage();

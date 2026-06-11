@@ -65,19 +65,19 @@ class SistemaLogisticaApp:
         selected_bg = "#1f538d"
 
         style.configure(
-            "Treeview", 
-            background=bg_color, 
-            foreground=fg_color, 
-            fieldbackground=bg_color, 
-            rowheight=25, 
-            borderwidth=0, 
+            "Treeview",
+            background=bg_color,
+            foreground=fg_color,
+            fieldbackground=bg_color,
+            rowheight=25,
+            borderwidth=0,
             font=("Helvetica", 11)
         )
         style.configure(
-            "Treeview.Heading", 
-            background=header_bg, 
-            foreground=header_fg, 
-            relief="flat", 
+            "Treeview.Heading",
+            background=header_bg,
+            foreground=header_fg,
+            relief="flat",
             font=("Helvetica", 12, "bold")
         )
         style.map("Treeview", background=[("selected", selected_bg)])
@@ -578,16 +578,26 @@ class SistemaLogisticaApp:
                         return
 
                 def do_POST(self):
+                    try:
+                        content_length = int(self.headers.get("Content-Length", 0))
+                        payload = json.loads(self.rfile.read(content_length) or b"{}")
+                    except (ValueError, json.JSONDecodeError):
+                        self._send_json(400, {"status": "error", "message": "Payload invalido."})
+                        return
+
+                    if self.path == "/coupon/validate":
+                        result = database.validate_coupon(
+                            payload.get("code"),
+                            payload.get("subtotal"),
+                        )
+                        self._send_json(200, result)
+                        return
+
                     if self.path != "/order":
                         self._send_json(404, {"status": "error", "message": "Rota nao encontrada."})
                         return
 
-                    try:
-                        content_length = int(self.headers.get("Content-Length", 0))
-                        order = json.loads(self.rfile.read(content_length) or b"{}")
-                    except (ValueError, json.JSONDecodeError):
-                        self._send_json(400, {"status": "error", "message": "Pedido invalido."})
-                        return
+                    order = payload
 
                     result = database.create_local_order(order)
                     if not result["ok"]:
