@@ -46,22 +46,20 @@ Resposta esperada:
 {"status":"ok"}
 ```
 
-### 2. Abrir a loja
+### 2. Acesso à Produção e Loja Pública
 
+A loja de E-commerce em produção não utiliza `localhost` nem `localStorage` para tokens. Ela utiliza a hospedagem no **GitHub Pages** e conecta-se via Web Config ao **Firebase**, utilizando **Cloud Functions** e **App Check** na nuvem para fechar os pedidos de sua empresa de forma segura e global.
+Jamais insira chaves reais como token num arquivo frontend público, pois arquivos da web em Javascript estão expostos ao serem lidos via F12, portanto, a segurança autêntica ocorre no lado Cloud com suas Regras.
+
+Para detalhes do deploy online, chaves na nuvem e o Checklist da Operação Produtiva, veja:
+🔗 [Guia de Deploy Firebase / GitHub Pages](docs/producao-github-pages-firebase.md)
+
+### 3. Abrir a loja e testar Local (Mock Frontend)
+
+Em desenvolvimento e validação visual de código offline, você pode abrir e testar temporariamente:
 Abra `E-commerce/index.html` com um servidor estático local, por exemplo Live Server no VS Code.
 
-Por padrão, a loja tenta enviar pedidos e validar cupons em:
-
-```text
-http://localhost:5000
-```
-
-Para apontar a loja para outro computador da rede, execute no console do navegador antes de usar o checkout:
-
-```js
-localStorage.setItem("GRAND_PARFUM_API_URL", "http://192.168.0.10:5000");
-localStorage.setItem("GRAND_PARFUM_API_TOKEN", "troque-este-token");
-```
+> Lembre-se, o modo local JSON/Mock são apenas sandboxes para testes offline interno da tela. Pedidos reais e integrações válidas dependem do ambiente com `Firebase` verdadeiro rodando com as Cloud Functions.
 
 ### 3. Rodar o dashboard
 
