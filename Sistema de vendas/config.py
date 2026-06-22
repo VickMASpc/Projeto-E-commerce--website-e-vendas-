@@ -1,28 +1,66 @@
 import os
+from pathlib import Path
 
 # Configuração centralizada do aplicativo de Logística
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = BASE_DIR.parent
+
+
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on", "sim"}
+
+
+def _env_int(name, default):
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Aviso: {name} invalido ({value!r}); usando {default}.")
+        return default
+
+
+def _env_list(name):
+    value = os.getenv(name, "")
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 
 # Informações Gerais
 APP_NAME = "Grand Parfum - Sistema Local de Vendas e Logistica"
 
 # Integração e API
-API_HOST = ""
-API_PORT = 5000
+API_HOST = os.getenv("API_HOST", "")
+API_PORT = _env_int("API_PORT", 5000)
+ALLOWED_ORIGINS = _env_list("ALLOWED_ORIGINS")
+API_TOKEN = os.getenv("API_TOKEN", "").strip()
 
 # Persistência de Dados
-# Se True, tenta carregar o Firebase. 
-# Se falhar ou o arquivo de credenciais não existir, alterna para modo local.
-USE_FIREBASE = True
-DB_FILE = os.path.join(os.path.dirname(__file__), "db_mock.json")
-FIREBASE_CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+# Se True, tenta carregar o Firebase.
+# Se falhar ou a credencial não existir, alterna para modo local/mock.
+USE_FIREBASE = _env_bool("USE_FIREBASE", True)
+DB_FILE = os.getenv("DB_FILE", str(BASE_DIR / "db_mock.json"))
+_DEFAULT_FIREBASE_CREDENTIALS = str(BASE_DIR / "serviceAccountKey.json")
+FIREBASE_CREDENTIALS_PATH = (
+    os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    or os.getenv("FIREBASE_CREDENTIALS_PATH")
+    or _DEFAULT_FIREBASE_CREDENTIALS
+)
+FIREBASE_CREDENTIALS_SOURCE = (
+    "GOOGLE_APPLICATION_CREDENTIALS" if os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    else "FIREBASE_CREDENTIALS_PATH" if os.getenv("FIREBASE_CREDENTIALS_PATH")
+    else "local default"
+)
 
 # Regras de Negócio
-LOW_STOCK_THRESHOLD = 5
+LOW_STOCK_THRESHOLD = _env_int("LOW_STOCK_THRESHOLD", 5)
 
 # Exportação para Frontend
-FRONTEND_EXPORT_ENABLED = True
-# Caminho para o arquivo que o frontend consome para exibir 
-# produtos em tempo real (modo local)
-FRONTEND_EXPORT_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "E-commerce", "products_live.js"
+FRONTEND_EXPORT_ENABLED = _env_bool("FRONTEND_EXPORT_ENABLED", True)
+FRONTEND_EXPORT_PATH = os.getenv(
+    "FRONTEND_EXPORT_PATH",
+    str(PROJECT_DIR / "E-commerce" / "products_live.js"),
 )

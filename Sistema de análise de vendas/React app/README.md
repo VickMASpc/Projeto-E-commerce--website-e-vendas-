@@ -71,3 +71,16 @@ export default defineConfig([
   },
 ])
 ```
+
+## Configuração para servidor remoto
+
+Crie um arquivo `.env` a partir de `.env.example` e aponte o dashboard para o servidor Python local ou remoto:
+
+```bash
+VITE_STATS_API_URL=http://192.168.0.10:5000/stats
+VITE_API_TOKEN=troque-este-token
+```
+
+- `VITE_STATS_API_URL` deve apontar para `/stats`; o dashboard continua derivando `/orders` e `/products` automaticamente a partir dessa URL.
+- `VITE_API_TOKEN` é opcional. Quando definido, o dashboard envia `Authorization: Bearer <token>` nas consultas.
+- Se a API não responder, o estado offline existente continua sendo exibido.

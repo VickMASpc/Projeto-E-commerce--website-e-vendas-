@@ -29,15 +29,27 @@ def error_response(message: str, code: int = 400) -> Tuple[int, Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 def validate_order_payload(payload: Any) -> Tuple[bool, str]:
-    """Return (is_valid, error_message).
-    
-    Accepts the raw *order* dict posted to /order or /orders.
-    Minimal validation: we just need it to be a non-empty mapping.
-    Field-level validation is delegated to the service layer.
-    """
+    """Return (is_valid, error_message) for /order or /orders."""
     if not isinstance(payload, dict):
         return False, "Payload deve ser um objeto JSON."
-    return True, ""
+
+    raw_items = payload.get("items") or payload.get("itens")
+    if not isinstance(raw_items, list) or not raw_items:
+        return False, "O campo 'items' deve conter ao menos um item."
+
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        product_id = item.get("product_id") or item.get("produto_id") or item.get("produtoId") or item.get("id")
+        quantity = item.get("quantity", item.get("quantidade", 0))
+        try:
+            quantity_value = int(float(quantity))
+        except (TypeError, ValueError):
+            quantity_value = 0
+        if str(product_id or "").strip() and quantity_value > 0:
+            return True, ""
+
+    return False, "Pedido deve ter ao menos um item com product_id e quantity > 0."
 
 
 def validate_coupon_payload(payload: Any) -> Tuple[bool, str]:

@@ -29,6 +29,28 @@ const WISHLIST_KEY = "minhaloja_wishlist";
 const DEFAULT_PRODUCT_LIMIT = 60;
 const MAX_CART_QUANTITY = 99;
 
+function resolveApiBaseUrl() {
+  const configuredUrl = window.GRAND_PARFUM_API_URL || localStorage.getItem("GRAND_PARFUM_API_URL") || "http://localhost:5000";
+  return String(configuredUrl).replace(/\/+$/, "");
+}
+
+function resolveApiToken() {
+  return window.GRAND_PARFUM_API_TOKEN || localStorage.getItem("GRAND_PARFUM_API_TOKEN") || "";
+}
+
+function buildApiHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  const token = String(resolveApiToken() || "").trim();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+function buildApiUrl(path) {
+  return `${resolveApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 function nowIsoString() {
   return new Date().toISOString();
 }
@@ -413,9 +435,9 @@ const FirebaseDB = {
 
       let localResponse = null;
       try {
-        localResponse = await fetch("http://localhost:5000/order", {
+        localResponse = await fetch(buildApiUrl("/order"), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: buildApiHeaders(),
           body: JSON.stringify(localOrderPayload),
         });
       } catch {
@@ -478,9 +500,9 @@ const FirebaseDB = {
 
   async validateCoupon(code, items, subtotal) {
     try {
-      const response = await fetch("http://localhost:5000/coupon/validate", {
+      const response = await fetch(buildApiUrl("/coupon/validate"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: buildApiHeaders(),
         body: JSON.stringify({
           code,
           subtotal,

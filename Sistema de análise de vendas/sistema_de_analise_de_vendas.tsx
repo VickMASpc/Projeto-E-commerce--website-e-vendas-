@@ -15,6 +15,8 @@ import {
   YAxis,
 } from 'recharts';
 
+const statsUrl = window.GRAND_PARFUM_STATS_API_URL || localStorage.getItem('GRAND_PARFUM_STATS_API_URL') || 'http://localhost:5000/stats';
+
 const fallbackData = {
   totalRevenue: 0,
   totalOrders: 0,
@@ -39,7 +41,7 @@ const SalesDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/stats');
+        const response = await fetch(statsUrl);
         if (!response.ok) throw new Error('Stats indisponiveis');
         const stats = await response.json();
         setData({ ...fallbackData, ...stats });
