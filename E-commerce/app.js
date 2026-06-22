@@ -4,12 +4,12 @@ import {
   doc,
   getDocs,
   getDoc,
-  getFirestore,
   limit,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { 
   onAuthStateChanged,
   signOut,
@@ -19,9 +19,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
-import firebaseConfig, { app, auth } from "./firebase-config.js";
-
-const db = getFirestore(app);
+import { app, auth, firestore as db, functions } from "./firebase-config.js";
 
 const PAGE = document.body.dataset.page || "home";
 const CART_KEY = "minhaloja_cart";
@@ -29,30 +27,93 @@ const WISHLIST_KEY = "minhaloja_wishlist";
 const DEFAULT_PRODUCT_LIMIT = 60;
 const MAX_CART_QUANTITY = 99;
 
-function resolveApiBaseUrl() {
-  const configuredUrl = window.GRAND_PARFUM_API_URL || localStorage.getItem("GRAND_PARFUM_API_URL") || "http://localhost:5000";
+function isLocalApiTestEnabled() {
+  return (
+    window.GRAND_PARFUM_ENABLE_LOCAL_API_TESTS === true ||
+    localStorage.getItem("GRAND_PARFUM_ENABLE_LOCAL_API_TESTS") === "true"
+  );
+}
+
+function resolveLocalApiBaseUrl() {
+  const configuredUrl =
+    window.GRAND_PARFUM_LOCAL_API_URL ||
+    localStorage.getItem("GRAND_PARFUM_LOCAL_API_URL") ||
+    "http://localhost:5000";
   return String(configuredUrl).replace(/\/+$/, "");
 }
 
-function resolveApiToken() {
-  return window.GRAND_PARFUM_API_TOKEN || localStorage.getItem("GRAND_PARFUM_API_TOKEN") || "";
+function resolveLocalApiToken() {
+  return (
+    window.GRAND_PARFUM_LOCAL_API_TOKEN ||
+    localStorage.getItem("GRAND_PARFUM_LOCAL_API_TOKEN") ||
+    ""
+  );
 }
 
-function buildApiHeaders() {
+function buildLocalApiHeaders() {
   const headers = { "Content-Type": "application/json" };
-  const token = String(resolveApiToken() || "").trim();
+  const token = String(resolveLocalApiToken() || "").trim();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
   return headers;
 }
 
-function buildApiUrl(path) {
-  return `${resolveApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+function buildLocalApiUrl(path) {
+  return `${resolveLocalApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 function nowIsoString() {
   return new Date().toISOString();
+}
+
+function buildOrderPayload(orderData = {}) {
+  return {
+    customer: {
+      ...(orderData.customer || {}),
+      id: orderData.userId || orderData.customer?.id || null,
+    },
+    customer_id: orderData.userId || orderData.customer?.id || null,
+    subtotal: orderData.subtotal || 0,
+    shipping: orderData.shipping || 0,
+    discount_total: orderData.discount_total || 0,
+    coupon_code: orderData.coupon_code || null,
+    total: orderData.total || 0,
+    items: (orderData.items || []).map((item) => ({
+      product_id: item.product_id || item.id || "",
+      product_name: item.name || item.product_name || "Produto",
+      quantity: item.quantity || 1,
+      unit_price: item.price || item.unit_price || 0,
+    })),
+  };
+}
+
+function normalizeCallableResult(result) {
+  return result?.data ?? result ?? {};
+}
+
+function buildCheckoutErrorMessage(error, fallbackMessage) {
+  const details = error?.details || {};
+  const reason = details?.reason || "";
+  const message = String(error?.message || details?.message || "").trim();
+
+  if (reason === "firebase-unavailable" || error?.code === "functions/unavailable") {
+    return "Falha de conexao com o Firebase. Tente novamente em instantes.";
+  }
+
+  if (reason === "insufficient-stock") {
+    return message || "Estoque insuficiente para concluir o pedido.";
+  }
+
+  if (reason === "invalid-coupon") {
+    return message || "Cupom invalido ou indisponivel.";
+  }
+
+  if (reason === "invalid-order" || reason === "tampered-total") {
+    return message || "Pedido recusado por validacao.";
+  }
+
+  return message || fallbackMessage;
 }
 
 function parseDateValue(value) {
@@ -414,77 +475,33 @@ const FirebaseDB = {
 
   async createOrder(orderData) {
     try {
-      const localOrderPayload = {
-        customer: {
-          ...(orderData.customer || {}),
-          id: orderData.userId || orderData.customer?.id || null,
-        },
-        customer_id: orderData.userId || orderData.customer?.id || null,
-        subtotal: orderData.subtotal || 0,
-        shipping: orderData.shipping || 0,
-        discount_total: orderData.discount_total || 0,
-        coupon_code: orderData.coupon_code || null,
-        total: orderData.total || 0,
-        items: (orderData.items || []).map((item) => ({
-          product_id: item.product_id || item.id || "",
-          product_name: item.name || item.product_name || "Produto",
-          quantity: item.quantity || 1,
-          unit_price: item.price || item.unit_price || 0,
-        })),
-      };
+      const payload = buildOrderPayload(orderData);
 
-      let localResponse = null;
-      try {
-        localResponse = await fetch(buildApiUrl("/order"), {
+      if (isLocalApiTestEnabled()) {
+        const localResponse = await fetch(buildLocalApiUrl("/order"), {
           method: "POST",
-          headers: buildApiHeaders(),
-          body: JSON.stringify(localOrderPayload),
+          headers: buildLocalApiHeaders(),
+          body: JSON.stringify(payload),
         });
-      } catch {
-        localResponse = null;
-      }
 
-      if (localResponse) {
         const result = await localResponse.json().catch(() => ({}));
         if (!localResponse.ok) {
-          throw new Error(result.message || "Pedido recusado pelo sistema local.");
+          throw new Error(
+            result.message || "Pedido recusado pela API local em modo de teste.",
+          );
         }
         return result.order_id;
       }
 
-      if (orderData.coupon_code) {
-        throw new Error("Cupons exigem o sistema local de vendas online.");
+      const callable = httpsCallable(functions, "createOrder");
+      const result = normalizeCallableResult(await callable(payload));
+      if (!result?.ok || !result?.order_id) {
+        throw new Error(result?.message || "Pedido recusado por validacao.");
       }
-
-      const orderId = `ord-${Date.now().toString().slice(-6)}`;
-      const payload = {
-        customer_id: orderData.userId || AuthManager.user?.uid || null,
-        customer_name: orderData.customer?.name || "Cliente",
-        customer_email: orderData.customer?.email || "",
-        customer_phone: orderData.customer?.phone || "",
-        customer_address: orderData.customer?.address || "",
-        items: (orderData.items || []).map((item) => ({
-          product_id: item.product_id || item.id || "",
-          product_name: item.name || item.product_name || "Produto",
-          unit_price: item.price || item.unit_price || 0,
-            quantity: item.quantity || 1,
-        })),
-        subtotal: orderData.subtotal || 0,
-        shipping: orderData.shipping || 0,
-        discount_total: orderData.discount_total || 0,
-        coupon_code: orderData.coupon_code || null,
-        total: orderData.total || 0,
-        status: "pendente",
-        created_at: nowIsoString(),
-        updated_at: nowIsoString(),
-        schemaVersion: 2,
-      };
-
-      await setDoc(doc(db, "pedidos", orderId), payload);
-      return orderId;
+      return result.order_id;
     } catch (error) {
       console.error("Erro ao criar pedido:", error);
-      throw error;
+      throw new Error(buildCheckoutErrorMessage(error, "Nao foi possivel concluir o pedido agora."));
     }
   },
 
@@ -500,27 +517,34 @@ const FirebaseDB = {
 
   async validateCoupon(code, items, subtotal) {
     try {
-      const response = await fetch(buildApiUrl("/coupon/validate"), {
-        method: "POST",
-        headers: buildApiHeaders(),
-        body: JSON.stringify({
-          code,
-          subtotal,
-          items: (items || []).map((item) => ({
-            product_id: item.id || item.product_id || "",
-            quantity: item.qty || item.quantity || 1,
-            unit_price: item.price || item.unit_price || 0,
-          })),
-        }),
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || "Nao foi possivel validar o cupom.");
+      const payload = {
+        code,
+        subtotal,
+        items: (items || []).map((item) => ({
+          product_id: item.id || item.product_id || "",
+          quantity: item.qty || item.quantity || 1,
+          unit_price: item.price || item.unit_price || 0,
+        })),
+      };
+
+      if (isLocalApiTestEnabled()) {
+        const response = await fetch(buildLocalApiUrl("/coupon/validate"), {
+          method: "POST",
+          headers: buildLocalApiHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(result.message || "Nao foi possivel validar o cupom.");
+        }
+        return result;
       }
-      return result;
+
+      const callable = httpsCallable(functions, "validateCoupon");
+      return normalizeCallableResult(await callable(payload));
     } catch (error) {
       console.error("Erro ao validar cupom:", error);
-      throw error;
+      throw new Error(buildCheckoutErrorMessage(error, "Nao foi possivel validar o cupom."));
     }
   },
 };
@@ -2399,7 +2423,9 @@ async function handleCheckout() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = subtotal > 199 ? 0 : 25;
-  const total = subtotal + shipping;
+  const activeCoupon = typeof Cart.getCoupon === "function" ? Cart.getCoupon() : null;
+  const discountTotal = toNumber(activeCoupon?.discount, 0);
+  const total = Math.max(0, subtotal - discountTotal + shipping);
 
   button.disabled = true;
   button.textContent = "Processando...";
@@ -2407,6 +2433,10 @@ async function handleCheckout() {
   try {
     const orderId = await FirebaseDB.createOrder({
       customer: { name, email, phone, address },
+      subtotal,
+      shipping,
+      discount_total: discountTotal,
+      coupon_code: activeCoupon?.code || null,
       total,
       items: items.map((item) => ({
         id: item.id,

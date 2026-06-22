@@ -23,26 +23,88 @@ from services.dashboard_service import DashboardService
 
 USE_FIREBASE = config.USE_FIREBASE
 db = None
+DATA_BACKEND = "uninitialized"
+DATA_RUNTIME_MESSAGE = ""
 
-if USE_FIREBASE:
+
+def _set_data_backend(backend, message):
+    global DATA_BACKEND, DATA_RUNTIME_MESSAGE
+    DATA_BACKEND = backend
+    DATA_RUNTIME_MESSAGE = message
+    print(message)
+
+
+def get_runtime_summary():
+    return {
+        "mode": config.GRAND_PARFUM_MODE,
+        "backend": DATA_BACKEND,
+        "message": DATA_RUNTIME_MESSAGE,
+        "firebase_enabled": USE_FIREBASE,
+        "firebase_required": config.FIREBASE_REQUIRED,
+        "mock_allowed": config.ALLOW_MOCK,
+        "credentials_path": config.FIREBASE_CREDENTIALS_PATH,
+        "credentials_source": config.FIREBASE_CREDENTIALS_SOURCE,
+        "credentials_present": config.firebase_credentials_exists(),
+        "project_id": config.firebase_project_hint(),
+    }
+
+
+def _initialize_data_backend():
+    global USE_FIREBASE
+
+    mode_label = config.GRAND_PARFUM_MODE.upper()
+    cred_path = config.FIREBASE_CREDENTIALS_PATH or "nao configurado"
+
+    if not config.USE_FIREBASE:
+        USE_FIREBASE = False
+        _set_data_backend(
+            "mock",
+            f"[DATA][MOCK][{mode_label}] Firebase desabilitado explicitamente via USE_FIREBASE=false. JSON/mock permitido neste modo.",
+        )
+        return None
+
     try:
         import firebase_admin
         from firebase_admin import credentials, firestore
 
-        cred_path = config.FIREBASE_CREDENTIALS_PATH
         if cred_path and os.path.exists(cred_path):
             cred = credentials.Certificate(cred_path)
             if not firebase_admin._apps:
                 firebase_admin.initialize_app(cred)
-            db = firestore.client()
-            print("Firebase initialized successfully")
-        else:
-            configured_path = cred_path or "nao configurado"
-            print(f"Aviso: credencial Firebase ({configured_path}) nao encontrada. Operando em modo mock.")
+            client = firestore.client()
+            USE_FIREBASE = True
+            _set_data_backend(
+                "firebase",
+                f"[DATA][FIREBASE][{mode_label}] Firebase ativo com credencial em {cred_path} ({config.FIREBASE_CREDENTIALS_SOURCE}).",
+            )
+            return client
+
+        message = (
+            f"[DATA][FIREBASE-ERROR][{mode_label}] Credencial Firebase ausente em {cred_path}. "
+            "Este modo exige Firebase configurado."
+        )
+        if config.ALLOW_MOCK:
             USE_FIREBASE = False
+            _set_data_backend(
+                "mock",
+                f"{message} GRAND_PARFUM_ALLOW_MOCK=true habilitou JSON/mock explicitamente.",
+            )
+            return None
+        raise RuntimeError(message)
     except Exception as error:
-        print(f"Erro ao inicializar Firebase: {error}")
-        USE_FIREBASE = False
+        if config.ALLOW_MOCK:
+            USE_FIREBASE = False
+            _set_data_backend(
+                "mock",
+                f"[DATA][MOCK-FALLBACK][{mode_label}] Firebase indisponivel ({error}). JSON/mock permitido explicitamente por configuracao.",
+            )
+            return None
+        raise RuntimeError(
+            f"[DATA][FIREBASE-ERROR][{mode_label}] Firebase obrigatorio, mas a inicializacao falhou: {error}"
+        ) from error
+
+
+db = _initialize_data_backend()
 
 
 DB_FILE = config.DB_FILE
@@ -449,10 +511,13 @@ def _get_repo():
     if repository is None:
         from repositories.json_repository import JsonRepository
         from repositories.firebase_repository import FirebaseRepository
-        import config
         json_repo = JsonRepository(config.DB_FILE)
         if USE_FIREBASE and db is not None:
-            repository = FirebaseRepository(db, json_repo)
+            repository = FirebaseRepository(
+                db,
+                json_repo,
+                allow_mock_fallback=config.ALLOW_MOCK,
+            )
         else:
             repository = json_repo
     return repository

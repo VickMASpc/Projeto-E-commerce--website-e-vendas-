@@ -30,8 +30,8 @@ Projeto beta de uma operação de perfumaria com vitrine online, sistema local d
 - Cadastro, edição e remoção de produtos.
 - Controle de estoque e acompanhamento de pedidos.
 - Registro de pedidos enviados pela loja.
-- Exportação dos dados do catálogo para manter a vitrine atualizada no modo local/mock.
-- Integração opcional com Firebase.
+- Exportação dos dados do catálogo para testes locais explícitos.
+- Integração Firebase-first no fluxo principal.
 - API local para receber pedidos e disponibilizar métricas operacionais.
 
 ### Dashboard de análise
@@ -39,26 +39,27 @@ Projeto beta de uma operação de perfumaria com vitrine online, sistema local d
 - Painel em React para acompanhar resultados da operação.
 - Consumo das métricas disponibilizadas pelo sistema local.
 - Visualização de indicadores e gráficos para apoiar a análise de vendas.
-- Estado vazio coerente quando a API local está indisponível ou sem dados.
+- Estado offline apenas para uso explícito de teste.
 
 ## Arquitetura e integração
 
 O fluxo principal conecta as três partes da aplicação:
 
 1. O cliente navega pela loja em `E-commerce/index.html`, consulta produtos e monta o carrinho.
-2. O checkout envia o pedido para a API local iniciada pelo sistema Python.
-3. O sistema de vendas registra o pedido, atualiza/consulta dados operacionais e mantém o estoque.
-4. O dashboard React consulta as métricas para exibir a análise de vendas.
-5. No modo local/mock, o sistema Python pode reexportar `E-commerce/products_live.js` para sincronizar a vitrine com os dados locais.
+2. O checkout da loja usa Firebase Functions para validar pedido, estoque e cupom.
+3. O sistema de vendas lê e atualiza dados operacionais no Firebase quando configurado em modo principal.
+4. O dashboard React consulta a API Python (`/stats`, `/orders`, `/products`) para exibir a análise de vendas.
+5. No modo local/mock explícito, o sistema Python ainda pode reexportar `E-commerce/products_live.js` para testes.
 
-### Endpoints locais
+### Endpoints da API interna
 
-Com o sistema Python em execução, a API fica disponível em `http://localhost:5000`:
+Com o sistema Python em execução, a API fica disponível por padrão em `http://127.0.0.1:5000`:
 
 | Endpoint | Função |
 | --- | --- |
-| `POST /order` | Registra pedidos enviados pela loja. |
 | `GET /stats` | Entrega métricas para o dashboard de análise. |
+| `GET /orders` | Lista pedidos normalizados. |
+| `GET /products` | Lista produtos normalizados. |
 
 ## Como executar
 
@@ -118,7 +119,7 @@ npm run build
 
 ## Observações de beta
 
-- O checkout registra pedidos para o fluxo operacional, mas não processa pagamento real.
+- O checkout registra pedidos via Firebase Functions para o fluxo operacional, mas não processa pagamento real.
 - Algumas áreas institucionais do rodapé ainda exibem avisos ou atalhos simples.
 - As imagens podem utilizar visual padrão quando o produto não possui URL de imagem.
 - O dashboard depende do sistema Python em execução para mostrar dados reais.
@@ -131,7 +132,10 @@ npm run build
 
 > **Atenção:** a chave Firebase que já foi comitada anteriormente deve ser revogada/rotacionada no Google Cloud/Firebase Console. Remover o arquivo do repositório não invalida uma chave que já foi exposta no histórico Git.
 
-O sistema de vendas não precisa de credencial Firebase para rodar em desenvolvimento: quando nenhuma credencial válida é encontrada, ele mantém o modo JSON/mock local usando `Sistema de vendas/db_mock.json`.
+O sistema de vendas agora usa `GRAND_PARFUM_MODE=production|development|test`.
+
+- `production`: exige Firebase configurado e falha claramente se a credencial estiver ausente ou inválida.
+- `development` e `test`: permitem JSON/mock apenas com configuração explícita.
 
 Para usar Firebase, mantenha a chave fora do versionamento e configure uma das variáveis abaixo:
 
@@ -154,6 +158,9 @@ As principais opções podem ser alteradas por variáveis de ambiente, sem mudar
 | `ALLOWED_ORIGINS` | vazio | Lista separada por vírgulas para CORS. Vazio mantém permissivo em desenvolvimento. |
 | `API_TOKEN` | vazio | Token opcional para proteger rotas de escrita. |
 | `FRONTEND_EXPORT_ENABLED` | `true` | Habilita/desabilita a exportação local para o frontend. |
+| `GRAND_PARFUM_MODE` | `development` | Define se o runtime é `production`, `development` ou `test`. |
+| `USE_FIREBASE` | `true` | Em `production`, Firebase continua obrigatório. |
+| `GRAND_PARFUM_ALLOW_MOCK` | `false` | Libera JSON/mock explicitamente apenas em `development` ou `test`. |
 | `FIREBASE_CREDENTIALS_PATH` | `Sistema de vendas/serviceAccountKey.json` local não versionado | Caminho para credencial Firebase fora do Git. |
 
 Exemplo para disponibilizar na rede local com CORS restrito e token:
@@ -180,7 +187,7 @@ Para iniciar somente a API, sem abrir CustomTkinter ou carregar telas da interfa
 python "Sistema de vendas/server_headless.py"
 ```
 
-O processo imprime host, porta, URL de health check, modo Firebase/mock e permanece ativo até `Ctrl+C`. O entrypoint desktop antigo continua disponível para uso com interface gráfica.
+O processo imprime host, porta, URL de health check, modo de execução, backend de dados, projeto Firebase e caminho da credencial sem expor segredo. O entrypoint desktop antigo continua disponível para uso com interface gráfica.
 
 
 ## Guia operacional

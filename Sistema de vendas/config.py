@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 
 # Configuração centralizada do aplicativo de Logística
@@ -29,6 +30,14 @@ def _env_list(name):
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def _env_mode(name, default="development"):
+    value = str(os.getenv(name, default) or default).strip().lower()
+    if value not in {"production", "development", "test"}:
+        print(f"Aviso: {name} invalido ({value!r}); usando {default}.")
+        return default
+    return value
+
+
 # Informações Gerais
 APP_NAME = "Grand Parfum - Sistema Local de Vendas e Logistica"
 
@@ -39,9 +48,18 @@ ALLOWED_ORIGINS = _env_list("ALLOWED_ORIGINS")
 API_TOKEN = os.getenv("API_TOKEN", "").strip()
 
 # Persistência de Dados
-# Se True, tenta carregar o Firebase.
-# Se falhar ou a credencial não existir, alterna para modo local/mock.
-USE_FIREBASE = _env_bool("USE_FIREBASE", True)
+GRAND_PARFUM_MODE = _env_mode("GRAND_PARFUM_MODE", "development")
+GRAND_PARFUM_ALLOW_MOCK = _env_bool("GRAND_PARFUM_ALLOW_MOCK", False)
+_USE_FIREBASE_REQUESTED = _env_bool("USE_FIREBASE", True)
+USE_FIREBASE = True if GRAND_PARFUM_MODE == "production" else _USE_FIREBASE_REQUESTED
+if GRAND_PARFUM_MODE == "production" and not _USE_FIREBASE_REQUESTED:
+    print("Aviso: USE_FIREBASE=false foi ignorado porque GRAND_PARFUM_MODE=production exige Firebase.")
+
+ALLOW_MOCK = GRAND_PARFUM_MODE in {"development", "test"} and (
+    (not USE_FIREBASE) or GRAND_PARFUM_ALLOW_MOCK
+)
+FIREBASE_REQUIRED = USE_FIREBASE and not ALLOW_MOCK
+
 DB_FILE = os.getenv("DB_FILE", str(BASE_DIR / "db_mock.json"))
 _DEFAULT_FIREBASE_CREDENTIALS = str(BASE_DIR / "serviceAccountKey.json")
 FIREBASE_CREDENTIALS_PATH = (
@@ -64,3 +82,18 @@ FRONTEND_EXPORT_PATH = os.getenv(
     "FRONTEND_EXPORT_PATH",
     str(PROJECT_DIR / "E-commerce" / "products_live.js"),
 )
+
+
+def firebase_credentials_exists() -> bool:
+    return bool(FIREBASE_CREDENTIALS_PATH and Path(FIREBASE_CREDENTIALS_PATH).exists())
+
+
+def firebase_project_hint() -> str:
+    try:
+        if not firebase_credentials_exists():
+            return "desconhecido"
+        with Path(FIREBASE_CREDENTIALS_PATH).open("r", encoding="utf-8") as file:
+            data = json.load(file)
+        return str(data.get("project_id") or "desconhecido")
+    except Exception:
+        return "desconhecido"

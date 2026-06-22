@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isActiveProduct() {
+      return !("active" in resource.data) || resource.data.active == true;
+    }
+
+    match /produtos/{productId} {
+      allow read: if isActiveProduct();
+      allow create, update, delete: if false;
+    }
+
+    match /pedidos/{orderId} {
+      allow read: if signedIn() && (
+        resource.data.customer_id == request.auth.uid ||
+        resource.data.clienteId == request.auth.uid
+      );
+      allow create, update, delete: if false;
+    }
+
+    match /cupons/{couponId} {
+      allow read, write: if false;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /carts/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /wishlists/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.product_id is string
+        && request.resource.data.score is number
+        && request.resource.data.score >= 1
+        && request.resource.data.score <= 5;
+      allow update, delete: if signedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    match /newsletter/{entryId} {
+      allow create: if request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 320;
+      allow read, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

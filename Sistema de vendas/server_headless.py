@@ -6,14 +6,25 @@ import os
 import time
 
 import config
+import database
 from api.server import start_api_server, stop_api_server
 
 
-def _firebase_mode() -> str:
-    credentials_path = config.FIREBASE_CREDENTIALS_PATH
-    if config.USE_FIREBASE and credentials_path and os.path.exists(credentials_path):
-        return f"Firebase ({config.FIREBASE_CREDENTIALS_SOURCE}: {credentials_path})"
-    return "JSON/mock local (credencial Firebase ausente ou desabilitada)"
+def _runtime_lines() -> list[str]:
+    runtime = database.get_runtime_summary()
+    backend = runtime.get("backend", "desconhecido").upper()
+    mode = str(runtime.get("mode", "development")).upper()
+    project_id = runtime.get("project_id", "desconhecido")
+    credentials_path = runtime.get("credentials_path", "nao configurado")
+    credentials_source = runtime.get("credentials_source", "desconhecido")
+    credentials_present = "presente" if runtime.get("credentials_present") else "ausente"
+    return [
+        f"[Headless] Modo de execucao: {mode}",
+        f"[Headless] Backend de dados: {backend}",
+        f"[Headless] Projeto Firebase: {project_id}",
+        f"[Headless] Credencial Firebase: {credentials_present} ({credentials_source}: {credentials_path})",
+        f"[Headless] Runtime: {runtime.get('message', 'sem mensagem')}",
+    ]
 
 
 def main() -> None:
@@ -25,7 +36,8 @@ def main() -> None:
     print(f"[Headless] Host: {display_host}")
     print(f"[Headless] Porta: {port}")
     print(f"[Headless] URL local: http://{url_host}:{port}/health")
-    print(f"[Headless] Modo de dados: {_firebase_mode()}")
+    for line in _runtime_lines():
+        print(line)
     print("[Headless] Pressione Ctrl+C para encerrar.")
 
     start_api_server(host=host, port=port)

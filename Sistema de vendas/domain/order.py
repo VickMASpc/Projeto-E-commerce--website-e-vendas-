@@ -74,6 +74,24 @@ class Order:
 
 DEFAULT_ORDER_ITEM = OrderItem().to_dict()
 DEFAULT_ORDER = Order().to_dict()
+CANONICAL_ORDER_FIELDS = (
+    "id",
+    "customer_id",
+    "customer_name",
+    "customer_email",
+    "customer_phone",
+    "customer_address",
+    "items",
+    "subtotal",
+    "shipping",
+    "discount_total",
+    "coupon_code",
+    "total",
+    "status",
+    "created_at",
+    "updated_at",
+    "schema_version",
+)
 
 
 def parse_float(value: Any, fallback: float = 0.0) -> float:
@@ -151,6 +169,13 @@ def normalize_order_item(item: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
     return normalized
 
 
+def canonical_order_contract() -> Dict[str, Any]:
+    return {
+        "fields": list(CANONICAL_ORDER_FIELDS),
+        "schema_version": 2,
+    }
+
+
 def normalize_order(order: Optional[Mapping[str, Any]], fallback_id: Optional[str] = None) -> Dict[str, Any]:
     order = dict(order or {})
     customer = dict(order.get("customer") or {})
@@ -164,16 +189,16 @@ def normalize_order(order: Optional[Mapping[str, Any]], fallback_id: Optional[st
     discount_total = max(parse_float(order.get("discount_total", order.get("discount")), 0.0), 0.0)
     total = parse_float(order.get("total"), subtotal - discount_total + shipping)
     coupon_code = str(order.get("coupon_code") or order.get("couponCode") or "").strip().upper() or None
-    created_at = str(order.get("created_at") or order.get("dataCriacao") or "").strip()
-    updated_at = str(order.get("updated_at") or order.get("atualizadoEm") or "").strip()
+    created_at = str(order.get("created_at") or order.get("dataCriacao") or order.get("createdAt") or "").strip()
+    updated_at = str(order.get("updated_at") or order.get("atualizadoEm") or order.get("updatedAt") or "").strip()
 
     normalized = Order(
         id=str(order.get("id") or fallback_id or "").strip(),
-        customer_id=order.get("customer_id") or order.get("clienteId") or order.get("userId") or customer.get("id") or None,
-        customer_name=str(order.get("customer_name") or order.get("clienteNome") or customer.get("name") or "Cliente").strip() or "Cliente",
-        customer_email=str(order.get("customer_email") or order.get("clienteEmail") or customer.get("email") or "").strip(),
-        customer_phone=str(order.get("customer_phone") or order.get("clienteTelefone") or customer.get("phone") or "").strip(),
-        customer_address=str(order.get("customer_address") or order.get("clienteEndereco") or customer.get("address") or "").strip(),
+        customer_id=order.get("customer_id") or order.get("customerId") or order.get("clienteId") or order.get("userId") or customer.get("id") or None,
+        customer_name=str(order.get("customer_name") or order.get("customerName") or order.get("clienteNome") or customer.get("name") or "Cliente").strip() or "Cliente",
+        customer_email=str(order.get("customer_email") or order.get("customerEmail") or order.get("clienteEmail") or customer.get("email") or "").strip(),
+        customer_phone=str(order.get("customer_phone") or order.get("customerPhone") or order.get("clienteTelefone") or customer.get("phone") or "").strip(),
+        customer_address=str(order.get("customer_address") or order.get("customerAddress") or order.get("clienteEndereco") or customer.get("address") or "").strip(),
         items=normalized_items,
         subtotal=subtotal,
         shipping=shipping,

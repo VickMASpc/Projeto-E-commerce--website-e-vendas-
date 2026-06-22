@@ -1,86 +1,35 @@
-# React + TypeScript + Vite
+# Dashboard React de análise de vendas
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este app lê métricas da API Python do sistema logístico.
 
-Currently, two official plugins are available:
+## Modos suportados
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. Modo interno local
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-## Configuração para servidor remoto
-
-Crie um arquivo `.env` a partir de `.env.example` e aponte o dashboard para o servidor Python local ou remoto:
+Use quando o dashboard roda junto com o sistema logístico:
 
 ```bash
-VITE_STATS_API_URL=http://192.168.0.10:5000/stats
+VITE_DASHBOARD_MODE=internal_api
+VITE_STATS_API_URL=http://127.0.0.1:5000/stats
 VITE_API_TOKEN=troque-este-token
 ```
 
-- `VITE_STATS_API_URL` deve apontar para `/stats`; o dashboard continua derivando `/orders` e `/products` automaticamente a partir dessa URL.
-- `VITE_API_TOKEN` é opcional. Quando definido, o dashboard envia `Authorization: Bearer <token>` nas consultas.
-- Se a API não responder, o estado offline existente continua sendo exibido.
+Com o servidor Python iniciado em modo Firebase, `/stats`, `/orders` e `/products` passam a refletir Firestore automaticamente.
+
+### 2. Modo teste
+
+Use apenas para ensaio visual explícito:
+
+```bash
+VITE_DASHBOARD_MODE=test
+VITE_ALLOW_OFFLINE_FALLBACK=true
+```
+
+Nesse modo o fallback offline pode aparecer sem mascarar produção.
+
+## Regras práticas
+
+- `VITE_STATS_API_URL` é obrigatório no modo `internal_api`.
+- O dashboard deriva `/orders` e `/products` automaticamente a partir de `/stats`.
+- Se a API não responder e o fallback offline não estiver explicitamente permitido, a UI mostra erro de configuração/conectividade em vez de parecer saudável.
+- O fluxo recomendado de produção continua sendo: iniciar o servidor logístico Python com Firebase configurado e apontar o dashboard para ele.

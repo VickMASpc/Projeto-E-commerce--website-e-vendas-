@@ -1,28 +1,110 @@
 from datetime import datetime
+
 from repositories.base import BaseRepository
 
+
 class FirebaseRepository(BaseRepository):
-    def __init__(self, db_client, fallback_repo: BaseRepository):
+    def __init__(self, db_client, fallback_repo: BaseRepository, allow_mock_fallback: bool = False):
         self.db = db_client
         self.fallback = fallback_repo
+        self.allow_mock_fallback = allow_mock_fallback
+
+    def _run_with_policy(self, action_name, firebase_operation, fallback_operation):
+        try:
+            return firebase_operation()
+        except Exception as error:
+            if not self.allow_mock_fallback:
+                raise RuntimeError(
+                    f"[DATA][FIREBASE-ONLY] Operacao '{action_name}' falhou no Firebase e o fallback mock nao esta permitido: {error}"
+                ) from error
+
+            print(
+                f"[DATA][MOCK-FALLBACK] Operacao '{action_name}' falhou no Firebase ({error}). "
+                "Usando repositorio JSON/mock por configuracao explicita."
+            )
+            return fallback_operation()
+
+    def _collection_docs(self, collection_name):
+        return list(self.db.collection(collection_name).get())
+
+    def _snapshot_data(self):
+        from database import normalize_order, normalize_product
+        from domain.coupon import normalize_coupon
+
+        products = [
+            normalize_product(doc.to_dict() | {"id": doc.id})
+            for doc in self._collection_docs("produtos")
+        ]
+        orders = [
+            normalize_order(doc.to_dict() | {"id": doc.id})
+            for doc in self._collection_docs("pedidos")
+        ]
+        coupons = [
+            normalize_coupon(doc.to_dict() | {"code": doc.id})
+            for doc in self._collection_docs("cupons")
+        ]
+        movements = [
+            dict(doc.to_dict() | {"id": doc.id})
+            for doc in self._collection_docs("estoque_movimentos")
+        ]
+        return {
+            "produtos": products,
+            "pedidos": orders,
+            "cupons": coupons,
+            "vendas": [],
+            "estoque_movimentos": movements,
+        }
+
+    def _write_collection(self, collection_name, entries, id_field):
+        target = self.db.collection(collection_name)
+        existing_docs = {doc.id for doc in target.get()}
+        next_ids = set()
+        batch = self.db.batch()
+
+        for entry in entries:
+            payload = dict(entry or {})
+            document_id = str(payload.get(id_field) or "").strip()
+            if not document_id:
+                continue
+            next_ids.add(document_id)
+            payload.pop(id_field, None)
+            batch.set(target.document(document_id), payload)
+
+        for document_id in existing_docs - next_ids:
+            batch.delete(target.document(document_id))
+
+        batch.commit()
 
     def read_data(self):
-        return self.fallback.read_data()
+        return self._run_with_policy("read_data", self._snapshot_data, self.fallback.read_data)
 
     def write_data(self, data):
-        self.fallback.write_data(data)
+        return self._run_with_policy(
+            "write_data",
+            lambda: (
+                self._write_collection("produtos", data.get("produtos", []), "id"),
+                self._write_collection("pedidos", data.get("pedidos", []), "id"),
+                self._write_collection("cupons", data.get("cupons", []), "code"),
+                self._write_collection("estoque_movimentos", data.get("estoque_movimentos", []), "id"),
+            ),
+            lambda: self.fallback.write_data(data),
+        )
 
     def get_products(self):
         from database import normalize_product
-        try:
-            docs = self.db.collection("produtos").get()
-            return [normalize_product(doc.to_dict() | {"id": doc.id}) for doc in docs]
-        except Exception as error:
-            print(f"Erro ao buscar produtos no Firebase: {error}")
-            return self.fallback.get_products()
+
+        return self._run_with_policy(
+            "get_products",
+            lambda: [
+                normalize_product(doc.to_dict() | {"id": doc.id})
+                for doc in self.db.collection("produtos").get()
+            ],
+            self.fallback.get_products,
+        )
 
     def add_product(self, nome, descricao, preco, estoque, categoria, detalhes=None):
         from database import normalize_product
+
         new_id = f"perf-{int(datetime.now().timestamp() % 1000000)}"
         payload = {
             "id": new_id,
@@ -38,26 +120,25 @@ class FirebaseRepository(BaseRepository):
         normalized = normalize_product(payload)
         normalized["id"] = new_id
 
-        try:
-            self.db.collection("produtos").document(new_id).set(normalized)
-            return new_id
-        except Exception as error:
-            print(f"Erro ao salvar produto no Firebase: {error}")
-            return self.fallback.add_product(nome, descricao, preco, estoque, categoria, detalhes)
+        return self._run_with_policy(
+            "add_product",
+            lambda: (self.db.collection("produtos").document(new_id).set(normalized), new_id)[1],
+            lambda: self.fallback.add_product(nome, descricao, preco, estoque, categoria, detalhes),
+        )
 
     def update_product(self, product_id, dados):
         from database import normalize_product
-        normalized = normalize_product({"id": product_id, **(dados or {})})
 
-        try:
-            self.db.collection("produtos").document(product_id).set(normalized)
-            return True
-        except Exception as error:
-            print(f"Erro ao atualizar produto no Firebase: {error}")
-            return self.fallback.update_product(product_id, dados)
+        normalized = normalize_product({"id": product_id, **(dados or {})})
+        return self._run_with_policy(
+            "update_product",
+            lambda: (self.db.collection("produtos").document(product_id).set(normalized), True)[1],
+            lambda: self.fallback.update_product(product_id, dados),
+        )
 
     def update_product_stock(self, product_id, novo_estoque):
         from database import _to_int
+
         products = self.get_products()
         current = next((product for product in products if product["id"] == product_id), None)
         if not current:
@@ -67,38 +148,45 @@ class FirebaseRepository(BaseRepository):
         self.update_product(product_id, current)
 
     def delete_product(self, produto_id):
-        try:
-            self.db.collection("produtos").document(produto_id).delete()
-        except Exception as error:
-            print(f"Erro ao deletar no Firebase: {error}")
-            self.fallback.delete_product(produto_id)
+        return self._run_with_policy(
+            "delete_product",
+            lambda: self.db.collection("produtos").document(produto_id).delete(),
+            lambda: self.fallback.delete_product(produto_id),
+        )
 
     def listen_to_orders(self, callback):
         def on_snapshot(col_snapshot, changes, read_time):
             callback()
-        try:
-            return self.db.collection("pedidos").on_snapshot(on_snapshot)
-        except Exception as error:
-            print(f"Erro no snapshot: {error}")
-            return self.fallback.listen_to_orders(callback)
+
+        return self._run_with_policy(
+            "listen_to_orders",
+            lambda: self.db.collection("pedidos").on_snapshot(on_snapshot),
+            lambda: self.fallback.listen_to_orders(callback),
+        )
 
     def get_orders(self):
         from database import normalize_order
-        try:
-            docs = self.db.collection("pedidos").get()
-            return [normalize_order(doc.to_dict() | {"id": doc.id}) for doc in docs]
-        except Exception as error:
-            print(f"Erro ao buscar pedidos no Firebase: {error}")
-            return self.fallback.get_orders()
+
+        return self._run_with_policy(
+            "get_orders",
+            lambda: [
+                normalize_order(doc.to_dict() | {"id": doc.id})
+                for doc in self.db.collection("pedidos").get()
+            ],
+            self.fallback.get_orders,
+        )
 
     def get_coupons(self):
         from domain.coupon import normalize_coupon
-        try:
-            docs = self.db.collection("cupons").get()
-            return [normalize_coupon(doc.to_dict() | {"code": doc.id}) for doc in docs]
-        except Exception as error:
-            print(f"Erro ao buscar cupons no Firebase: {error}")
-            return self.fallback.get_coupons()
+
+        return self._run_with_policy(
+            "get_coupons",
+            lambda: [
+                normalize_coupon(doc.to_dict() | {"code": doc.id})
+                for doc in self.db.collection("cupons").get()
+            ],
+            self.fallback.get_coupons,
+        )
 
     def create_local_order(self, order):
         from firebase_admin import firestore
@@ -108,7 +196,11 @@ class FirebaseRepository(BaseRepository):
         if not normalized["items"]:
             return {"ok": False, "message": "Pedido sem items.", "order_id": None}
 
-        coupon_result = validate_coupon(normalized.get("coupon_code"), normalized["subtotal"]) if normalized.get("coupon_code") else None
+        coupon_result = (
+            validate_coupon(normalized.get("coupon_code"), normalized["subtotal"])
+            if normalized.get("coupon_code")
+            else None
+        )
         if normalized.get("coupon_code") and not coupon_result["valid"]:
             return {"ok": False, "message": coupon_result["message"], "order_id": None}
 
@@ -148,7 +240,11 @@ class FirebaseRepository(BaseRepository):
                     insufficient_stock.append(item["product_name"])
 
             if insufficient_stock:
-                return {"ok": False, "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}", "order_id": None}
+                return {
+                    "ok": False,
+                    "message": f"Estoque insuficiente para: {', '.join(insufficient_stock)}",
+                    "order_id": None,
+                }
 
             for item in normalized["items"]:
                 product_id = item["product_id"]
@@ -157,6 +253,7 @@ class FirebaseRepository(BaseRepository):
                 txn.update(product_ref, {"stock": current_stock - item["quantity"]})
 
             from services.inventory_service import InventoryService
+
             InventoryService(self).reserve_or_deduct_for_order(normalized)
 
             normalized["status"] = "pago"
@@ -166,25 +263,38 @@ class FirebaseRepository(BaseRepository):
             txn.set(order_ref, normalized)
             return {"ok": True, "message": "Pedido registrado.", "order_id": normalized["id"]}
 
-        try:
-            return process_order(transaction)
-        except Exception as error:
-            print(f"Erro ao registrar pedido no Firebase: {error}")
-            return self.fallback.create_local_order(order)
+        return self._run_with_policy(
+            "create_local_order",
+            lambda: process_order(transaction),
+            lambda: self.fallback.create_local_order(order),
+        )
 
     def update_order_status(self, pedido_id, novo_status):
         from database import _now_iso
-        try:
-            self.db.collection("pedidos").document(pedido_id).update({
-                "status": novo_status,
-                "updated_at": _now_iso(),
-            })
-        except Exception as error:
-            print(f"Erro ao atualizar status no Firebase: {error}")
-            self.fallback.update_order_status(pedido_id, novo_status)
+
+        return self._run_with_policy(
+            "update_order_status",
+            lambda: self.db.collection("pedidos").document(pedido_id).update(
+                {
+                    "status": novo_status,
+                    "updated_at": _now_iso(),
+                }
+            ),
+            lambda: self.fallback.update_order_status(pedido_id, novo_status),
+        )
 
     def get_movements(self):
-        return self.fallback.get_movements()
+        return self._run_with_policy(
+            "get_movements",
+            lambda: [dict(doc.to_dict() | {"id": doc.id}) for doc in self.db.collection("estoque_movimentos").get()],
+            self.fallback.get_movements,
+        )
 
     def add_movement(self, movement):
-        self.fallback.add_movement(movement)
+        return self._run_with_policy(
+            "add_movement",
+            lambda: self.db.collection("estoque_movimentos").document(
+                str((movement or {}).get("id") or f"mov-{int(datetime.now().timestamp() * 1000)}")
+            ).set(dict(movement or {})),
+            lambda: self.fallback.add_movement(movement),
+        )

@@ -2,6 +2,12 @@
 .venv/
 __pycache__/
 *.pyc
+*.log
+*.tmp
+*.bak
+
+# Local analysis artifacts
+.understand-anything/
 
 # Environment and local configuration
 .env
@@ -9,6 +15,8 @@ __pycache__/
 !.env.example
 Sistema de vendas/server_config.json
 server_config.json
+*.local.json
+*.local.env
 
 # Firebase/service account credentials
 serviceAccountKey.json
@@ -18,3 +26,8 @@ firebase-adminsdk*.json
 
 # Local runtime state
 export_status.json
+logs/
+functions/node_modules/
+functions/lib/
+Sistema de análise de vendas/React app/node_modules/
+Sistema de análise de vendas/React app/dist/

@@ -65,16 +65,23 @@ class SettingsView:
         self.export_status_label.pack(fill=tk.X)
 
     def refresh(self):
-        credentials_path = config.FIREBASE_CREDENTIALS_PATH
-        credentials_status = "presente" if os.path.exists(credentials_path) else "ausente"
-        mode = "Firebase" if database.USE_FIREBASE else "JSON/mock"
+        runtime = database.get_runtime_summary()
+        credentials_path = runtime.get("credentials_path", config.FIREBASE_CREDENTIALS_PATH)
+        credentials_status = "presente" if runtime.get("credentials_present") else "ausente"
+        mode = (
+            f"{str(runtime.get('mode', 'development')).upper()} / "
+            f"{str(runtime.get('backend', 'desconhecido')).upper()}"
+        )
         api_host = config.API_HOST or "0.0.0.0"
 
         self.value_labels["mode"].configure(text=mode)
         self.value_labels["api"].configure(text=f"{api_host}:{config.API_PORT}")
         self.value_labels["db_file"].configure(text=config.DB_FILE)
         self.value_labels["firebase_credentials"].configure(
-            text=f"{credentials_status} ({credentials_path})"
+            text=(
+                f"{credentials_status} | projeto {runtime.get('project_id', 'desconhecido')} | "
+                f"{runtime.get('credentials_source', 'desconhecido')}: {credentials_path}"
+            )
         )
         self.value_labels["frontend_export"].configure(
             text="habilitada" if config.FRONTEND_EXPORT_ENABLED else "desabilitada"

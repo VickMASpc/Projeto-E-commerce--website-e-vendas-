@@ -10,7 +10,7 @@ Use o modo desktop quando quiser abrir o backoffice com interface CustomTkinter 
 python "Sistema de vendas/sistema_de_registro_de_vendas_e_gerenciamento_de_estoque.py"
 ```
 
-A API fica disponível por padrão em `http://localhost:5000`. Se não houver credencial Firebase válida, o sistema usa o modo JSON/mock local.
+A API fica disponível por padrão em `http://127.0.0.1:5000`. Em produção, ausência de credencial Firebase válida faz o sistema falhar claramente. JSON/mock só deve ser usado em `development` ou `test` com configuração explícita.
 
 ## 2. Rodar servidor headless local
 
@@ -20,7 +20,7 @@ Use o modo headless quando quiser iniciar somente a API, sem abrir janela:
 python "Sistema de vendas/server_headless.py"
 ```
 
-O servidor imprime a URL de `/health`, o host, a porta, o modo Firebase/mock e permanece ativo até `Ctrl+C`.
+O servidor imprime a URL de `/health`, o modo de execução, o backend de dados, o projeto Firebase detectado e o caminho da credencial sem exibir segredo.
 
 ## 3. Rodar servidor em outro computador da rede
 
@@ -29,7 +29,7 @@ No computador que será o servidor, configure host, porta, token, CORS e credenc
 ```bash
 API_HOST=0.0.0.0
 API_PORT=5000
-FIREBASE_CREDENTIALS_PATH=C:\Users\Usuario\AppData\Roaming\GrandParfum\serviceAccountKey.json
+FIREBASE_CREDENTIALS_PATH=%APPDATA%\GrandParfum\serviceAccountKey.json
 API_TOKEN=troque-este-token
 ALLOWED_ORIGINS=http://localhost:5500,http://192.168.0.10:5173
 python "Sistema de vendas/server_headless.py"
@@ -65,34 +65,39 @@ Se outro computador não conseguir acessar a API, libere a porta configurada (`5
 
 No Windows, abra **Segurança do Windows > Firewall e proteção de rede > Configurações avançadas > Regras de Entrada** e crie uma regra TCP para a porta `5000`, restrita ao perfil/rede local quando possível.
 
-## 6. Configurar loja para apontar ao servidor remoto
+## 6. Loja publicada e modo de teste local
 
-Antes de carregar a loja, defina a URL e, se usado, o token. Você pode colocar em um script local não versionado ou executar no console do navegador:
+No fluxo normal de produção, a loja usa Firebase Authentication, Firestore e Cloud Functions. Não é necessário configurar `API_URL`, token em `localStorage` ou IP manual por dispositivo.
+
+Se você quiser testar a API Python localmente de forma explícita, habilite o modo local:
 
 ```js
-window.GRAND_PARFUM_API_URL = "http://192.168.0.10:5000";
-window.GRAND_PARFUM_API_TOKEN = "troque-este-token";
+window.GRAND_PARFUM_ENABLE_LOCAL_API_TESTS = true;
+window.GRAND_PARFUM_LOCAL_API_URL = "http://192.168.0.10:5000";
+window.GRAND_PARFUM_LOCAL_API_TOKEN = "troque-este-token";
 ```
 
 Também é possível persistir no navegador:
 
 ```js
-localStorage.setItem("GRAND_PARFUM_API_URL", "http://192.168.0.10:5000");
-localStorage.setItem("GRAND_PARFUM_API_TOKEN", "troque-este-token");
+localStorage.setItem("GRAND_PARFUM_ENABLE_LOCAL_API_TESTS", "true");
+localStorage.setItem("GRAND_PARFUM_LOCAL_API_URL", "http://192.168.0.10:5000");
+localStorage.setItem("GRAND_PARFUM_LOCAL_API_TOKEN", "troque-este-token");
 ```
 
-A loja usa `http://localhost:5000` somente como fallback centralizado para desenvolvimento. Cupons exigem que a API esteja disponível; pedidos sem cupom ainda podem cair no fallback Firebase existente quando a API não responde.
+Sem essa flag explícita, checkout e cupom seguem pelo backend Firebase.
 
 ## 7. Configurar dashboard para apontar ao servidor remoto
 
 No dashboard React, crie `.env` a partir de `.env.example`:
 
 ```bash
+VITE_DASHBOARD_MODE=internal_api
 VITE_STATS_API_URL=http://192.168.0.10:5000/stats
 VITE_API_TOKEN=troque-este-token
 ```
 
-O dashboard usa `/stats` como base e deriva `/orders` e `/products` automaticamente. Se a API não responder, o estado offline continua sendo exibido.
+O dashboard usa `/stats` como base e deriva `/orders` e `/products` automaticamente. Para usar dados reais do Firebase, basta iniciar o servidor logístico com Firebase configurado. O fallback offline só deve ser usado em modo `test`.
 
 ## 8. Usar `LIGAR_SERVIDOR.bat` arrastando arquivos
 
@@ -106,7 +111,7 @@ Exemplo seguro sem segredo real:
 {
   "host": "0.0.0.0",
   "port": 5000,
-  "credentialsPath": "C:/Users/Usuario/AppData/Roaming/GrandParfum/serviceAccountKey.json",
+  "credentialsPath": "%APPDATA%/GrandParfum/serviceAccountKey.json",
   "apiToken": "troque-este-token",
   "allowedOrigins": ["http://localhost:5500", "http://192.168.0.10:5173"]
 }

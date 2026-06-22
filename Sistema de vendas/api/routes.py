@@ -65,7 +65,12 @@ class _OrderHandler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0].rstrip("/")
 
         if path == "/health":
-            self._json(200, serialise_health())
+            runtime = database.get_runtime_summary()
+            self._json(200, serialise_health() | {
+                "mode": runtime.get("mode"),
+                "backend": runtime.get("backend"),
+                "project_id": runtime.get("project_id"),
+            })
             return
 
         if path == "/stats":

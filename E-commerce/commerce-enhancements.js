@@ -245,7 +245,7 @@ function renderCartCouponPanel() {
       ? pricing.couponStillValid
         ? `Cupom ${coupon.code} aplicado.`
         : "O carrinho mudou. Reaplique o cupom."
-      : "Use um cupom valido do sistema local.";
+      : "Use um cupom valido para este pedido.";
 
     panel.innerHTML = `
       <label class="coupon-panel__label" for="coupon-code">Cupom</label>

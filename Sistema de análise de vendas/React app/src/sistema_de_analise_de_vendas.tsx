@@ -129,6 +129,7 @@ type RawProduct = {
 }
 
 type TabKey = 'overview' | 'orders' | 'drivers'
+type DashboardMode = 'internal_api' | 'test'
 
 const fallbackData: DashboardData = {
   totalRevenue: 0,
@@ -159,8 +160,11 @@ const fallbackData: DashboardData = {
   topCustomers: [],
 }
 
-const statsUrl = import.meta.env.VITE_STATS_API_URL ?? 'http://localhost:5000/stats'
+const dashboardMode = (import.meta.env.VITE_DASHBOARD_MODE?.trim() || 'internal_api') as DashboardMode
+const statsUrl = import.meta.env.VITE_STATS_API_URL?.trim() ?? ''
 const apiToken = import.meta.env.VITE_API_TOKEN?.trim() ?? ''
+const allowOfflineFallback =
+  dashboardMode === 'test' || import.meta.env.VITE_ALLOW_OFFLINE_FALLBACK === 'true'
 const apiFetchOptions: RequestInit = apiToken
   ? { cache: 'no-store', headers: { Authorization: `Bearer ${apiToken}` } }
   : { cache: 'no-store' }
@@ -357,6 +361,7 @@ export default function SalesDashboard() {
   const [data, setData] = useState<DashboardData>(fallbackData)
   const [loading, setLoading] = useState(true)
   const [isOffline, setIsOffline] = useState(false)
+  const [configurationError, setConfigurationError] = useState('')
   const [activeTab, setActiveTab] = useState<TabKey>('overview')
 
   useEffect(() => {
@@ -365,6 +370,13 @@ export default function SalesDashboard() {
     const fetchData = async (keepLoading = false) => {
       try {
         if (!keepLoading) setLoading(true)
+        if (!statsUrl) {
+          throw new Error(
+            dashboardMode === 'test'
+              ? 'Dashboard em modo de teste sem VITE_STATS_API_URL configurado.'
+              : 'VITE_STATS_API_URL é obrigatório para o dashboard interno.',
+          )
+        }
 
         const [statsResponse, ordersResponse, productsResponse] = await Promise.all([
           fetch(statsUrl, apiFetchOptions),
@@ -419,11 +431,18 @@ export default function SalesDashboard() {
           topCustomers: stats.topCustomers ?? fallbackData.topCustomers,
         })
         setIsOffline(false)
+        setConfigurationError('')
       } catch (error) {
         console.error('Erro ao carregar dashboard', error)
         if (cancelled) return
-        setData(fallbackData)
-        setIsOffline(true)
+        const message = error instanceof Error ? error.message : 'Erro ao carregar dashboard.'
+        setConfigurationError(message)
+        if (allowOfflineFallback) {
+          setData(fallbackData)
+          setIsOffline(true)
+        } else {
+          setIsOffline(false)
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -523,14 +542,24 @@ export default function SalesDashboard() {
                 <div className="mt-3 flex items-center gap-2">
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
-                      isOffline ? 'bg-amber-400' : 'animate-pulse bg-emerald-400'
+                      configurationError
+                        ? 'bg-rose-400'
+                        : isOffline
+                          ? 'bg-amber-400'
+                          : 'animate-pulse bg-emerald-400'
                     }`}
                   />
                   <p className="text-base font-semibold text-white">
-                    {isOffline ? 'Fallback offline' : 'Conectado em tempo real'}
+                    {configurationError
+                      ? 'Configuracao pendente'
+                      : isOffline
+                        ? 'Modo offline de teste'
+                        : 'Conectado em tempo real'}
                   </p>
                 </div>
-                <p className="mt-1 text-sm text-slate-400">{formatUpdatedAt(data.lastUpdated)}</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  {configurationError || formatUpdatedAt(data.lastUpdated)}
+                </p>
               </div>
               <div className="rounded-[24px] border border-white/10 bg-black/15 p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Janela</p>
