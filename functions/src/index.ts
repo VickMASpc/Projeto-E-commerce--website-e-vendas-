@@ -3,7 +3,7 @@ import { DocumentSnapshot, FieldValue, getFirestore, Transaction } from "firebas
 import { HttpsError, onRequest } from "firebase-functions/v2/https";
 import corsLib from "cors";
 
-const cors = corsLib({ origin: true });
+const cors = corsLib({ origin: "https://vickmaspc.github.io" });
 
 import {
   buildOrderDocument,
