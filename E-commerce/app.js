@@ -493,8 +493,15 @@ const FirebaseDB = {
         return result.order_id;
       }
 
-      const callable = httpsCallable(functions, "createOrder");
-      const result = normalizeCallableResult(await callable(payload));
+      // Converted to fetch for onRequest compatible with CORS middleware
+      const functionUrl = `https://southamerica-east1-ecommerce-74d5c.cloudfunctions.net/createOrder`;
+      const response = await fetch(functionUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: payload }),
+      });
+      
+      const result = normalizeCallableResult(await response.json());
       if (!result?.ok || !result?.order_id) {
         throw new Error(result?.message || "Pedido recusado por validacao.");
       }
@@ -540,8 +547,14 @@ const FirebaseDB = {
         return result;
       }
 
-      const callable = httpsCallable(functions, "validateCoupon");
-      return normalizeCallableResult(await callable(payload));
+      // Converted to fetch for onRequest compatible with CORS middleware
+      const functionUrl = `https://southamerica-east1-ecommerce-74d5c.cloudfunctions.net/validateCoupon`;
+      const response = await fetch(functionUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: payload }),
+      });
+      return normalizeCallableResult(await response.json());
     } catch (error) {
       console.error("Erro ao validar cupom:", error);
       throw new Error(buildCheckoutErrorMessage(error, "Nao foi possivel validar o cupom."));
