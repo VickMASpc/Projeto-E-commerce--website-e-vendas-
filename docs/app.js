@@ -1021,6 +1021,10 @@ const Cart = {
     localStorage.setItem(CART_KEY, JSON.stringify(payload));
   },
 
+  getCoupon() {
+    return this.readStorage().coupon;
+  },
+
   async loadFromCloud(uid) {
     this.userId = uid;
     const items = this.getItems();
@@ -1083,8 +1087,8 @@ const Cart = {
 
   getItems() {
     try {
-      const saved = JSON.parse(localStorage.getItem(CART_KEY)) || [];
-      return saved.map((item) => ({
+      const { items } = this.readStorage();
+      return items.map((item) => ({
         id: item.id,
         name: item.name || "Produto",
         price: toNumber(item.price),
