@@ -126,3 +126,77 @@ npm run build
 ## Repositório
 
 - [Grand Parfum — Projeto E-commerce, website e vendas](https://github.com/VickMASpc/Projeto-E-commerce--website-e-vendas-)
+
+## Configuração segura do Firebase e da API
+
+> **Atenção:** a chave Firebase que já foi comitada anteriormente deve ser revogada/rotacionada no Google Cloud/Firebase Console. Remover o arquivo do repositório não invalida uma chave que já foi exposta no histórico Git.
+
+O sistema de vendas não precisa de credencial Firebase para rodar em desenvolvimento: quando nenhuma credencial válida é encontrada, ele mantém o modo JSON/mock local usando `Sistema de vendas/db_mock.json`.
+
+Para usar Firebase, mantenha a chave fora do versionamento e configure uma das variáveis abaixo:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/caminho/seguro/serviceAccountKey.json"
+# ou
+export FIREBASE_CREDENTIALS_PATH="/caminho/seguro/serviceAccountKey.json"
+```
+
+Há um exemplo sem segredo real em `Sistema de vendas/serviceAccountKey.example.json`. Não copie credenciais reais para arquivos versionados.
+
+### Configuração flexível do servidor
+
+As principais opções podem ser alteradas por variáveis de ambiente, sem mudar código:
+
+| Variável | Padrão | Descrição |
+| --- | --- | --- |
+| `API_HOST` | vazio / desenvolvimento local | Endereço de bind da API. Use `0.0.0.0` para aceitar conexões da rede local. |
+| `API_PORT` | `5000` | Porta HTTP da API. |
+| `ALLOWED_ORIGINS` | vazio | Lista separada por vírgulas para CORS. Vazio mantém permissivo em desenvolvimento. |
+| `API_TOKEN` | vazio | Token opcional para proteger rotas de escrita. |
+| `FRONTEND_EXPORT_ENABLED` | `true` | Habilita/desabilita a exportação local para o frontend. |
+| `FIREBASE_CREDENTIALS_PATH` | `Sistema de vendas/serviceAccountKey.json` local não versionado | Caminho para credencial Firebase fora do Git. |
+
+Exemplo para disponibilizar na rede local com CORS restrito e token:
+
+```bash
+export API_HOST="0.0.0.0"
+export API_PORT="5000"
+export ALLOWED_ORIGINS="http://localhost:5173,http://192.168.0.10:5173"
+export API_TOKEN="troque-por-um-token-forte"
+python "Sistema de vendas/server_headless.py"
+```
+
+Com `API_TOKEN` definido, chamadas de escrita devem enviar:
+
+```http
+Authorization: Bearer troque-por-um-token-forte
+```
+
+### Modo headless da API
+
+Para iniciar somente a API, sem abrir CustomTkinter ou carregar telas da interface gráfica:
+
+```bash
+python "Sistema de vendas/server_headless.py"
+```
+
+O processo imprime host, porta, URL de health check, modo Firebase/mock e permanece ativo até `Ctrl+C`. O entrypoint desktop antigo continua disponível para uso com interface gráfica.
+
+
+## Guia operacional
+
+A documentação completa de operação local, rede, launcher, credenciais Firebase, segurança e empacotamento com PyInstaller está em [`docs/operacional.md`](docs/operacional.md).
+
+Resumo rápido:
+
+```bash
+python "Sistema de vendas/server_headless.py"
+```
+
+Para rede local, configure o servidor com `API_HOST=0.0.0.0`, `API_PORT=5000`, `API_TOKEN`, `ALLOWED_ORIGINS` e, se usar Firebase, `FIREBASE_CREDENTIALS_PATH` apontando para uma chave fora do repositório, por exemplo `%APPDATA%\GrandParfum\serviceAccountKey.json`. Não exponha a porta `5000` diretamente na internet; use token, CORS restrito, HTTPS/proxy ou VPN.
+
+Para gerar executável sem embutir credenciais:
+
+```bash
+pyinstaller "Sistema de vendas/pyinstaller_server.spec"
+```

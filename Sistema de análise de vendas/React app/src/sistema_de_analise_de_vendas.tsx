@@ -160,6 +160,10 @@ const fallbackData: DashboardData = {
 }
 
 const statsUrl = import.meta.env.VITE_STATS_API_URL ?? 'http://localhost:5000/stats'
+const apiToken = import.meta.env.VITE_API_TOKEN?.trim() ?? ''
+const apiFetchOptions: RequestInit = apiToken
+  ? { cache: 'no-store', headers: { Authorization: `Bearer ${apiToken}` } }
+  : { cache: 'no-store' }
 const pollMs = 15000
 const chartColors = ['#f6c453', '#ff8f6b', '#44c4a1', '#54a6ff', '#a78bfa', '#f472b6']
 const tabs: { id: TabKey; label: string; caption: string }[] = [
@@ -363,9 +367,9 @@ export default function SalesDashboard() {
         if (!keepLoading) setLoading(true)
 
         const [statsResponse, ordersResponse, productsResponse] = await Promise.all([
-          fetch(statsUrl, { cache: 'no-store' }),
-          fetch(statsUrl.replace(/\/stats$/, '/orders'), { cache: 'no-store' }),
-          fetch(statsUrl.replace(/\/stats$/, '/products'), { cache: 'no-store' }),
+          fetch(statsUrl, apiFetchOptions),
+          fetch(statsUrl.replace(/\/stats$/, '/orders'), apiFetchOptions),
+          fetch(statsUrl.replace(/\/stats$/, '/products'), apiFetchOptions),
         ])
 
         if (!statsResponse.ok) {

@@ -27,6 +27,7 @@ import json
 from http.server import BaseHTTPRequestHandler
 from typing import Any, Dict
 
+import config
 import database
 from api.schemas import (
     error_response,
@@ -85,11 +86,14 @@ class _OrderHandler(BaseHTTPRequestHandler):
     # POST dispatcher
     # ------------------------------------------------------------------
     def do_POST(self) -> None:  # noqa: N802
+        path = self.path.split("?")[0].rstrip("/")
+
+        if path in ("/coupon/validate", "/order", "/orders") and not self._authorize_write():
+            return
+
         payload = self._read_json()
         if payload is None:
             return  # _read_json already sent 400
-
-        path = self.path.split("?")[0].rstrip("/")
 
         if path == "/coupon/validate":
             valid, msg = validate_coupon_payload(payload)
@@ -118,6 +122,8 @@ class _OrderHandler(BaseHTTPRequestHandler):
 
         # Expected shape:  /orders/<id>/status
         if len(parts) == 4 and parts[1] == "orders" and parts[3] == "status":
+            if not self._authorize_write():
+                return
             order_id = parts[2]
             payload = self._read_json()
             if payload is None:
@@ -163,6 +169,23 @@ class _OrderHandler(BaseHTTPRequestHandler):
 
         self._json(200, ok_response({"order_id": result.get("order_id")}))
 
+    def _authorize_write(self) -> bool:
+        token = config.API_TOKEN
+        if not token:
+            return True
+
+        auth_header = self.headers.get("Authorization", "")
+        if not auth_header:
+            self._json(401, {"status": "error", "message": "Token de API ausente."})
+            return False
+
+        prefix = "Bearer "
+        if not auth_header.startswith(prefix) or auth_header[len(prefix):].strip() != token:
+            self._json(403, {"status": "error", "message": "Token de API invalido."})
+            return False
+
+        return True
+
     def _read_json(self) -> Any:
         """Read and parse the request body.  Sends 400 and returns None on failure."""
         try:
@@ -174,9 +197,15 @@ class _OrderHandler(BaseHTTPRequestHandler):
             return None
 
     def _cors_headers(self) -> None:
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin")
+        allowed_origins = config.ALLOWED_ORIGINS
+        if not allowed_origins:
+            self.send_header("Access-Control-Allow-Origin", "*")
+        elif origin in allowed_origins:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
     def _json(self, status: int, payload: Any) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")

@@ -30,13 +30,15 @@ if USE_FIREBASE:
         from firebase_admin import credentials, firestore
 
         cred_path = config.FIREBASE_CREDENTIALS_PATH
-        if os.path.exists(cred_path):
+        if cred_path and os.path.exists(cred_path):
             cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred)
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app(cred)
             db = firestore.client()
             print("Firebase initialized successfully")
         else:
-            print(f"Aviso: {os.path.basename(config.FIREBASE_CREDENTIALS_PATH)} nao encontrado. Operando em modo mock.")
+            configured_path = cred_path or "nao configurado"
+            print(f"Aviso: credencial Firebase ({configured_path}) nao encontrada. Operando em modo mock.")
             USE_FIREBASE = False
     except Exception as error:
         print(f"Erro ao inicializar Firebase: {error}")

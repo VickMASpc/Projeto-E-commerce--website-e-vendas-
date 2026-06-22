@@ -2,3 +2,19 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+Sistema de vendas/server_config.json
+server_config.json
+
+# Firebase/service account credentials
+serviceAccountKey.json
+*serviceAccount*.json
+!Sistema de vendas/serviceAccountKey.example.json
+firebase-adminsdk*.json
+
+# Local runtime state
+export_status.json

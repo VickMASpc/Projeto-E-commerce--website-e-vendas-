@@ -82,6 +82,13 @@ def start_api_server(
 
         _server = httpd
 
+        try:
+            import config
+            if not config.API_TOKEN:
+                print("[API] Aviso: API_TOKEN nao definido; rotas de escrita estao sem autenticacao.")
+        except Exception:
+            pass
+
     def _serve() -> None:
         print(f"[API] Servidor de integracao rodando em http://{host or '0.0.0.0'}:{port}/")
         try:
